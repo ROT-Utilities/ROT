@@ -1,0 +1,98 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO), 
+TRASH (DEVELOPER),
+notbeer (ROT's base code)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |   
+ |    |   \/    |    \    |   
+ |____|_  /\_______  /____|   
+        \/         \/         
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Website: https://www.rotmc.ml
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Thank you!
+*/
+{
+        "format_version": "1.16.0",
+        "animation_controllers": {
+                "controller.animation.player.is_moving": {
+                        "initial_state": "default",
+                        "states": {
+                                "default": {
+                                        "transitions": [
+                                                {
+                                                        "moving": "query.is_moving"
+                                                }
+                                        ]
+                                },
+                                "moving": {
+                                        "on_entry": [
+                                                "/tag @s add is_moving"
+                                        ],
+                                        "transitions": [
+                                                {
+                                                        "default": "!query.is_moving"
+                                                }
+                                        ],
+                                        "on_exit": [
+                                                "/tag @s remove is_moving"
+                                        ]
+                                }
+                        }
+                },
+                "controller.animation.player.is_sleeping": {
+                        "states": {
+                                "default": {
+                                        "transitions": [
+                                                {
+                                                        "sleeping": "query.is_sleeping"
+                                                }
+                                        ]
+                                },
+                                "sleeping": {
+                                        "on_entry": [
+                                                "/tag @s add is_sleeping"
+                                        ],
+                                        "transitions": [
+                                                {
+                                                        "default": "!query.is_sleeping"
+                                                }
+                                        ],
+                                        "on_exit": [
+                                                "/tag @s remove is_sleeping"
+                                        ]
+                                }
+                        }
+                },
+                "controller.animation.player.last_hit_by_player": {
+                        "initial_state": "default",
+                        "states": {
+                                "default": {
+                                        "transitions": [
+                                                {
+                                                        "last_hit_by_player": "query.last_hit_by_player"
+                                                }
+                                        ]
+                                },
+                                "last_hit_by_player": {
+                                        "on_entry": [
+                                                "/tag @s add last_hit_by_player"
+                                        ],
+                                        "transitions": [
+                                                {
+                                                        "default": "!query.last_hit_by_player"
+                                                }
+                                        ],
+                                        "on_exit": [
+                                                "/tag @s remove last_hit_by_player"
+                                        ]
+                                }
+                        }
+                }
+        }
+}
