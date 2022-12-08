@@ -17,8 +17,8 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import quick from '../../Papers/DatabasePaper.js';
 import Server from '../../ServerBook.js';
+import quick from '../../main.js';
 const cmd = Server.command.create({
     name: 'top',
     description: `When you type ${quick.prefix}top in chat... I'll teleport you to the highest point above your player!`,

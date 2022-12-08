@@ -18,7 +18,7 @@ Thank you!
 */
 /**
 import { world } from '@minecraft/server';
-import config from '../../config.js';
+import config from '../../main.js';
 import { commands } from '../../Papers/CommandPaper/CommandPaper.js';
 import { ActionForm } from '../../Papers/FormPaper.js';
 import { setTickInterval } from '../../Papers/paragraphs/ExtrasParagraphs.js';

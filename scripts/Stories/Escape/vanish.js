@@ -18,8 +18,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { MinecraftEffectTypes } from '@minecraft/server';
-import quick from '../../Papers/DatabasePaper.js';
 import Server from '../../ServerBook.js';
+import quick from '../../main.js';
 const cmd = Server.command.create({
     name: 'vanish',
     description: `When you type ${quick.prefix}vanish in chat... You'll vanish!`,
@@ -64,7 +64,7 @@ cmd.playerType('name', async (_, plr) => {
         try {
             await plr.runCommandAsync('effect @s clear');
         }
-        catch (_a) { }
+        catch { }
         plr.removeTag('vanish');
         plr.addTag('unvanish');
         plr.removeTag('dvvanish');

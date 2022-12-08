@@ -19,7 +19,7 @@ Thank you!
 */
 /**
 import { world, Location } from '@minecraft/server';
-import config from '../../config.js';
+import config from '../../main.js';
 import quick from '../../Papers/DatabasePaper.js';
 import { hexToText, textToHex } from '../../Papers/paragraphs/ConvertersParagraphs.js';
 import Server from '../../ServerBook.js';

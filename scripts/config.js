@@ -17,12 +17,13 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 //Hello and welcome to the config file and where you can edit things of ROT!
-const config = {
+export const config = {
     //ROT settings:
     prefix: '!',
     displayChatTime: true,
     defaultRank: '§bMember',
-    theDiscord: 'https://discord.gg/2ADBWfcC6S',
+    ROTDiscord: 'https://discord.gg/2ADBWfcC6S',
+    discord: 'https://discord.gg/2ADBWfcC6S',
     adminTag: 'v',
     hideAdminTag: false,
     rottleRewards: false,
@@ -36,10 +37,40 @@ const config = {
     hiveArrow: true,
     bannedPlayers: {},
     toggle: {
+        Server: {
+            broadcast: true,
+            close: true,
+            clearchat: true,
+            //members: true,
+        },
+        Management: {
+            //ban: true,
+            rank: true,
+            tac: true,
+        },
+        Escape: {
+            cmd: true,
+            // feed: true,
+            // GMA: true,
+            // GMC: true,
+            // GMS: true,
+            // heal: true,
+            //home: true,
+            // kill: true,
+            // repair: true,
+            sudo: true,
+            // top: true,
+            //vanish: true,
+        },
+        Fantasy: {
+            rickroll: true,
+            rottle: true,
+        },
         ROT: {
+            //form: true,
+            //quick: true,
             help: true,
-            form: true,
-        }
-    }
+        },
+    },
+    useQuick: true
 };
-export default config;

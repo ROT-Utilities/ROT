@@ -93,16 +93,17 @@ const cmd = Server.command.create({
 });
 cmd.startingArgs(['slot', 'all']);
 cmd.dynamicType('slot', ['slot', 'hand'], (plr) => {
-    var _a, _b, _c, _d, _e, _f;
+    // @ts-ignore
     const inventory = plr.getComponent('minecraft:inventory').container;
-    const item = inventory.getItem(plr.selectedSlot), itemName = (_f = (_e = (_d = (_c = (_b = (_a = item === null || item === void 0 ? void 0 : item.typeId) === null || _a === void 0 ? void 0 : _a.match(/:([\s\S]*)$/)[1]) === null || _b === void 0 ? void 0 : _b.replace(/[\W]/g, ' ')) === null || _c === void 0 ? void 0 : _c.replaceAll('_', ' ')) === null || _d === void 0 ? void 0 : _d.split(' ')) === null || _e === void 0 ? void 0 : _e.map((w) => { var _a; return ((_a = w === null || w === void 0 ? void 0 : w.charAt(0)) === null || _a === void 0 ? void 0 : _a.toUpperCase()) + (w === null || w === void 0 ? void 0 : w.slice(1)); })) === null || _f === void 0 ? void 0 : _f.join(' ');
-    if (!item || !repairables.includes(item === null || item === void 0 ? void 0 : item.typeId))
+    const item = inventory.getItem(plr.selectedSlot), itemName = item?.typeId?.match(/:([\s\S]*)$/)[1]?.replace(/[\W]/g, ' ')?.replaceAll('_', ' ')?.split(' ')?.map((w) => w?.charAt(0)?.toUpperCase() + w?.slice(1))?.join(' ');
+    if (!item || !repairables.includes(item?.typeId))
         return plr.send('You cannot repair this item!', 'REPAIR');
     plr.send(`You have successfully repaired your §c${itemName}§a§8!`, 'REPAIR');
     inventory.setItem(plr.selectedSlot, newItem(item));
 }, null, false);
 cmd.dynamicType('all', ['all', 'many', 'more'], (plr) => {
     let count = 0;
+    // @ts-ignore
     const inventory = plr.getComponent('inventory').container;
     for (let i = 0; i < inventory.size; i++) {
         const item = inventory.getItem(i);

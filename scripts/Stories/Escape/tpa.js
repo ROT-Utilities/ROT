@@ -18,7 +18,7 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 /**
-import config from '../../config.js';
+import config from '../../main.js';
 import quick from '../../Papers/DatabasePaper.js';
 //import { Tpa } from '../../Papers/TpaPaper.js';
 import Server from '../../ServerBook.js';

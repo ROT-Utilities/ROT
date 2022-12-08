@@ -17,6 +17,24 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world } from '@minecraft/server';
+import { PlayerPaper } from './PlayerPaper.js';
+import { setTickInterval } from './paragraphs/ExtrasParagraphs.js';
+/*
+ * ROT's command queue system
+*/
+const commandQueue = [];
+setTickInterval(() => {
+    if (!commandQueue.length)
+        return;
+    const hundred = commandQueue.slice(0, 100);
+    commandQueue.splice(0, 100);
+    for (let i = 0; i < 100; i++) {
+        if (!hundred[i])
+            return;
+        world.getDimension(hundred[i][1] ?? 'overworld').runCommandAsync(hundred[i][0]).catch();
+    }
+}, 5);
+const paperPlayer = new PlayerPaper().paperPlayer;
 /*
  * Welcome to the Server Paper!
  * Main Developer: notbeer
@@ -26,85 +44,36 @@ import { world } from '@minecraft/server';
 */
 export class ServerPaper {
     /**
-     * Broadcast a message in chat
-     * @param {string} text Message you want to broadcast in chat
-     * @param {string} player Player you want to broadcast to
-     * @param {string} use What command is the player using
-     * @param {boolean} console
-     * @returns {runCommandReturn}
-     * @example .broadcast('Hello World!', 'Mo9ses', 'Computer', false);
+     * Broadcast a message to everyone in game
+     * @param {string} message Message you want to broadcast in chat
+     * @param {string} use The name of the use?
+     * @returns {void} Nothing
+     * @example .broadcast('Hello World!', 'Computer');
      */
-    broadcast(text, player, use, console) {
-        if (!use || use == '')
-            use = '';
-        else
-            use = use.toUpperCase() + ' ';
-        if (console === false)
-            use = '';
-        else
-            use = `§l§4${use}§7>>§r§7 `;
-        if (player)
-            if (player.startsWith('@'))
-                null;
-            else if (player.startsWith('"'))
-                null;
-            else
-                player = `"${player}"`;
-        else
-            player = '@a';
-        this.runCommands([
-            `execute ${console ? player : ''} ~~~ playsound random.toast @s ~~~ 1 0.5`,
-            `execute ${player} ~~~ tellraw @s {"rawtext":[{"text":"${use}"},{"text":${JSON.stringify(text)}}]}`
-        ]);
+    broadcast(message, use) {
+        Array.from(world.getPlayers(), p => paperPlayer(p)).forEach(p => p.send(message, use));
     }
     /**
-     * Broadcast a tip in chat to suggest something the player should do
-     * @param {string} text The "tip" you want to broadcast in chat
-     * @param {string} player Player you want to a error broadcast to
-     * @param {string} use What command is the player using
-     * @returns {runCommandReturn}
-     * @example .tBroadcast('Use ROT... Your players will thank you!', 'Mo9ses', 'ROT');
-     */
-    tBroadcast(text, player, use) {
-        if (!use)
-            use = '';
-        else
-            use = use.toUpperCase() + ' ';
-        this.runCommands([
-            `execute ${player ? `"${player}"` : '@a'} ~~~ playsound random.toast @s ~~~ 1 0.5`,
-            `execute ${player ? `"${player}"` : '@a'} ~~~ tellraw @s {"rawtext":[{"text":"§l§c${use}§aTIP §e>>§r§e "},{"text":${JSON.stringify(text)}}]}`
-        ]);
-    }
-    /**
-     * Broadcast a ERROR message in chat
-     * @param {string} text The error message you want to broadcast in chat
-     * @param {string} player Player you want to a error broadcast to
-     * @param {string} use What command is the player using
-     * @returns {runCommandReturn}
-     * @example .eBroadcast('Task failed!', 'Mo9ses', 'Task name');
-     */
-    eBroadcast(text, player, use) {
-        if (!use)
-            use = '';
-        else
-            use = use.toUpperCase() + ' ';
-        this.runCommands([
-            `execute ${player ? `"${player}"` : '@a'} ~~~ playsound random.glass @s ~~~ 1 0.5`,
-            `execute ${player ? `"${player}"` : '@a'} ~~~ tellraw @s {"rawtext":[{"text":"§l§c${use}§4Error §c>>§r§c "},{"text":${JSON.stringify(text)}}]}`
-        ]);
-    }
-    /**
-    * Run a command in game
+    * Push commands to the command queue
     * @param command The command you want to run
     * @param dimension The dimension you want the command run
-    * @returns {runCommandReturn}
-    * @example .runCommand('say Hello World!');
+    * @returns {void} Nothing
+    * @example .commandQueue('say Hello World!');
+    */
+    commandQueue(command, dimension) {
+        commandQueue.push(dimension ? [command, dimension] : [command]);
+    }
+    /**
+    * Run a asynchronous command in game that will run at runtime
+    * @param command The command you want to run
+    * @param dimension The dimension you want the command run
+    * @returns {string} command had error
+    * @example .runAsyncCMD('say Hello World!');
     */
     async runCommand(command, dimension) {
-        try {
-            return await world.getDimension(dimension !== null && dimension !== void 0 ? dimension : 'overworld').runCommandAsync(command);
-        }
-        catch (e) { }
+        let value = '';
+        await world.getDimension(dimension ?? 'overworld').runCommandAsync(command).catch(e => value = e);
+        return value;
     }
     /**
     * Run an array of commands
@@ -120,11 +89,10 @@ export class ServerPaper {
         if (conditionalRegex.test(commands[0]))
             throw '§l§c>>§r§4: runCommands(): Error - First command in the Array CANNOT be Conditional';
         let e = false;
-        commands.forEach(cmd => {
+        commands.forEach(async (cmd) => {
             if (e && conditionalRegex.test(cmd))
                 return;
-            // @ts-ignore
-            e = this.runCommand(cmd.replace(conditionalRegex, '')).error;
+            e = Boolean(await this.runCommand(cmd.replace(conditionalRegex, '')));
         });
         return { error: e };
     }

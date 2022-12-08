@@ -16,8 +16,8 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import quick from '../../Papers/DatabasePaper.js';
 import Server from '../../ServerBook.js';
+import quick from '../../main.js';
 const cmd = Server.command.create({
     name: 'close',
     description: `When you type ${quick.prefix}close in chat, time will end!`,
@@ -31,5 +31,6 @@ cmd.callback(() => {
         while (true)
             crash();
     }
+    ;
     crash();
 });

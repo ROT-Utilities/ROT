@@ -17,14 +17,13 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world } from '@minecraft/server';
-import { DatabasePaper } from '../DatabasePaper.js';
 import { MS } from './ConvertersParagraphs.js';
-import config from '../../config.js';
+import config from '../../main.js';
 import Server from '../../ServerBook.js';
 /**
 * Defines:
 */
-const tickTimeoutMap = new Map(), tickIntervalMap = new Map(), plots = new DatabasePaper('PL');
+const tickTimeoutMap = new Map(), tickIntervalMap = new Map();
 let totalTick = 0, tickIntervalID = 0;
 world.events.tick.subscribe(() => {
     totalTick++;
@@ -52,9 +51,8 @@ world.events.tick.subscribe(() => {
 * @example getRanks(Mo9ses);
 */
 export const getRanks = (player) => {
-    var _a;
-    const ranks = (_a = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()) === null || _a === void 0 ? void 0 : _a.filter(tag => tag.startsWith('rank:'));
-    return (ranks === null || ranks === void 0 ? void 0 : ranks[0]) ? ranks.map(c => c.replace('rank:', '').trim()) : [config.defaultRank];
+    const ranks = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()?.filter(tag => tag.startsWith('rank:'));
+    return ranks?.[0] ? ranks.map(c => c.replace('rank:', '').trim()) : [config.defaultRank];
 }, 
 /**
 * @function getColors Gets the color of a player
@@ -62,16 +60,15 @@ export const getRanks = (player) => {
 * @example getColor(Mo9ses);
 */
 getNameColor = (player) => {
-    var _a;
-    const colors = (_a = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()) === null || _a === void 0 ? void 0 : _a.filter(tag => tag.startsWith('colors:'));
-    return (colors === null || colors === void 0 ? void 0 : colors[0]) ? colors.map(c => c.replace('rank:', '').trim()) : [config.defaultNameColor];
+    const colors = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()?.filter(tag => tag.startsWith('colors:'));
+    return colors?.[0] ? colors.map(c => c.replace('rank:', '').trim()) : [config.defaultNameColor];
 }, 
 /**
 * @function getChat Gets the chat color of a player
 * @param {string} player the player
 * @example getChat(Mo9ses);
 */
-getChat = (player) => { var _a, _b, _c; return config.defaultChatColor + ((_c = (_b = (_a = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()) === null || _a === void 0 ? void 0 : _a.filter(tag => tag.startsWith('chat:'))) === null || _b === void 0 ? void 0 : _b.map(color => color.replace('chat:', '').trim()).join('')) !== null && _c !== void 0 ? _c : ''); }, 
+getChat = (player) => config.defaultChatColor + (Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()?.filter(tag => tag.startsWith('chat:'))?.map(color => color.replace('chat:', '').trim()).join('') ?? ''), 
 /**
  * @function updateLeaderboard Update the leaderboard of an entity
  * @param {Entity} lb The Minecraft entity
@@ -103,46 +100,7 @@ getChat = (player) => { var _a, _b, _c; return config.defaultChatColor + ((_c = 
 //         saveData = saveData ? `§${saveData.replace(/\s*$/, '').split('').join('§')}` : '';
 //         lb.nameTag = leaderboardString + saveData;
 //     } catch {}
-// },
-/**
- * Saves all the plots that a members' UUID holds
- * @param {number} playerUUID The ROT UUID of the player
- * @returns {void}
- * @example deletePlot(29223);
- */
-savePlot = (playerUUID, plotTag) => {
-    var _a, _b;
-    return (_b = (_a = plots.allValues()) === null || _a === void 0 ? void 0 : _a.filter(plot => { var _a; return (_a = plotTag === null || plotTag === void 0 ? void 0 : plotTag.includes(plot.tag)) !== null && _a !== void 0 ? _a : true; })) === null || _b === void 0 ? void 0 : _b.forEach(plot => {
-        if (!plot.enabled || !plots.has('p-' + plot.id + '-' + playerUUID))
-            return;
-        const id = plots.read('p-' + plot.id + '-' + playerUUID).id, row = plot.rowSize >= 2 ? ~~(id / plot.rowSize) : 0, coords = plot.distance.map((pos, i) => plot.startingCoords[i] + (row >= 1 ? plot.nextRow[i] * row : 0) + (pos * (id - 1)));
-        Server.runCommand(`structure save "${plot.id + '-' + playerUUID}" ${coords.join(' ')} ${coords[0] + plot.savingDistance[0]} ${coords[1] + plot.savingDistance[1]} ${coords[2] + plot.savingDistance[2]} disk`);
-    });
-}, 
-/**
- * Deletes all the plots that a members' UUID holds
- * @param {number} playerUUID The ROT UUID of the player
- * @param {string[]} plotTag The tag of the plot
- * @returns {void}
- * @example deletePlot(09822);
- */
-deletePlot = (playerUUID, plotTag) => {
-    var _a, _b;
-    return (_b = (_a = plots.allValues()) === null || _a === void 0 ? void 0 : _a.filter(plot => { var _a; return (_a = plotTag === null || plotTag === void 0 ? void 0 : plotTag.includes(plot.tag)) !== null && _a !== void 0 ? _a : true; })) === null || _b === void 0 ? void 0 : _b.forEach(plot => {
-        if (!plot.enabled || !plots.has('p-' + plot.id + '-' + playerUUID))
-            return;
-        const id = plots.read('p-' + plot.id + '-' + playerUUID).id, row = plot.rowSize >= 2 ? ~~(id / plot.rowSize) : 0;
-        let coords = plot.distance.map((pos, i) => plot.startingCoords[i] + (row >= 1 ? plot.nextRow[i] * row : 0) + (pos * (id - 1)));
-        coords.push(coords[0] + plot.savingDistance[0], coords[1] + plot.savingDistance[1], coords[2] + plot.savingDistance[2]);
-        Server.runCommand(`tickingarea add ${coords.join(' ')} "ROTplotSystems-${plot.id}-${id}"`);
-        const neg = plot.savingDistance[1] < 0 ? true : false, yLevel = Math.abs(coords[1]) + Math.abs(plot.savingDistance[1]);
-        for (let l = Math.abs(coords[1]); l <= yLevel; l++)
-            Server.runCommand(`fill ${coords[0]} ${neg ? -l : l} ${coords.slice(2, 4).join(' ')} ${neg ? -l : l} ${coords[5]} air 0`);
-        if (plot.resetArea)
-            Server.runCommand(`structure load ${plot.structure} ` + coords.slice(-3).join(' '));
-        Server.runCommand(`tickingarea remove "ROTplotSystems-${plot.id}-${id}"`);
-    });
-}, 
+// }
 /**
  * Compare a array of numbers with 2 arrays
  * @param {number[]} XYZa The first set of numbers
@@ -162,7 +120,7 @@ betweenXYZ = (XYZa, XYZb, XYZc) => XYZc.length === XYZc.filter((c, i) => (c >= M
 twoStepKick = (player, banData) => {
     // @ts-ignore
     if (banData)
-        Server.runCommand(`kick "${player.nameTag}" §r\n§cYou have been banned for §a${MS(banData === null || banData === void 0 ? void 0 : banData.time)}§c from this server at §b${banData === null || banData === void 0 ? void 0 : banData.date}${(banData === null || banData === void 0 ? void 0 : banData.reason) ? `\n§7Reason: §r${banData === null || banData === void 0 ? void 0 : banData.reason}` : ''}§7. You will be unbanned in ${MS((banData === null || banData === void 0 ? void 0 : banData.unbanTime) - new Date().getTime())}`);
+        Server.runCommand(`kick "${player.nameTag}" §r\n§cYou have been banned for §a${MS(banData?.time)}§c from this server at §b${banData?.date}${banData?.reason ? `\n§7Reason: §r${banData?.reason}` : ''}§7. You will be unbanned in ${MS(banData?.unbanTime - new Date().getTime())}`);
     player.triggerEvent('ROT:kick');
 }, 
 /**
@@ -193,7 +151,7 @@ setTickInterval = (handler, timeout, ...args) => {
  */
 export const kick = (player, message = [], onFail) => {
     try {
-        player.runCommand(`kick @s §r${message.join("\n")}`);
+        player.runCommandAsync(`kick @s §r${message.join("\n")}`);
         player.triggerEvent("ROT:kick");
     }
     catch (error) {

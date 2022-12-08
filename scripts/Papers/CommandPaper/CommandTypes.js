@@ -5,14 +5,26 @@ export const staticBook = {
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
     },
+    delyeet: {
+        des: 'Deletes stuff',
+        val: ['delete', 'delyeet', 'd-', 'yeet'],
+        con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
+        err: 'You cannot use special characters!'
+    },
+    add: {
+        des: 'Adds stuff',
+        val: ['add', 'a-', 'push'],
+        con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
+        err: 'You cannot use special characters!'
+    },
     remove: {
-        des: '',
-        val: ['remove', 'delete', 'd-', 'r-', 'del', 'rem', 're', 'yeet'],
+        des: 'Removes stuff',
+        val: ['remove', 'r-', 'rem', 're'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
     },
     save: {
-        des: '',
+        des: 'Saves stuff?',
         val: ['save', 's-', 'memory', 'sav'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
@@ -61,13 +73,31 @@ export const staticBook = {
     },
     try: {
         des: '',
-        val: ['try', 'tryo', 't', 'tr'],
+        val: ['try', 'tryo', 'tr'],
         con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
         err: 'You cannot use special characters!'
     },
     quit: {
         des: '',
         val: ['quit', 'q', 'qu'],
+        con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
+        err: 'You cannot use special characters!'
+    },
+    set: {
+        des: '',
+        val: ['set', 'push', 'put'],
+        con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
+        err: 'You cannot use special characters!'
+    },
+    toggle: {
+        des: '',
+        val: ['toggle', 'enable', 'disable', 'on', 'off'],
+        con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
+        err: 'You cannot use special characters!'
+    },
+    rename: {
+        des: '',
+        val: ['rename', 'name', 'rn', 'rname'],
         con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
         err: 'You cannot use special characters!'
     }

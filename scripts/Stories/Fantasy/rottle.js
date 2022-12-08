@@ -17,7 +17,7 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import config from '../../config.js';
+import config from '../../main.js';
 import { DatabasePaper } from '../../Papers/DatabasePaper.js';
 import Server from '../../ServerBook.js';
 const cmd = Server.command.create({
@@ -34,36 +34,34 @@ cmd.callback((plr) => {
         return rottle.write(plr.id, { inMatch: false });
 });
 cmd.staticType('play', 'play', (plr) => {
-    var _a, _b;
     if (rottle.read(plr.id).inMatch)
         return plr.error('You cannot start a game with me if you are already in a game with me! Type "§4!rm quit§c" in chat and give me the win loser');
     rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
         inMatch: true,
         word: words[~~(Math.random() * words.length)],
         attempts: 0,
-        matchesPlayed: ((_b = (_a = rottle.read(plr.id)) === null || _a === void 0 ? void 0 : _a.matchesPlayed) !== null && _b !== void 0 ? _b : 0) + 1
+        matchesPlayed: (rottle.read(plr.id)?.matchesPlayed ?? 0) + 1
     }));
     return plr.send(`The match has started! The word I am thinking of is §c${rottle.read(plr.id).word.length}§7 letters long! You only get §c${config.rottleAttemps}§7 attempts!`);
 }, null, false);
 cmd.staticType('try', 'try', (plr, val) => {
-    var _a, _b, _c, _d, _e, _f, _g;
     if (!rottle.read(plr.id).inMatch)
         return plr.error('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
-    if (((_a = val.split(' ')) === null || _a === void 0 ? void 0 : _a.length) > 1)
+    if (val.split(' ')?.length > 1)
         return plr.error('It\'s only one word, and the word doesn\'t have any numbers or stuff like that. Don\'t worry, I didn\'t count that as a "attempt"');
     rottle.write(plr.id, Object.assign(rottle.read(plr.id), { attempts: rottle.read(plr.id).attempts + 1 }));
     if (rottle.read(plr.id).word === val) {
         rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
             inMatch: false,
-            wins: ((_c = (_b = rottle.read(plr.id)) === null || _b === void 0 ? void 0 : _b.wins) !== null && _c !== void 0 ? _c : 0) + 1,
-            averageAttempts: ((_e = (_d = rottle.read(plr.id)) === null || _d === void 0 ? void 0 : _d.averageAttempts) !== null && _e !== void 0 ? _e : 0) + rottle.read(plr.id).attempts
+            wins: (rottle.read(plr.id)?.wins ?? 0) + 1,
+            averageAttempts: (rottle.read(plr.id)?.averageAttempts ?? 0) + rottle.read(plr.id).attempts
         }));
         return plr.send(`Dang, you actally got the word right... GG\n§aWord:§c ${rottle.read(plr.id).word}\n§aAttempts:§c ` + rottle.read(plr.id).attempts);
     }
     if (rottle.read(plr.id).attempts >= config.rottleAttemps) {
         rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
             inMatch: false,
-            losses: ((_g = (_f = rottle.read(plr.id)) === null || _f === void 0 ? void 0 : _f.losses) !== null && _g !== void 0 ? _g : 0) + 1
+            losses: (rottle.read(plr.id)?.losses ?? 0) + 1
         }));
         if (config.rottleRewards)
             Server.runCommands(config.rottleRewardsCmds.map(cmd => { return cmd.replace('@rottler', `"${plr.name}"`); }));
@@ -75,18 +73,16 @@ cmd.staticType('try', 'try', (plr, val) => {
     return plr.send(`§cWrong!§7 Here are the letters that are in that word: §l${tryWord.join('')}§r§7. You have §c${10 - rottle.read(plr.id).attempts}§7 attempts left!`);
 });
 cmd.staticType('quit', 'quit', (plr) => {
-    var _a, _b;
     if (!rottle.read(plr.id).inMatch)
         return plr.send('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
     rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
         inMatch: false,
-        losses: ((_b = (_a = rottle.read(plr.id)) === null || _a === void 0 ? void 0 : _a.losses) !== null && _b !== void 0 ? _b : 0) + 1
+        losses: (rottle.read(plr.id)?.losses ?? 0) + 1
     }));
     return plr.send('Thanks for the free win loser!');
 }, null, false);
 cmd.dynamicType('stats', ['stats', 's', 'sto'], (plr) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-    plr.send(`Here are your stats:\n§aWins:§c ${(_b = (_a = rottle.read(plr.id)) === null || _a === void 0 ? void 0 : _a.wins) !== null && _b !== void 0 ? _b : 0}\n§aLosses:§c ${(_d = (_c = rottle.read(plr.id)) === null || _c === void 0 ? void 0 : _c.losses) !== null && _d !== void 0 ? _d : '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(((_e = rottle.read(plr.id)) === null || _e === void 0 ? void 0 : _e.wins) / ((_f = rottle.read(plr.id)) === null || _f === void 0 ? void 0 : _f.losses))}\n§aMatches played:§c ${(_h = (_g = rottle.read(plr.id)) === null || _g === void 0 ? void 0 : _g.matchesPlayed) !== null && _h !== void 0 ? _h : 0}\n§aAverage attemps before a win:§c ` + (((_j = rottle.read(plr.id)) === null || _j === void 0 ? void 0 : _j.averageAttempts) / ((_k = rottle.read(plr.id)) === null || _k === void 0 ? void 0 : _k.wins)));
+    plr.send(`Here are your stats:\n§aWins:§c ${rottle.read(plr.id)?.wins ?? 0}\n§aLosses:§c ${rottle.read(plr.id)?.losses ?? '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(rottle.read(plr.id)?.wins / rottle.read(plr.id)?.losses)}\n§aMatches played:§c ${rottle.read(plr.id)?.matchesPlayed ?? 0}\n§aAverage attemps before a win:§c ` + (rottle.read(plr.id)?.averageAttempts / rottle.read(plr.id)?.wins));
 });
 const words = [
     'cattle',

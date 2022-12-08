@@ -10,52 +10,55 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2022 all rights reserved by Mo9seServer. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
-Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Docs: https://docServer.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { world, Player, BlockRaycastOptions, Location } from '@minecraft/server';
+import { world, Player, Location } from '@minecraft/server';
 import { DatabasePaper } from './DatabasePaper.js';
-import quick from './DatabasePaper.js';
 import { MessageForm } from './FormPaper.js';
-import { ServerPaper } from './ServerPaper.js';
-const playerData = {}, cache = {}, s = new ServerPaper();
+import quick from '../main.js';
+const playerData = {}, cache = {};
 export class PlayerPaper {
     paperPlayer(player, data) {
         const plr = player instanceof Player ? player : Array.from(world.getPlayers()).find(p => p.nameTag.toLowerCase() === player.toLowerCase());
         if (!player)
             return;
-        // @ts-ignore parseInt(hexString, 16);
-        const db = new DatabasePaper(player.id.toString(16).toUpperCase(), 'PLR');
+        data.from = data.from[0].toUpperCase() + data.from.slice(1);
+        // @ts-ignore
+        const db = new DatabasePaper(plr.id.toString(16).toUpperCase(), 'PLR');
         return Object.assign(player, {
             isAdmin: plr.hasTag(quick.adminTag),
-            write: (key, value, memoryKey) => {
+            write: (key, value) => {
                 Object.assign(cache[plr.nameTag], { [key]: value });
-                db.write(key, value, memoryKey);
+                db.write(key, value);
             },
-            read: (key) => { var _a, _b; return (_b = (_a = cache[plr.nameTag]) === null || _a === void 0 ? void 0 : _a[key]) !== null && _b !== void 0 ? _b : db.read(key); },
+            read: (key) => cache[plr.nameTag]?.[key] ?? db.read(key),
             delete: (key) => {
                 db.delete(key);
                 delete cache[plr.nameTag][key];
             },
             send: (msg, from) => {
-                var _a;
-                s.broadcast(msg, plr.nameTag, (_a = from !== null && from !== void 0 ? from : data.from) !== null && _a !== void 0 ? _a : undefined);
+                plr.runCommandAsync('playsound random.toast @s ~~~ 1 0.5');
+                plr.tell({ 'rawtext': [{ 'text': `§l§3${from ? `${from} ` : data.from ? `${data.from} ` : ''}§3>>§r§1 ` }, { 'text': msg }] });
+            },
+            tip: (msg, from) => {
+                plr.runCommandAsync('playsound random.toast @s ~~~ 1 0.5');
+                plr.tell({ 'rawtext': [{ 'text': `§l§1${from ? `${from} ` : data.from ? `${data.from} ` : ''}§aTIP §3>>§r§1 ` }, { 'text': msg }] });
             },
             error: (msg, from) => {
-                var _a;
-                s.eBroadcast(msg, plr.nameTag, (_a = from !== null && from !== void 0 ? from : data.from) !== null && _a !== void 0 ? _a : undefined);
+                plr.runCommandAsync('playsound random.glass @s ~~~ 1 0.5');
+                plr.tell({ 'rawtext': [{ 'text': `§l§1${from ? `${from} ` : data.from ? `${data.from} ` : ''}§3Error >>§r§1 ` }, { 'text': msg }] });
             },
             UIerror: (msg, buttons, from) => {
-                var _a, _b, _c;
                 const UI = new MessageForm();
                 let val = false;
-                UI.setTitle(`${(_a = from !== null && from !== void 0 ? from : `§c§l${data.from} Error`) !== null && _a !== void 0 ? _a : '§c§lError!'}`);
+                UI.setTitle(`${from ?? `§c§l${data.from} Error` ?? '§c§lError!'}`);
                 UI.setBody(`§c${msg}`);
-                UI.setButton1((_b = buttons[0]) !== null && _b !== void 0 ? _b : '§e§lTry again');
-                UI.setButton1((_c = buttons[1]) !== null && _c !== void 0 ? _c : '§c§lClose');
+                UI.setButton1(buttons[0] ?? '§e§lTry again');
+                UI.setButton1(buttons[1] ?? '§c§lClose');
                 UI.send(plr, res => val = Boolean(res.selection));
                 return val;
             },
@@ -67,15 +70,17 @@ export class PlayerPaper {
             getScore: (obj) => {
                 return world.scoreboard.getObjective(obj).getScore(plr.scoreboard);
             },
+            hasTags: (tags) => {
+                let all = true;
+                tags.forEach(t => !plr.hasTag(t) && (all = false));
+                return all;
+            },
             veiwLocation: (dist) => {
                 const l = plr.viewVector;
                 return new Location(l.x, l.y, l.z);
             },
             veiwBlock: (getBlock) => {
-                const r = new BlockRaycastOptions();
-                r.includeLiquidBlocks = true;
-                r.maxDistance = 300;
-                const l = plr.getBlockFromViewVector(r);
+                const l = plr.getBlockFromViewVector({ includeLiquidBlocks: true, maxDistance: 300 });
                 return getBlock ? l : [l.x, l.y, l.z];
             },
             veiwEntity: (getPos) => {
@@ -87,8 +92,8 @@ export class PlayerPaper {
     offlinePlayer(name, from, player) {
         return {
             nameTag: name,
-            send: (msg, frm) => { var _a; return s.broadcast(msg, name, (_a = frm !== null && frm !== void 0 ? frm : from) !== null && _a !== void 0 ? _a : undefined); },
-            error: (msg, frm) => { var _a; return s.broadcast(msg, name, (_a = frm !== null && frm !== void 0 ? frm : from) !== null && _a !== void 0 ? _a : undefined); },
+            // send: (msg: string, frm?: string) => Server.broadcast(msg, name, frm ?? from ?? undefined),
+            // error: (msg: string, frm?: string) => Server.broadcast(msg, name, frm ?? from ?? undefined),
         };
     }
 }

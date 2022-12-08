@@ -34,7 +34,7 @@ export class ActionForm {
      * @returns {void}
      */
     addButton(text, iconPath) {
-        this.form.button(text, iconPath !== null && iconPath !== void 0 ? iconPath : undefined);
+        this.form.button(text, iconPath ?? undefined);
     }
     /**
      * @function send The sends the UI to a member
@@ -142,7 +142,7 @@ export class ModalForm {
      * @returns {void}
      */
     addInput(label, placeHolderText, defaultValue) {
-        this.form.textField(label, placeHolderText, defaultValue !== null && defaultValue !== void 0 ? defaultValue : '');
+        this.form.textField(label, placeHolderText, defaultValue ?? '');
     }
     /**
      * @function addDropdown Make a drop down menu to the form
@@ -153,7 +153,7 @@ export class ModalForm {
      * @returns {void}
      */
     addDropdown(label, options, defaultValueIndex) {
-        this.form.dropdown(label, options, defaultValueIndex !== null && defaultValueIndex !== void 0 ? defaultValueIndex : 0);
+        this.form.dropdown(label, options, defaultValueIndex ?? 0);
     }
     /**
      * @function addSlider Add a slider that will sliiiiiiiiiiiiide on the fooooooorm!
@@ -168,7 +168,7 @@ export class ModalForm {
     addSlider(label, minimumValue, maximumValue, valueStep, defaultValue) {
         if (minimumValue >= maximumValue)
             throw new Error('[Forms UI Silder] Error - the Min value cannot be greater than the Max value');
-        this.form.slider(label, minimumValue, maximumValue, valueStep !== null && valueStep !== void 0 ? valueStep : 1, defaultValue !== null && defaultValue !== void 0 ? defaultValue : ~~(maximumValue / minimumValue));
+        this.form.slider(label, minimumValue, maximumValue, valueStep ?? 1, defaultValue ?? ~~(maximumValue / minimumValue));
     }
     /**
      * @function addToggle Adds a on/off button to the form
@@ -178,7 +178,7 @@ export class ModalForm {
      * @returns {void}
      */
     addToggle(label, defaultValue) {
-        this.form.toggle(label, defaultValue !== null && defaultValue !== void 0 ? defaultValue : false);
+        this.form.toggle(label, defaultValue ?? false);
     }
     /**
      * @function send The sends the UI to a member

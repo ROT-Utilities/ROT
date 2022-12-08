@@ -20,14 +20,12 @@ import Server from '../../ServerBook.js';
 const cmd = Server.command.create({
     name: 'clearchat',
     description: 'This command will clear the chat.',
-    aliases: ['chatc', 'bomb', 'nochat', 'hidechat', 'clear'],
+    aliases: ['chatc', 'bomb', 'clearc'],
     admin: true,
     category: 'Server',
     developers: ['Aex66']
 });
 cmd.callback((plr) => {
-    let space = '  ';
-    for (let i = 0; i < 100; i++)
-        Server.broadcast(space.repeat(100), '@a', '', false);
-    Server.broadcast(`The chat has been cleared by §c${plr.name}§r§7!`, '@a', 'ROT');
+    Server.broadcast('\n\n\n\n\n'.repeat(100));
+    Server.broadcast(`The chat has been cleared by §c${plr.nameTag}§r§1!`, 'ROT');
 });
