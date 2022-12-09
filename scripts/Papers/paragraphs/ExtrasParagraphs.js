@@ -45,24 +45,8 @@ world.events.tick.subscribe(() => {
 * Notes: I don't really know what goes on down here...
 * Sub developer: Mo9ses
 * Link to name: Miscellaneous
-****************************************
-* @function getRanks Gets the ranks of a player you
-* @param {string} player the player
-* @example getRanks(Mo9ses);
 */
-export const getRanks = (player) => {
-    const ranks = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()?.filter(tag => tag.startsWith('rank:'));
-    return ranks?.[0] ? ranks.map(c => c.replace('rank:', '').trim()) : [config.defaultRank];
-}, 
-/**
-* @function getColors Gets the color of a player
-* @param {string} player the player
-* @example getColor(Mo9ses);
-*/
-getNameColor = (player) => {
-    const colors = Array.from(world.getPlayers()).find(n => n.name.toLowerCase() === player.toLowerCase()).getTags()?.filter(tag => tag.startsWith('colors:'));
-    return colors?.[0] ? colors.map(c => c.replace('rank:', '').trim()) : [config.defaultNameColor];
-}, 
+export const 
 /**
 * @function getChat Gets the chat color of a player
 * @param {string} player the player

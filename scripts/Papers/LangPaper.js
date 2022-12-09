@@ -37,7 +37,7 @@ export const startLang = () => Object.assign(Lang, {
         useForm: 'This command cannot be execute in chat. Use "§3!ui§1" to run it as a form command.',
         wrongPrefix: `Sorry, the prefix on this server is now "§3${quick.prefix}§1"`,
         noArgs: 'This commands does not have any arguments! You only need to type the command.',
-        notAArg: (cmd, before, err, afther, tip) => `Not sure what you mean by "§3${quick.prefix + cmd}${before.length ? ` ${before.join(' ')}` : ''}§r §b${err}§r§3${afther ? ` §e${afther}` : ''}§r§1". §b${err[0].toUpperCase() + err.slice(1)}§r§1 is not a vaild argument.${tip ? ` Maybe try typing §a${tip}§1?` : ''}`,
+        notAArg: (cmd, before, err, afther, tip) => `Not sure what you mean by "§3${quick.prefix + cmd}${before.length ? ` ${before.join(' ')}` : ''}§r §b${err}§r§3${afther ? ` §3${afther}` : ''}§r§1". §b${err[0].toUpperCase() + err.slice(1)}§r§1 is not a vaild argument.${tip ? ` Maybe try typing §a${tip}§1?` : ''}`,
         noPerms: 'You do not have permission to execute this command.',
         noArgPerm: 'You do not have permission to execute this argument. How do you even know about it?',
         missingArgs: (cmd, args, tip) => `The command you typed: "§3${quick.prefix + cmd}${args.length ? ' ' + args.join(' ') : ''}§1" is missing arguments!${tip ? ` Maybe try typing §a${tip}§1 at the end.` : ''} If you need more help, type "§3${quick.prefix}help ${cmd}§1" in chat :)`,

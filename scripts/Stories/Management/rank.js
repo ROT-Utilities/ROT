@@ -27,14 +27,14 @@ const cmd = Server.command.create({
     admin: true,
     developers: ['Mo9ses']
 });
-cmd.startingArgs(['create', 'delete', 'plr', 'remove', 'prefix']);
+cmd.startingArgs(['create', 'delete', 'list', 'plr', /*'prefix'*/]);
 cmd.staticType('create', 'create', (plr, val, args) => {
     if (db.has(val))
         return plr.error(`A rank with the name "§3${val}§1" has already been created!`);
-    db.write(val, { tag: val, prefix: args[0].length ? args[0].join(' ') : '§eNew Rank' });
-    plr.send(`Successfully created rank §3${val}§1 with the prefix "§r${args[0].length ? args[0].join(' ') : '§eNew Rank'}§r§1"!`);
-}, 'set prefix', true, false);
-cmd.dynamicType('set prefix', '*');
+    db.write(val, { tag: val, prefix: args[0]?.length ? args[0].join(' ') : '§eNew Rank' });
+    plr.send(`Successfully created rank §3${val}§1 with the prefix "§r${args[0]?.length ? args[0].join(' ') : '§eNew Rank'}§r§1"!`);
+}, 'any', true, false);
+cmd.dynamicType('any', '*');
 cmd.staticType('delete', 'delyeet', (plr, val) => {
     if (!db.has(val))
         return plr.error(`There aren't any ranks with the name "§3${val}§1". Are you sure it isn't a tag?`);
@@ -47,9 +47,12 @@ cmd.staticType('list', 'list', plr => {
         return plr.send('There are no ranks on the server at this moment');
     plr.send(`Here are all of the ranks!\n${db.allKeys().map(r => `§3Name: §1${r[0].toUpperCase() + r.slice(1)}§3, tag: §1${db.read(r).tag}§3, prefix: §1${db.read(r).prefix}§r`).join('\n')}`);
 }, null, false);
-cmd.playerType('set player', (plr, plr2, args) => {
+cmd.playerType('plr', (plr, plr2, args) => {
+    if (args[0] === 'add')
+        plr2.addTag(args[1].join(' '));
+    else
+        plr.removeTag(args[1].join(' '));
+    plr.send(`The rank "§3${args[1].join(' ')}§1" have been ${args[0] === 'add' ? '§agranted§1 to' : '§crevoked§1 from'} §3${plr2.nameTag}§1!`);
 }, true, ['add', 'remove']);
-cmd.staticType('add', 'add', (plr, _, args) => {
-}, 'set player', false);
-cmd.staticType('remove', 'remove', (plr, _, args) => {
-}, 'set player', false);
+cmd.staticType('add', 'add', null, 'any', false);
+cmd.staticType('remove', 'remove', null, 'any', false);

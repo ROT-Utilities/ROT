@@ -23,7 +23,6 @@ import Server from '../../ServerBook.js';
 import lang from '../LangPaper.js';
 import quick from '../../main.js';
 import { DatabasePaper } from '../DatabasePaper';
-import { getNameColor, getRanks } from '../paragraphs/ExtrasParagraphs.js';
 /**
  * This is what initiates the commands
 */
@@ -40,7 +39,7 @@ world.events.beforeChat.subscribe(data => {
             return;
         if (!ROT.has('setup'))
             return data.cancel = false;
-        const message = data.message.charAt(0).toUpperCase() + data.message.slice(1), rank = `§7[${getRanks(data.sender.name)}§r§7] ${getNameColor(data.sender.name)}`;
+        const message = data.message.charAt(0).toUpperCase() + data.message.slice(1), rank = `§7[${player.getPrefixes().join('§r§7, ')}§r§7] ${player.getNameColors().join('')}`;
         let currentHour = time.getUTCHours(), AMPM = '';
         if (currentHour < 0)
             currentHour = currentHour + 24;
@@ -48,7 +47,7 @@ world.events.beforeChat.subscribe(data => {
             AMPM = currentHour === 12 ? 'PM' : 'AM', currentHour === 0 ? currentHour = 12 : null;
         else
             currentHour = currentHour - 12, AMPM = 'PM';
-        return Array.from(world.getPlayers()).forEach(plr => plr.tell(`${rank}${data.sender.nameTag}§r§7 ${currentHour}:${time.getUTCMinutes() < 10 ? '0' + time.getUTCMinutes() : time.getUTCMinutes()} ${AMPM}: §f${message}`));
+        return Array.from(world.getPlayers()).forEach(plr => plr.tell(`${rank}${player.nameTag}§r§7 ${currentHour}:${time.getUTCMinutes() < 10 ? '0' + time.getUTCMinutes() : time.getUTCMinutes()} ${AMPM}: §f${message}`));
     }
     const args = data.message.slice(quick.prefix.length).trim().split(/\s+/), command = args.shift().toLowerCase();
     Server.command.run(command, Server.player.paperPlayer(data.sender, { from: command }), args);
@@ -56,7 +55,7 @@ world.events.beforeChat.subscribe(data => {
 /*
  * Welcome to the CommandPaper!
  * Main Developer: Mo9ses
- * Sub developer: notbeer
+ * Sub developer: Nobody!
  * Link to name: Command Paper
 */
 export class CommandPaper {
@@ -127,18 +126,15 @@ export class CommandPaper {
         for (const a of nextArgs) {
             if (!['sta', 'dyn'].includes(cmd.aR[a].tY))
                 continue;
-            if (cmd.aR[a].tY === 'sta') {
-                if (cmd.aR[a].tV[0].includes(args[0]))
-                    return { aRN: a, tV: args[1], nA: args.slice(cmd.aR[a].tV[1] ? 2 : 1) };
+            if (cmd.aR[a].tY === 'sta')
                 if (staticBook[cmd.aR[a].tV[0]].val.includes(args[0]))
-                    return { aRN: a, tV: args[1], nA: args.slice(cmd.aR[a].tV[1] ? 2 : 1) };
-                continue;
-            }
+                    return { aRN: a, tV: cmd.aR[a].tV[1] ? args[1] : cmd.aR[a].tV[0], nA: args.slice(cmd.aR[a].tV[1] ? 2 : 1) };
+                else
+                    continue;
             const res = cmd.aR[a].tV[0].find((v) => v === '*' || args.slice(0, v.split(' ').length).join(' ') === v);
             if (res)
                 return { aRN: a, tV: cmd.aR[a].tV[2] ? args.slice(0, cmd.aR[a].tV[2]) : cmd.aR[a].tV[0].includes('*') ? args.slice(0, res.split(' ').length).join(' ') : args[0], nA: cmd.aR[a].tV[2] ? args.slice(cmd.aR[a].tV[2]) : args.slice(res.split(' ').length) };
         }
-        ;
         const argTypes = {};
         nextArgs?.filter(a => !['sta', 'dyn'].includes(cmd.aR[a].tY))?.forEach(a => Object.assign(argTypes, { [cmd.aR[a].tY]: a }));
         const allTypes = Object.keys(argTypes);
@@ -189,7 +185,8 @@ export class CommandPaper {
                 else
                     testing = false;
             }
-            if (left !== args[0])
+            const minMax = cmd.aR[argTypes['plr']].tV;
+            if (left !== args[0] && (minMax?.min ?? 0) <= time && time <= (minMax?.max ?? 0))
                 return { aRN: argTypes['tim'], tV: time, nA: args.slice(1) };
         }
     }
@@ -209,7 +206,7 @@ export class CommandPaper {
         if (type.tY === 'boo')
             return 'true';
         if (type.tV === 'tim')
-            return '';
+            return MS(type.tV.max);
         return;
     }
     /**
@@ -226,7 +223,7 @@ export class CommandPaper {
             return player.error(ROT.read('setup') ? lang.cmd.unknown : lang.setup.notSetup, 'ROT');
         if (!cmd.rM.cM)
             return player.error(lang.cmd.useForm, 'ROT');
-        if (player.isAdmin ? true : cmd.admin || (cmd.tags?.length ? !player.hasTags(cmd.tags) : false))
+        if (player.isAdmin ? false : cmd.admin || (cmd.tags?.length ? !player.hasTags(cmd.tags) : false))
             return player.error(lang.cmd.noPerms, 'ROT');
         if (!cmd.sT[0].length && args.length)
             return player.error(lang.cmd.noArgs, 'ROT');

@@ -20,6 +20,7 @@ import { world } from '@minecraft/server';
 import { config } from './config.js';
 import { DatabasePaper } from './Papers/DatabasePaper.js';
 import { startLang } from './Papers/LangPaper.js';
+import Server from './ServerBook.js';
 /**
  * Quick
  * This handles in game configuration
@@ -40,14 +41,14 @@ world.events.worldInitialize.subscribe(() => {
  * startup function. This will start ROT
 */
 import './Stories/ROT/setup.js';
-export function startup() {
-    const time = new Date().getTime(), Server = import('./ServerBook.js');
-    Server.then(i => i.default.command.list.splice(i.default.command.list.findIndex(c => c.name === 'setup'), 1));
+export async function startup() {
+    ROT.write('setup', 1);
+    const time = new Date().getTime();
+    Server.command.list.splice(Server.command.list.findIndex(c => c.name === 'setup'), 1);
     if (config.useQuick && ROT.has('ServerConfig'))
         Object.entries(ROT.read('ServerConfig')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
-    Object.keys(quick.toggle).forEach(c => Object.keys(quick.toggle[c]).forEach(cmd => import(`./Stories/${c}/${cmd}.js`).catch(e => console.warn(`Failed to import command "${cmd}" from category "${c}"     ${e}: ${e.stack}`))));
-    ROT.write('setup', 1);
-    Server.then(s => s.default.command.list.forEach((cmd, i) => {
+    await Object.keys(quick.toggle).forEach(c => Object.keys(quick.toggle[c]).forEach(cmd => import(`./Stories/${c}/${cmd}.js`).catch(e => console.warn(`Failed to import command "${cmd}" from category "${c}"     ${e}: ${e.stack}`))));
+    Server.command.list.forEach((cmd, i) => {
         try {
             const length = Object.keys(cmd.aR).length, fakeArgs = cmd.aR;
             if (length && !cmd.sT[0].length)
@@ -55,7 +56,7 @@ export function startup() {
             if (!length && cmd.sT[0].length)
                 throw Error(`Command "${cmd.name}" has starting args, but no args.`);
             if (cmd.sT[0].some(a => !cmd.aR.hasOwnProperty(a)))
-                console.warn(`Some of the starting arguments for the command "${cmd.name}" don't exist.`);
+                throw Error(`Some of the starting arguments for the command "${cmd.name}" don't exist.`);
             Object.assign(fakeArgs, { '-1': { nA: cmd.sT[0] } });
             for (const arg in fakeArgs) {
                 if (fakeArgs[arg].nN && !fakeArgs[arg].nA.length)
@@ -71,8 +72,8 @@ export function startup() {
         }
         catch (e) {
             console.warn(e);
-            s.default.command.list.splice(i, 1);
+            Server.command.list.splice(i, 1);
         }
-    }));
-    Server.then(i => i.default.broadcast(`ROT has been loaded in §3${new Date().getTime() - time}§1 milliseconds!`, 'Server'));
+    });
+    Server.broadcast(`ROT has been loaded in §3${new Date().getTime() - time}§1 milliseconds!`, 'Server');
 }
