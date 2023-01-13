@@ -1,8 +1,25 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |
+ |    |   \/    |    \    |
+ |____|_  /\_______  /____|
+        \/         \/
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Â© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Website: https://www.rotmc.ml
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Thank you!
+*/
 import { ActionFormData, MessageFormData, ModalFormData } from '@minecraft/server-ui';
 /**
  * @class A Action Form is simple gametest UI that has only buttons
  * @example const dc = new ActionForm(); dc.show('Mo9ses');
- * @returns Shows a simple message form to the member "Mo9ses"
+ * @returns Shows a simple action form to the member "Mo9ses"
  */
 export class ActionForm {
     constructor() {
@@ -43,13 +60,11 @@ export class ActionForm {
      * @example .send('Mo9ses');
      * @returns {void}
      */
-    send(player, callback) {
-        //@ts-ignore
-        this.form.show(player).then((res) => {
+    async send(player, callback) {
+        await this.form.show(player).then((res) => {
             if (!callback)
                 return;
-            return callback(res, player);
-            // @ts-ignore
+            callback(res, player);
         }).catch((err) => console.warn(err));
     }
 }
@@ -105,13 +120,11 @@ export class MessageForm {
      * @example .send('Mo9ses');
      * @returns {void}
      */
-    send(player, callback) {
-        //@ts-ignore
-        this.form.show(player).then((res) => {
+    async send(player, callback) {
+        await this.form.show(player).then((res) => {
             if (!callback)
                 return;
-            return callback(res, player);
-            // @ts-ignore
+            callback(res, player);
         }).catch((err) => console.warn(err));
     }
 }
@@ -166,7 +179,7 @@ export class ModalForm {
      * @returns {void}
      */
     addSlider(label, minimumValue, maximumValue, valueStep, defaultValue) {
-        if (minimumValue >= maximumValue)
+        if (minimumValue > maximumValue)
             throw new Error('[Forms UI Silder] Error - the Min value cannot be greater than the Max value');
         this.form.slider(label, minimumValue, maximumValue, valueStep ?? 1, defaultValue ?? ~~(maximumValue / minimumValue));
     }
@@ -187,13 +200,11 @@ export class ModalForm {
      * @example .send('Mo9ses');
      * @returns {void}
      */
-    send(player, callback) {
-        //@ts-ignore
-        this.form.show(player).then((res) => {
+    async send(player, callback) {
+        await this.form.show(player).then((res) => {
             if (!callback)
                 return;
-            return callback(res, player);
-            // @ts-ignore
+            callback(res, player);
         }).catch((err) => console.warn(err));
     }
 }

@@ -1,8 +1,7 @@
 /*
 ROT Developers and Contributors:
 Moises (OWNER/CEO/Developer),
-Aex66 (Developer),
-notbeer (ROT's base code)
+Aex66 (Developer)
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 __________ ___________________
 \______   \\_____  \__    ___/
@@ -11,28 +10,26 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
 import config from '../../main.js';
-import { DatabasePaper } from '../../Papers/DatabasePaper.js';
-import Server from '../../ServerBook.js';
-const cmd = Server.command.create({
+import Commands from '../../Papers/CommandPaper/CommandPaper.js';
+import Server from '../../Papers/ServerPaper.js';
+import Database from '../../Papers/DatabasePaper.js';
+const cmd = Commands.create({
     name: 'rottle',
     description: 'A fun little word game were you have to guess the word that ROT is thinking of :)',
     aliases: ['rm', 'rottie'],
     category: 'Fantasy',
     developers: ['Aex66']
 });
-const rottle = new DatabasePaper('rottle');
+const rottle = Database.register('rottle');
 cmd.startingArgs(['play', 'try', 'quit', 'stats']);
-cmd.callback((plr) => {
-    if (!rottle.has(plr.id))
-        return rottle.write(plr.id, { inMatch: false });
-});
+cmd.callback((plr) => !rottle.has(plr.id) && rottle.write(plr.id, { inMatch: false }));
 cmd.staticType('play', 'play', (plr) => {
     if (rottle.read(plr.id).inMatch)
         return plr.error('You cannot start a game with me if you are already in a game with me! Type "§4!rm quit§c" in chat and give me the win loser');
@@ -42,7 +39,7 @@ cmd.staticType('play', 'play', (plr) => {
         attempts: 0,
         matchesPlayed: (rottle.read(plr.id)?.matchesPlayed ?? 0) + 1
     }));
-    return plr.send(`The match has started! The word I am thinking of is §c${rottle.read(plr.id).word.length}§7 letters long! You only get §c${config.rottleAttemps}§7 attempts!`);
+    plr.send(`The match has started! The word I am thinking of is §c${rottle.read(plr.id).word.length}§7 letters long! You only get §c${config.rottleAttemps}§7 attempts!`);
 }, null, false);
 cmd.staticType('try', 'try', (plr, val) => {
     if (!rottle.read(plr.id).inMatch)
@@ -63,27 +60,23 @@ cmd.staticType('try', 'try', (plr, val) => {
             inMatch: false,
             losses: (rottle.read(plr.id)?.losses ?? 0) + 1
         }));
-        if (config.rottleRewards)
-            Server.runCommands(config.rottleRewardsCmds.map(cmd => { return cmd.replace('@rottler', `"${plr.name}"`); }));
+        if (config.rottleRewards.length)
+            Server.runCommands(config.rottleRewards.map((c) => c.replace('@rottler', `"${plr.name}"`)), true);
         return plr.send(`§cTen strikes, your OUT!§7 Thanks for the free win! The word was §c${rottle.read(plr.id).word}§7 by the way XD.`);
     }
-    let tryWord = val.split('').map(letter => {
-        return rottle.read(plr.id).word.split('').includes(letter) ? `§a${letter}` : `§4${letter}`;
-    });
-    return plr.send(`§cWrong!§7 Here are the letters that are in that word: §l${tryWord.join('')}§r§7. You have §c${10 - rottle.read(plr.id).attempts}§7 attempts left!`);
+    let tryWord = val.split('').map(letter => rottle.read(plr.id).word.split('').includes(letter) ? `§a${letter}` : `§4${letter}`);
+    plr.send(`§cWrong!§7 Here are the letters that are in that word: §l${tryWord.join('')}§r§7. You have §c${10 - rottle.read(plr.id).attempts}§7 attempts left!`);
 });
 cmd.staticType('quit', 'quit', (plr) => {
     if (!rottle.read(plr.id).inMatch)
-        return plr.send('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
+        return plr.error('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
     rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
         inMatch: false,
         losses: (rottle.read(plr.id)?.losses ?? 0) + 1
     }));
-    return plr.send('Thanks for the free win loser!');
+    plr.send('Thanks for the free win loser!');
 }, null, false);
-cmd.dynamicType('stats', ['stats', 's', 'sto'], (plr) => {
-    plr.send(`Here are your stats:\n§aWins:§c ${rottle.read(plr.id)?.wins ?? 0}\n§aLosses:§c ${rottle.read(plr.id)?.losses ?? '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(rottle.read(plr.id)?.wins / rottle.read(plr.id)?.losses)}\n§aMatches played:§c ${rottle.read(plr.id)?.matchesPlayed ?? 0}\n§aAverage attemps before a win:§c ` + (rottle.read(plr.id)?.averageAttempts / rottle.read(plr.id)?.wins));
-});
+cmd.dynamicType('stats', ['stats', 's', 'sto'], plr => plr.send(`Here are your stats:\n§aWins:§c ${rottle.read(plr.id)?.wins ?? 0}\n§aLosses:§c ${rottle.read(plr.id)?.losses ?? '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(rottle.read(plr.id)?.wins / rottle.read(plr.id)?.losses)}\n§aMatches played:§c ${rottle.read(plr.id)?.matchesPlayed ?? 0}\n§aAverage attemps before a win:§c ` + (rottle.read(plr.id)?.averageAttempts / rottle.read(plr.id)?.wins)));
 const words = [
     'cattle',
     'resident',

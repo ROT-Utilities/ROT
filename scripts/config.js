@@ -10,7 +10,7 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
@@ -20,19 +20,20 @@ Thank you!
 export const config = {
     //ROT settings:
     prefix: '!',
+    release: 5,
     displayChatTime: true,
+    chatStyle: '$rank $player $time: §f$msg§r',
+    rankStyle: '',
     defaultRank: '§bMember',
     ROTDiscord: 'https://discord.gg/2ADBWfcC6S',
     discord: 'https://discord.gg/2ADBWfcC6S',
-    adminTag: 'v',
+    adminTag: '',
     hideAdminTag: false,
-    rottleRewards: false,
-    rottleRewardsCmds: [
-        'give "@rottler" diamond',
-        'summon tnt'
+    rottleRewards: [
+    //Example of commands: 'give "@rottler" diamond',    
     ],
     rottleAttemps: 10,
-    defaultNameColor: '§c',
+    defaultNameColor: '§e',
     defaultChatColor: '§f',
     hiveArrow: true,
     bannedPlayers: {},
@@ -41,36 +42,60 @@ export const config = {
             broadcast: true,
             close: true,
             clearchat: true,
-            //members: true,
+            serveritem: true
         },
         Management: {
-            //ban: true,
-            rank: true,
+            ban: true,
             tac: true,
         },
+        Structure: {
+            leaderboard: true,
+            text: true
+        },
         Escape: {
-            cmd: true,
-            // feed: true,
-            // GMA: true,
-            // GMC: true,
-            // GMS: true,
-            // heal: true,
-            //home: true,
-            // kill: true,
-            // repair: true,
-            sudo: true,
-            // top: true,
-            //vanish: true,
+            itemedit: true
         },
         Fantasy: {
             rickroll: true,
             rottle: true,
         },
         ROT: {
-            //form: true,
-            //quick: true,
             help: true,
         },
+    },
+    epics: {
+        "Auction House": {
+            enabled: true,
+            entry: 'main',
+            obj: 'money',
+            tag: 'ah',
+            currency: 'Gold',
+            houseName: 'Auction House',
+            color1: '§a',
+            color2: '§e',
+            color3: '§6',
+            npc: true,
+            npcName: 'Black Hat Matt',
+            comeBack: true,
+            namePost: true,
+            sliderStep: 10,
+            postAmount: [10, 1000000],
+            createPostPercent: [5, 5000],
+            buyersPremiumPercent: [5, 1000],
+            removePostPercent: [10, 1000],
+            maxPosts: 100,
+            maxClientPosts: 3,
+            bannedItems: [
+                'minecraft:air',
+            ],
+            coolHouseNames: true,
+            maxPostTime: 48,
+            maxHoldTime: 72,
+            checkPosts: 60,
+            boxNumber: true,
+            secondTake: true,
+            tryTime: 300, //Do NOT change this number. I'd only make it lower if my sever is SUPER laggy
+        }
     },
     useQuick: true
 };

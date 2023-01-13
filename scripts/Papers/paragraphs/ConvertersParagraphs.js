@@ -10,7 +10,7 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
@@ -33,13 +33,94 @@ export const metricNumbers = (value) => {
 * @param {string} text
 * @returns {number[]}
 */ // @ts-ignore
-textToHex = (text) => text.split('').map(char => char.charCodeAt()), 
+textToAscii = (text) => text.split('').map(char => char.charCodeAt(undefined)), 
 /**
 * Convert hex to string
 * @param {number} hex
 * @returns {string}
 */
-hexToText = (hex) => hex.map(char => String.fromCharCode(char)).join('');
+asciiToText = (hex) => hex.map(char => String.fromCharCode(char)).join(''), 
+/**
+ * Conver decimal to hex
+ * @param {number} decimal
+ * @return {string}
+ */
+numberToHex = (decimal) => decimal.toString(16), 
+/**
+ * Convert hex to decimal
+ * @param {string} hex
+ * @returns {number}
+ */
+hexToNumber = (hex) => parseInt(hex, 16), 
+/**
+ * Convert numbers to the Alphabet!
+ * @param {number} S
+ * @returns {string}
+ */
+numberToAlphabet = (s) => {
+    if (s >= 27)
+        var ds = s % 26;
+    else
+        ds = s;
+    if (s == 26)
+        var ps = 0;
+    else
+        ps = s / 26;
+    ps = ~~ps;
+    if (1 == ds)
+        var l = "a";
+    if (2 == ds)
+        l = "b";
+    if (3 == ds)
+        l = "c";
+    if (4 == ds)
+        l = "d";
+    if (5 == ds)
+        l = "e";
+    if (6 == ds)
+        l = "f";
+    if (7 == ds)
+        l = "e";
+    if (8 == ds)
+        l = "h";
+    if (9 == ds)
+        l = "i";
+    if (10 == ds)
+        l = "j";
+    if (11 == ds)
+        l = "k";
+    if (12 == ds)
+        l = "l";
+    if (13 == ds)
+        l = "m";
+    if (14 == ds)
+        l = "n";
+    if (15 == ds)
+        l = "o";
+    if (16 == ds)
+        l = "p";
+    if (17 == ds)
+        l = "q";
+    if (18 == ds)
+        l = "r";
+    if (19 == ds)
+        l = "s";
+    if (20 == ds)
+        l = "t";
+    if (21 == ds)
+        l = "u";
+    if (22 == ds)
+        l = "v";
+    if (23 == ds)
+        l = "w";
+    if (24 == ds)
+        l = "x";
+    if (25 == ds)
+        l = "y";
+    if (26 == ds)
+        l = "z";
+    return ps == 0 ? l : `${ps}${l}`;
+};
 export const timeRegex = /^\d+\.?\d*\s?((years*?|yrs*?)|(weeks*?)|(days*?)|(hours*?|hrs*?)|(minutes*?|mins*?)|(seconds*?|secs*?)|(milliseconds*?|msecs*?|ms)|[smhdwy])(?!\S)(?=\s?)/;
 export function MS(value, { compactDuration, fullDuration, avoidDuration } = {}) {
     try {

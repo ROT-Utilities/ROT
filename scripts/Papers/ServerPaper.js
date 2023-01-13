@@ -10,14 +10,14 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
 import { world } from '@minecraft/server';
-import { PlayerPaper } from './PlayerPaper.js';
+import Player from './PlayerPaper.js';
 import { setTickInterval } from './paragraphs/ExtrasParagraphs.js';
 /*
  * ROT's command queue system
@@ -34,7 +34,6 @@ setTickInterval(() => {
         world.getDimension(hundred[i][1] ?? 'overworld').runCommandAsync(hundred[i][0]).catch();
     }
 }, 5);
-const paperPlayer = new PlayerPaper().paperPlayer;
 /*
  * Welcome to the Server Paper!
  * Main Developer: notbeer
@@ -42,7 +41,7 @@ const paperPlayer = new PlayerPaper().paperPlayer;
  * Sub developer: Mo9ses
  * Link to name: Server Paper
 */
-export class ServerPaper {
+class ServerPaper {
     /**
      * Broadcast a message to everyone in game
      * @param {string} message Message you want to broadcast in chat
@@ -50,17 +49,20 @@ export class ServerPaper {
      * @returns {void} Nothing
      * @example .broadcast('Hello World!', 'Computer');
      */
-    broadcast(message, use) {
-        Array.from(world.getPlayers(), p => paperPlayer(p)).forEach(p => p.send(message, use));
+    broadcast(message, use, sound, tag) {
+        const players = Array.from(world.getPlayers(), p => Player.playerType(p));
+        if (tag)
+            return players.forEach(p => p.hasTag(tag) && p.send(message, use, sound));
+        players.forEach(p => p.send(message, use, sound));
     }
     /**
     * Push commands to the command queue
     * @param command The command you want to run
     * @param dimension The dimension you want the command run
     * @returns {void} Nothing
-    * @example .commandQueue('say Hello World!');
+    * @example .queueCommand('say Hello World!');
     */
-    commandQueue(command, dimension) {
+    queueCommand(command, dimension) {
         commandQueue.push(dimension ? [command, dimension] : [command]);
     }
     /**
@@ -84,10 +86,12 @@ export class ServerPaper {
     *   '%say notbeer has a Diamond!'
     * ]);
     */
-    runCommands(commands) {
+    runCommands(commands, queue) {
+        if (queue)
+            return commands.forEach(c => commandQueue.push([c]));
         const conditionalRegex = /^%/;
         if (conditionalRegex.test(commands[0]))
-            throw '§l§c>>§r§4: runCommands(): Error - First command in the Array CANNOT be Conditional';
+            throw 'Error >>: runCommands(): Error - First command in the Array CANNOT be Conditional';
         let e = false;
         commands.forEach(async (cmd) => {
             if (e && conditionalRegex.test(cmd))
@@ -97,3 +101,5 @@ export class ServerPaper {
         return { error: e };
     }
 }
+const Server = new ServerPaper();
+export default Server;

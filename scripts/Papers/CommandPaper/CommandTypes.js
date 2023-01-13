@@ -14,35 +14,35 @@ export const staticBook = {
     add: {
         des: 'Adds stuff',
         val: ['add', 'a-', 'push'],
-        con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
+        con: (val) => true,
         err: 'You cannot use special characters!'
     },
     remove: {
         des: 'Removes stuff',
-        val: ['remove', 'r-', 'rem', 're'],
+        val: ['remove', 'r-', 'rem', 're', 'delete'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
     },
     save: {
-        des: 'Saves stuff?',
-        val: ['save', 's-', 'memory', 'sav'],
+        des: 'Saves stuff',
+        val: ['save', 's-', 'sav'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
     },
     list: {
-        des: '',
+        des: 'See stuff',
         val: ['list', 'l-', 'lis', 'tell'],
         con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
         err: 'You cannot use special characters!'
     },
     sell: {
-        des: '',
+        des: 'Sell stuff',
         val: [`sell`, 's-'],
         con: (val) => val /* You can write code here to make sure it's a Minecraft item without writing it every time inside a commond*/,
         err: 'That is not a Minecraft item'
     },
     teleport: {
-        des: '',
+        des: 'Relative coordinates',
         val: ['tp', 'teleport', 'go', 'go-to'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
@@ -61,7 +61,7 @@ export const staticBook = {
     },
     decline: {
         des: '',
-        val: ['deny', 'decline', 'no'],
+        val: ['deny', 'decline', 'no', 'cancel'],
         con: (val) => val.replace(/[a-zA-Z0-9-_ ]/g, '') === '',
         err: 'You cannot use special characters!'
     },
@@ -89,18 +89,24 @@ export const staticBook = {
         con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
         err: 'You cannot use special characters!'
     },
-    toggle: {
-        des: '',
-        val: ['toggle', 'enable', 'disable', 'on', 'off'],
-        con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
-        err: 'You cannot use special characters!'
-    },
     rename: {
         des: '',
         val: ['rename', 'name', 'rn', 'rname'],
-        con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
+        con: () => true,
         err: 'You cannot use special characters!'
-    }
+    },
+    join: {
+        desc: '',
+        val: ['join', 'enter'],
+        con: () => true,
+        err: 'You cannot use special characters!'
+    },
+    replace: {
+        desc: '',
+        val: ['replace'],
+        con: () => true,
+        err: 'You cannot use special characters!'
+    },
 } /* as { [key: string]: { des: string, val: string[], con?: (val: string) => boolean, err?: string }}*/;
 export const typeBook = {};
 export const staticKeys = Object.keys(staticBook), staticValues = staticKeys.map((key) => staticBook[key].val).flat();

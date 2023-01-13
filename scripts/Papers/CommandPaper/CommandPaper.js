@@ -10,7 +10,7 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
@@ -19,39 +19,10 @@ Thank you!
 import { Location, world } from '@minecraft/server';
 import { MS, timeRegex } from '../paragraphs/ConvertersParagraphs.js';
 import { staticBook, staticValues } from './CommandTypes.js';
-import Server from '../../ServerBook.js';
 import lang from '../LangPaper.js';
 import quick from '../../main.js';
-import { DatabasePaper } from '../DatabasePaper';
-/**
- * This is what initiates the commands
-*/
-const ROT = new DatabasePaper('server');
-world.events.beforeChat.subscribe(data => {
-    data.cancel = true;
-    if (!data.message.startsWith(quick.prefix)) {
-        const player = Server.player.paperPlayer(data.sender, { from: 'CHAT' }), time = new Date();
-        if (data.message.startsWith(quick.prefix))
-            return player.error(lang.cmd.wrongPrefix);
-        if (data.sender.hasTag('mute'))
-            return player.error(lang.chat.mutted);
-        if (data.message.trim() === '')
-            return;
-        if (!ROT.has('setup'))
-            return data.cancel = false;
-        const message = data.message.charAt(0).toUpperCase() + data.message.slice(1), rank = `§7[${player.getPrefixes().join('§r§7, ')}§r§7] ${player.getNameColors().join('')}`;
-        let currentHour = time.getUTCHours(), AMPM = '';
-        if (currentHour < 0)
-            currentHour = currentHour + 24;
-        if (currentHour <= 12)
-            AMPM = currentHour === 12 ? 'PM' : 'AM', currentHour === 0 ? currentHour = 12 : null;
-        else
-            currentHour = currentHour - 12, AMPM = 'PM';
-        return Array.from(world.getPlayers()).forEach(plr => plr.tell(`${rank}${player.nameTag}§r§7 ${currentHour}:${time.getUTCMinutes() < 10 ? '0' + time.getUTCMinutes() : time.getUTCMinutes()} ${AMPM}: §f${message}`));
-    }
-    const args = data.message.slice(quick.prefix.length).trim().split(/\s+/), command = args.shift().toLowerCase();
-    Server.command.run(command, Server.player.paperPlayer(data.sender, { from: command }), args);
-});
+import Player from '../PlayerPaper.js';
+import Database from '../DatabasePaper.js';
 /*
  * Welcome to the CommandPaper!
  * Main Developer: Mo9ses
@@ -110,7 +81,7 @@ export class CommandPaper {
                 quotes.push(na);
         });
         if (quotes.length)
-            return null;
+            return;
         return output;
     }
     /**
@@ -131,21 +102,17 @@ export class CommandPaper {
                     return { aRN: a, tV: cmd.aR[a].tV[1] ? args[1] : cmd.aR[a].tV[0], nA: args.slice(cmd.aR[a].tV[1] ? 2 : 1) };
                 else
                     continue;
-            const res = cmd.aR[a].tV[0].find((v) => v === '*' || args.slice(0, v.split(' ').length).join(' ') === v);
+            const res = cmd.aR[a].tV[0].find((v) => args.slice(0, v.split(' ').length).join(' ') === v);
             if (res)
-                return { aRN: a, tV: cmd.aR[a].tV[2] ? args.slice(0, cmd.aR[a].tV[2]) : cmd.aR[a].tV[0].includes('*') ? args.slice(0, res.split(' ').length).join(' ') : args[0], nA: cmd.aR[a].tV[2] ? args.slice(cmd.aR[a].tV[2]) : args.slice(res.split(' ').length) };
+                return { aRN: a, tV: cmd.aR[a].tV[1] ? args.slice(0, cmd.aR[a].tV[2]) : args[0], nA: cmd.aR[a].tV[1] ? args.slice(cmd.aR[a].tV[2]) : args.slice(res.split(' ').length) };
         }
         const argTypes = {};
         nextArgs?.filter(a => !['sta', 'dyn'].includes(cmd.aR[a].tY))?.forEach(a => Object.assign(argTypes, { [cmd.aR[a].tY]: a }));
         const allTypes = Object.keys(argTypes);
         if (allTypes.includes('plr')) {
-            if (args[0] === '@s' && cmd.aR[argTypes['plr']].tV[2])
-                return { aRN: argTypes['plr'], tV: cmd.aR[argTypes['plr']].tV[1] ? player : player.nameTag, nA: args.slice(1) };
-            let val = Array.from(world.getPlayers()).find(p => p.nameTag.toLowerCase() === args[0].toLowerCase());
-            if (cmd.aR[argTypes['plr']].tV[1])
-                val = val ? Server.player.paperPlayer(val, cmd.aR[argTypes['plr']].tV[0]) : null;
-            else
-                val = args[0];
+            if (args[0] === '@s' && (cmd.aR[argTypes['plr']].tV[0]?.self ?? true))
+                return { aRN: argTypes['plr'], tV: cmd.aR[argTypes['plr']].tV[1] ? player : Player.offlinePlayer(player.nameTag), nA: args.slice(1) };
+            const val = cmd.aR[argTypes['plr']].tV[1] ? Player.playerType(Array.from(world.getPlayers()).find(p => p.nameTag.toLowerCase() === args[0].toLowerCase()), cmd.aR[argTypes['plr']].tV[0]) : Player.offlinePlayer(args[0]);
             if (val)
                 return { aRN: argTypes['plr'], tV: val, nA: args.slice(1) };
         }
@@ -172,7 +139,7 @@ export class CommandPaper {
             if (loc.length === 3)
                 return { aRN: argTypes['loc'], tV: new Location(loc[0], loc[1], loc[2]), nA: args.slice(3) };
         }
-        if (allTypes.includes('num') && !isNaN(parseInt(args[0])))
+        if (allTypes.includes('num') && !isNaN(Number(args[0])) && (cmd.aR[argTypes['num']].tV?.float ? true : !`${Number(args[0])}`.includes('.')))
             return { aRN: argTypes['num'], tV: Number(args[0]), nA: args.slice(1) };
         if (allTypes.includes('tim')) {
             let time = 0, left = args[0], testing = true;
@@ -185,10 +152,12 @@ export class CommandPaper {
                 else
                     testing = false;
             }
-            const minMax = cmd.aR[argTypes['plr']].tV;
-            if (left !== args[0] && (minMax?.min ?? 0) <= time && time <= (minMax?.max ?? 0))
+            const minMax = cmd.aR[argTypes['tim']].tV;
+            if (left !== args[0] && (minMax?.min ?? 0) <= time && minMax?.max ? time <= minMax.max : true)
                 return { aRN: argTypes['tim'], tV: time, nA: args.slice(1) };
         }
+        if (allTypes.includes('ukn') && args.length)
+            return { aRN: argTypes['ukn'], tV: cmd.aR[argTypes['ukn']].tV === 1 ? args[0] : args.slice(0, cmd.aR[argTypes['ukn']].tV), nA: args.slice(cmd.aR[argTypes['ukn']].tV) };
     }
     findExample(type, player) {
         if (!type)
@@ -197,16 +166,18 @@ export class CommandPaper {
             return staticBook[type.tV[0]].val[0];
         if (type.tY === 'dyn')
             return type.tV[0][0];
+        if (type.tY === 'ukn')
+            return ['bruh', 'ok', 'monkey', '"michael jackson"', 'idk', 'minecraft?'][~~(Math.random() * 6)];
         if (type.tY === 'plr')
             return Array.from(world.getPlayers(), plr => plr.nameTag).find(n => n !== player.nameTag) || '@s';
         if (type.tY === 'num')
-            return `${type.tV ? ~~(Math.random() * (type.tV?.max || (type.tV?.min + 5) || 15)) + type.tV?.min || (type.tV?.max - 5) || -15 : 0}`;
+            return `${type.tV ? ~~(Math.random() * (type.tV?.max || (type.tV?.min + 5) || 15)) + type.tV?.min || (type.tV?.max - 5) || -15 : ~~(Math.random() * 100)}`;
         if (type.tY === 'loc')
             return '~ ~ ~';
         if (type.tY === 'boo')
             return 'true';
-        if (type.tV === 'tim')
-            return MS(type.tV.max);
+        if (type.tY === 'tim')
+            return MS(type.tV?.max > 0 ? type.tV.max : type.tV?.min ? type.tV.min : 3600000);
         return;
     }
     /**
@@ -217,19 +188,22 @@ export class CommandPaper {
      * @example .run('warp', player, ['create', 'epic loser']);
      * @returns {void}
      */
-    run(command, player, args) {
-        const cmd = this.list.find(cmd => cmd.name === command || cmd.aliases && cmd.aliases.includes(command)), time = new Date().getTime();
+    run(cmd, player, args) {
         if (!cmd)
-            return player.error(ROT.read('setup') ? lang.cmd.unknown : lang.setup.notSetup, 'ROT');
+            return player.error(Database.register('server').read('setup') ? lang.cmd.unknown : lang.setup.notSetup, 'ROT');
         if (!cmd.rM.cM)
             return player.error(lang.cmd.useForm, 'ROT');
         if (player.isAdmin ? false : cmd.admin || (cmd.tags?.length ? !player.hasTags(cmd.tags) : false))
             return player.error(lang.cmd.noPerms, 'ROT');
         if (!cmd.sT[0].length && args.length)
             return player.error(lang.cmd.noArgs, 'ROT');
-        // Make this assume @s and ~~~                                  \/
         if (cmd.sT[1] && !args.length)
-            return player.error(lang.cmd.missingArgs(command, args, this.findExample(cmd.aR[cmd.sT[0][0]], player)), 'ROT');
+            if (cmd.sT[0].some(a => cmd.aR[a].tY === 'plr' && (cmd.aR[a].tV[0]?.self ?? true)))
+                args = ['@s'];
+            else if (cmd.sT[0].some(a => cmd.aR[a].tY === 'loc'))
+                args = ['~~~'];
+            else
+                return player.error(lang.cmd.missingArgs(cmd.name, args, this.findExample(cmd.aR[cmd.sT[0][0]], player)), 'ROT');
         const cls = {}, output = this.parseArgs(args);
         if (!output)
             return player.error(lang.cmd.openQou);
@@ -244,25 +218,24 @@ export class CommandPaper {
                 return player.error(lang.cmd.maxArgs(nextArgs[0]), 'ROT');
             const type = this.findType(cmd, player, nAR, nextArgs), arg = type?.aRN ? cmd.aR[type.aRN] : null;
             if (!arg)
-                return player.error(lang.cmd.notAArg(command, args.slice(0, args.length - nextArgs.length), nextArgs[0], nextArgs.slice(1).join(' '), this.findExample(cmd.aR[nAR[0]], player)), 'ROT');
+                return player.error(lang.cmd.notAArg(cmd.name, args.slice(0, args.length - nextArgs.length), nextArgs[0], nextArgs.slice(1).join(' '), this.findExample(cmd.aR[nAR[0]], player)), 'ROT');
             if (arg.nN && !type.nA.length)
-                if (cmd.aR[type.aRN].nA.some(a => cmd.aR[a].tY === 'plr' && cmd.aR[a].tV[2]))
+                if (cmd.aR[type.aRN].nA.some(a => cmd.aR[a].tY === 'plr' && (cmd.aR[a].tV[0]?.self ?? true)))
                     Object.assign(type, { nA: ['@s'] });
                 else if (cmd.aR[type.aRN].nA.some(a => cmd.aR[a].tY === 'loc'))
                     Object.assign(type, { nA: ['~~~'] });
                 else
-                    return player.error(lang.cmd.missingArgs(command, args, this.findExample(cmd.aR[arg.nA[0]], player)));
+                    return player.error(lang.cmd.missingArgs(cmd.name, args, this.findExample(cmd.aR[arg.nA[0]], player)));
             if (['dyn', 'sta'].includes(arg.tY) && !type.tV?.length && arg.tV[1])
                 return player.error(lang.cmd.needVal(arg.tV[0]), 'ROT');
             if (arg.tY === 'sta' && (!staticBook[arg.tV[0]]?.con(type.tV) ?? false))
-                return player.error(staticBook[arg.tV[0]]?.err ?? lang.cmd.valErr(arg.tV[0]), command);
+                return player.error(staticBook[arg.tV[0]]?.err ?? lang.cmd.valErr(arg.tV[0]), cmd.name);
             if (arg.tG?.length && !arg.tG.some(t => player.hasTag(t)))
                 return player.error(lang.cmd.noArgPerm, 'ROT');
             Object.assign(cls, { [type.aRN]: type.tV });
             nextArgs = type.nA;
             tries++;
         }
-        console.warn(`Operation compeleted in ${new Date().getTime() - time} MS!`);
         try {
             const keys = Object.keys(cls), values = keys.map(k => cls[k]);
             if (cmd.cB)
@@ -276,7 +249,7 @@ export class CommandPaper {
                 if (cmd.aR[keys[i]].cB)
                     cmd.aR[keys[i]].cB(player, cls[keys[i]], values);
                 if (Object.keys(this.forceQueue).includes(cmd.name))
-                    cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], values);
+                    cmd.aR[this.forceQueue[cmd.name][0]].cB && cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], values);
                 values.splice(0, 1);
             }
         }
@@ -294,7 +267,6 @@ export class CommandPaper {
      * @returns {void}
      */
     form(cmd, player) {
-        const time = new Date().getTime();
         if ((cmd.admin && !player.hasTag(quick.adminTag)) || (cmd.tags?.length && !cmd.tags.some(t => player.hasTag(t))))
             return player.error(lang.cmd.noPerms, 'ROT');
         if (!cmd.sT[0].length)
@@ -302,28 +274,29 @@ export class CommandPaper {
     }
     /**
      * Register a command into ROT
-     * @param {command} command The command
+     * @param {command} cmd The command
      * @example .register(.create({ name: 'nothing' }));
      * @returns {void}
      */
     map(cmd) {
-        return;
+        return [''];
     }
 }
+const Commands = new CommandPaper();
+export default Commands;
 /**
  * The command class
  */
-//Add bridgeType to the command builder
 class command {
     constructor(information) {
-        Server.command.list.push(Object.assign(information, {
+        Commands.list.push(Object.assign(information, {
             sT: [[], false],
             aR: {},
             cB: null,
             rM: { cM: true, fM: true, tG: true },
         }));
         this.name = information.name;
-        this.index = Server.command.list.findIndex(c => c.name === this.name);
+        this.index = Commands.list.findIndex(c => c.name === this.name);
     }
     /**
      * Runs a function if the command is execute successfully (Before the arg callbacks)
@@ -332,7 +305,7 @@ class command {
      * @returns {command}
      */
     callback(callback) {
-        Server.command.list[this.index].cB = callback;
+        Commands.list[this.index].cB = callback;
         return this;
     }
     /**
@@ -341,7 +314,7 @@ class command {
      * @returns {void}
      */
     end(callback) {
-        Object.assign(Server.command.endQueue, { [this.name]: callback });
+        Object.assign(Commands.endQueue, { [this.name]: callback });
     }
     /**
      * Force the command builder to run a argument. Remember, this argument will run after the origin has been called
@@ -349,7 +322,7 @@ class command {
      * @param {string} value The value that will the command builder will send to the argument (recommended)
      */
     force(argument, value) {
-        Object.assign(Server.command.forceQueue, { [this.name]: [argument, value] });
+        Object.assign(Commands.forceQueue, { [this.name]: [argument, value] });
     }
     /**
      * The starting argument(s) for the command. This is required if you have arguments
@@ -363,7 +336,7 @@ class command {
         arg.forEach(a => !test.includes(a) && test.push(a));
         if (arg.length !== test.length)
             throw Error(`Please check your starting args for "${this.name}"!`);
-        Server.command.list[this.index].sT = [arg, needArg ?? true];
+        Commands.list[this.index].sT = [arg, needArg ?? true];
         return this;
     }
     /**
@@ -375,13 +348,13 @@ class command {
      * @returns {command}
      */
     relayMethod({ cmd, form, tag }) {
-        const rM = Server.command.list[this.index].rM;
+        const rM = Commands.list[this.index].rM;
         if (cmd !== undefined && rM.cM !== cmd)
-            Server.command.list[this.index].rM.cM = cmd;
+            Commands.list[this.index].rM.cM = cmd;
         if (form !== undefined && rM.fM !== form)
-            Server.command.list[this.index].rM.fM = form;
+            Commands.list[this.index].rM.fM = form;
         if (tag !== undefined && rM.tG !== tag)
-            Server.command.list[this.index].rM.tG = tag;
+            Commands.list[this.index].rM.tG = tag;
         return this;
     }
     /**
@@ -398,10 +371,10 @@ class command {
      * @returns {command}
      */
     staticType(name, type, callback, nextArgs, needValue, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'sta',
                 tV: [type, needValue ?? true],
                 cB: callback ?? null,
@@ -422,10 +395,10 @@ class command {
      * @returns {command}
      */
     booleanType(name, callback, nextArgs, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'boo',
                 cB: callback ?? null,
                 nA: nA,
@@ -446,10 +419,10 @@ class command {
      * @returns {command}
      */
     locationType(name, callback, nextArgs, loaded, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'loc',
                 tV: loaded ?? true,
                 cB: callback ?? null,
@@ -471,12 +444,12 @@ class command {
      * @returns {command}
      */
     numberType(name, callback, nextArgs, data, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         if (data && data.min > data.max)
             throw Error(`Argument "${name}" from command "${this.name}" cannot have a min value greater than the max.`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'num',
                 tV: data ?? null,
                 cB: callback ?? null,
@@ -498,48 +471,16 @@ class command {
      * }, ['test2']);
      * @returns {command}
      */
-    playerType(name, callback, online, nextArgs, data, self, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+    playerType(name, callback, online, nextArgs, data, needNextArg) {
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'plr',
-                tV: [data ?? {}, online ?? true, self ?? true],
+                tV: [data ?? {}, online ?? true],
                 cB: callback ?? null,
                 nA: nA,
                 nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false
-            } });
-        return this;
-    }
-    /**
-     * Creates a dynamic argument
-     * @param {string} name The name of the argument
-     * @param {ArrowFunction | Function} callback The function that runs after the argument is found
-     * @param {string | string[]} nextArgs The name of the next argument(s) that will run afther this
-     * @param {boolean} needValue If the arg after this one will be need and returned as a value
-     * @param {number} length The number of args it will return as a value (Will not be processed if needValue is false or undefined)
-     * @param {boolean} needNextArg If the next argument(s) from before are needed
-     * @example .dynamicType('hello', 'BOI WHAT THE HELLLLL', (plr, str, args) => {
-     * <tab> console.warn(string); //Output: [9, 10, -91]
-     * }, ['hi 2.0'], true);
-     * @returns {command}
-     */
-    dynamicType(name, data, callback, nextArgs, needValue, length, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
-        const val = [data].flat();
-        if (val.some(v => staticValues.includes(v)))
-            throw Error(`Dynamic argument "${name}" from command "${this.name}" can't have a value that is already in a static type.`);
-        const nA = nextArgs ? [nextArgs].flat() : [];
-        if (nA.includes('*') && nA.length > 1)
-            throw Error(`Dynamic argument "${name}" from command "${this.name}" can't take any argument if it has multiple argument aliases`);
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
-                tY: 'dyn',
-                tV: [val, needValue ?? false, length ? 0 : val[0] === '*' ? 30 : 0],
-                cB: callback ?? null,
-                nA: nA,
-                nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false,
-                tG: []
             } });
         return this;
     }
@@ -556,10 +497,10 @@ class command {
      * @returns {command}
      */
     timeType(name, callback, nextArgs, data, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
             throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
+        Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'tim',
                 tV: data ?? null,
                 cB: callback ?? null,
@@ -568,16 +509,73 @@ class command {
             } });
         return this;
     }
-    teamType(name, argNames, callback, nextArgs, needNextArg) {
-        if (Object.keys(Server.command.list[this.index].aR).includes(name))
-            throw Error(`Failed to add teamType "${name}" to "${this.name}". This argument/type already exists!`);
-        const val = [argNames].flat(), nA = nextArgs ? [nextArgs].flat() : [];
-        Object.assign(Server.command.list[this.index].aR, { [name]: {
-                tY: 'tem',
-                tV: val,
+    /**
+     * Creates a dynamic argument
+     * @param {string} name The name of the argument
+     * @param {string} value What the command builder is looking for
+     * @param {ArrowFunction | Function} callback The function that runs after the argument is found
+     * @param {string | string[]} nextArgs The name of the next argument(s) that will run afther this
+     * @param {boolean} needValue If the arg after this one will be need and returned as a value
+     * @param {number} length The number of args it will return as a value (Will not be processed if needValue is false or undefined)
+     * @param {boolean} needNextArg If the next argument(s) from before are needed
+     * @example .dynamicType('hello', 'BOI WHAT THE HELLLLL', (plr, str, args) => {
+     * <tab> console.warn(string); //Output: 'BOI WHAT THE HELLLLL'
+     * }, ['hi 2.0'], false);
+     * @returns {command}
+     */
+    dynamicType(name, value, callback, nextArgs, needValue, length, needNextArg) {
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
+            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+        const val = [value].flat();
+        if (val.some(v => staticValues.includes(v)))
+            throw Error(`Dynamic argument "${name}" from command "${this.name}" can't have a value that is already in a static type.`);
+        const nA = nextArgs ? [nextArgs].flat() : [];
+        Object.assign(Commands.list[this.index].aR, { [name]: {
+                tY: 'dyn',
+                tV: [val, needValue ?? false, length ?? 1],
                 cB: callback ?? null,
                 nA: nA,
                 nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false,
+                tG: []
+            } });
+        return this;
+    }
+    /**
+     * Creates a unknown argument
+     * @param {string} name The name of the argument
+     * @param {ArrowFunction | Function} callback The function that runs after the argument is found
+     * @param {string | string[]} nextArgs The name of the next argument(s) that will run afther this
+     * @param {number} length The number of args it will return as a value (Will not be processed if needValue is false or undefined)
+     * @param {boolean} needNextArg If the next argument(s) from before are needed
+     * @example .unknownType('hello', (plr, str, args) => {
+     * <tab> console.warn(string); //Output: Shiii, idk...
+     * }, ['hi 2.0']);
+     * @returns {command}
+     */
+    unknownType(name, callback, length, nextArgs, needNextArg) {
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
+            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+        const nA = nextArgs ? [nextArgs].flat() : [];
+        Object.assign(Commands.list[this.index].aR, { [name]: {
+                tY: 'ukn',
+                tV: length ?? 256,
+                cB: callback ?? null,
+                nA: nA,
+                nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false,
+                tG: []
+            } });
+        return this;
+    }
+    bridge(name, value, argNames, callback, needArgs) {
+        if (Object.keys(Commands.list[this.index].aR).includes(name))
+            throw Error(`Failed to add bridge "${name}" to "${this.name}". This argument/type already exists!`);
+        const val = [argNames].flat();
+        Object.assign(Commands.list[this.index].aR, { [name]: {
+                tY: 'dyn',
+                tV: [staticBook[value].val, false, 0],
+                cB: callback ?? null,
+                nA: val,
+                nN: needArgs ?? true,
                 tG: []
             } });
         return this;
@@ -588,15 +586,15 @@ class command {
      * @param {argConfig} info The new information
      * @returns {command}
      */
-    argConfig(argNames, info) {
+    config(argNames, info) {
         const args = [argNames].flat();
         args.forEach(a => {
-            const arg = Server.command.list[this.index].aR[a], tags = info.tags ? info.tags : arg?.tG ?? [];
+            const arg = Commands.list[this.index].aR[a], tags = info.tags ? info.tags : arg?.tG ?? [];
             if (info.admin)
                 tags.push(quick.adminTag);
             if (!arg)
                 throw Error(`Failed editing argument "${a}" from command "${this.name}" because it does not exist!`);
-            Object.assign(Server.command.list[this.index].aR[a], {
+            Object.assign(Commands.list[this.index].aR[a], {
                 nA: info.nextArgs ?? arg.nA,
                 tG: tags,
                 nN: info.needNextArgs ?? arg.nN
@@ -605,6 +603,3 @@ class command {
         return this;
     }
 }
-/**
- * Checks ROT command arguments for imperfections
- */ 

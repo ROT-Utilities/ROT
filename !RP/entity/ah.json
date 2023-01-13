@@ -1,0 +1,36 @@
+{
+	"format_version": "1.8.0",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "rot:ah",
+			"spawn_egg": {
+				"base_color": "#c9ffe5",
+				"overlay_color": "#dbfff8"
+			},
+			"render_controllers": [
+				"controller.render.ah"
+			],
+			"geometry": {
+				"default": "geometry.humanoid.ah"
+			},
+			"textures": {
+				"ah": "textures/rot/entity/ah"
+			},
+			"materials": {
+				"default": "npc",
+				"animated": "player_animated"
+			},
+			"scripts": {
+				"scale": "0.9375"
+			},
+			"animations": {
+				"bob": "animation.humanoid.bob"
+			},
+			"animation_controllers": [
+				{
+					"bob": "controller.animation.humanoid.bob"
+				}
+			]
+		}
+	}
+}

@@ -1,9 +1,9 @@
 {
 	"format_version": 2,
 	"header": {
-		"name": "§3§lROT V3 §aPart 3",
-		"description": "§cWelcome to §4§lROT§r§c! §4§lROT§r§c is a Minecraft Bedrock addon designed to make §6§lYOUR§r§c Minecraft server §4§lBETTER§r§c! Remember to use \"§7!help§c\"!",
-		"uuid": "d061afe6-08db-4925-b1a4-655f7f69a7dd",
+		"name": "§e§lROT V3.0.4§r",
+		"description": "§6Welcome to §a§lROT§r§c! §a§lROT§r§6 is a Minecraft Bedrock addon designed to make §lYOUR§r§6 Minecraft server §6§lBETTER§r§6! Remember to use \"§7!help§6\"!§r",
+		"uuid": "bdc6d0ef-c138-4a68-a93e-8b64ffdbc9ce",
 		"version": [
 			3,
 			0,
@@ -12,12 +12,12 @@
 		"min_engine_version": [
 			1,
 			19,
-			40
+			51
 		]
 	},
 	"modules": [
 		{
-			"description": "§cWelcome to §4§lROT§r§c! §4§lROT§r§c is a Minecraft Bedrock addon designed to make §6§lYOUR§r§c Minecraft server §4§lBETTER§r§c! Remember to use \"§7!help§c\"!",
+			"description": "§6Welcome to §a§lROT§r§c! §a§lROT§r§6 is a Minecraft Bedrock addon designed to make §lYOUR§r§6 Minecraft server §6§lBETTER§r§6! Remember to use \"§7!help§6\"!§r",
 			"type": "data",
 			"uuid": "42f17752-1b47-4dbe-82b7-0b0d96192698",
 			"version": [
@@ -27,10 +27,10 @@
 			]
 		},
 		{
-			"description": "§c§lROT Gametest Modifier. Remember to use §7!help",
+			"description": "§c§lROT Gametest Modifier. Remember to use §7!help§r",
 			"type": "script",
 			"language": "javascript",
-			"uuid": "a188da6f-fccc-473a-94aa-f6fa7ef59962",
+			"uuid": "ae42437c-fa05-4d22-b0f1-f858b773480a",
 			"version": [
 				3,
 				0,

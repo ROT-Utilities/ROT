@@ -1,0 +1,13 @@
+{
+	"format_version": "1.8.0",
+	"render_controllers": {
+		"controller.render.ah": {
+			"geometry": "Geometry.default",
+			"materials": [ { "*": "Material.default" } ],
+			"textures": [ "texture.ah" ],
+			"part_visibility": [
+			  { "*": true }
+			]
+		}
+	}
+}

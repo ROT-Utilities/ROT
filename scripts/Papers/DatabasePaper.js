@@ -10,69 +10,190 @@ __________ ___________________
  |____|_  /\_______  /____|
         \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2022 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { textToHex, hexToText } from './paragraphs/ConvertersParagraphs.js';
 import { world } from '@minecraft/server';
-import Server from '../ServerBook.js';
+import { textToAscii, asciiToText } from './paragraphs/ConvertersParagraphs.js';
+import { setTickInterval } from './paragraphs/ExtrasParagraphs.js';
+import Server from './ServerPaper.js';
+import quick from '../main.js';
 /*
  * Welcome to the DatabasePaper!
  * Main Developer: Mo9ses
  * Sub developer: Nobady!
  * Link to name: Database Paper
-*/ //Don't forget to make the memory release system
+*/
+try {
+    world.scoreboard.addObjective('DB:model', '');
+}
+catch { }
+;
 const memory = {};
-export class DatabasePaper {
-    constructor(table, identifier) {
-        const id = identifier || 'ROT';
-        if ((id + table).length > 16)
-            throw Error('[Database] constructor(): Error - The table name is too long!');
+class DatabasePaper {
+    register(table, identifier) {
+        if (!identifier)
+            identifier = 'ROT';
+        if (identifier === 'DB')
+            throw Error('You cannot create a database with the identifier "DB"');
+        if (table === 'model')
+            throw Error('You cannot create a database with the table "model"');
+        if (table.includes(':') || identifier.includes(':'))
+            throw Error(`The database "${table}" table name or identifier cannot include a ":"`);
+        Server.queueCommand(`scoreboard players set "${identifier}" "DB:model" 0`);
         try {
-            world.scoreboard.addObjective(id + table, '');
+            world.scoreboard.addObjective(`DB:${identifier}`, '');
         }
         catch { }
         ;
-        this.fullName = id + table;
+        Server.queueCommand(`scoreboard players set "${table}" "DB:${identifier}" 0`);
+        return new database(`${identifier}:`, table);
+    }
+    /**
+     * Checks if the world has a database
+     * @param table The name of the table
+     * @param identifier The identifier
+     * @returns {boolean}
+     */
+    has(table, identifier) {
+        return Boolean(world.scoreboard.getObjective(`${identifier ?? 'ROT'}:${table}`));
+    }
+    /**
+     * Drops a table
+     * @returns {void} returns nothing
+     * @example .drop('Bruh', 'MEMES');
+     */
+    drop(table, identifier) {
+        if (!identifier)
+            identifier = 'ROT';
+        Server.queueCommand(`scoreboard players reset "${table}" "DB:${identifier}"`);
+        try {
+            world.scoreboard.removeObjective(`${identifier}:${table}`);
+        }
+        catch { }
+        ;
+        if (this.allTables(identifier).length === 1) {
+            Server.queueCommand(`scoreboard players reset "${identifier}" "DB:model"`);
+            try {
+                world.scoreboard.removeObjective(`DB:${identifier}`);
+            }
+            catch { }
+            ;
+        }
+        delete memory[`${identifier}:${table}`];
+    }
+    /**
+     * List all of the registered tables
+     * @param {string} identifier List all of the tables with a specific identifier
+     * @returns {string[] | { id: string[] }}
+     */
+    allTables(identifier) {
+        if (identifier) {
+            if (!world.scoreboard.getObjective(`DB:${identifier}`))
+                return [];
+            return world.scoreboard.getObjective(`DB:${identifier}`).getParticipants().map(p => p.displayName);
+        }
+        const IDs = {};
+        world.scoreboard.getObjective('DB:model').getParticipants().map(p => p.displayName).forEach(i => Object.assign(IDs, { [i]: world.scoreboard.getObjective(`DB:${i}`).getParticipants().map(p2 => p2.displayName) }));
+        return IDs;
+    }
+}
+const Database = new DatabasePaper();
+export default Database;
+class database {
+    /**
+     * Creating a database!
+     * @param table The name of the table
+     * @param identifier The id of the table. Used like this "id:table"
+     */
+    constructor(identifier, table) {
         this.table = table;
-        Object.assign(memory, { [this.fullName]: {} });
+        this.fullName = `${identifier}${table}`;
+        if (!memory.hasOwnProperty(this.fullName))
+            Object.assign(memory, { [this.fullName]: {} });
+        try {
+            world.scoreboard.addObjective(this.fullName, '');
+        }
+        catch { }
+        ;
     }
     /**
      * Save a value or update a value in the Database under a key
      * @param {string} key The key you want to save the value as
-     * @param {any} value The value you want to save
-     * @param {boolean} memoryKey You can save the key and call for it later using .getCollection();
+     * @param {any} value The value you want to save. If you type null, it will not take any space
      * @returns {database}
      * @example .write('Test Key', 'Test Value');
      */
     write(key, value) {
-        Object.assign(memory[this.fullName], { [key]: [value, new Date().getTime()] });
-        let keyL = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.startsWith(key) && p.score != 0).length + 1, j = 1, data = textToHex(JSON.stringify(value));
-        for (let l = 1; l < keyL; l++)
-            Server.commandQueue(`scoreboard players reset "${key + l}" "${this.fullName}"`);
+        Object.assign(memory[this.fullName], { [key]: [value, new Date().getMinutes() + quick.release] });
+        let valueL = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.startsWith(key) && p.score !== 0).length + 1, j = 1;
+        const data = textToAscii(JSON.stringify(value));
+        if (valueL > data.length)
+            for (let l = 1; l < valueL; l++)
+                Server.queueCommand(`scoreboard players reset "${key}=${l}" "${this.fullName}"`);
         for (const hex of data)
-            Server.commandQueue(`scoreboard players set "${key + j}" "${this.fullName}" ${hex}`), j++;
-        Server.commandQueue(`scoreboard players set "${key}" "${this.fullName}" 0`);
+            Server.queueCommand(`scoreboard players set "${key}=${j}" "${this.fullName}" ${hex}`), j++;
+        Server.queueCommand(`scoreboard players set "${key}" "${this.fullName}" 0`);
+        return this;
+    }
+    /**
+     * Save value(s) or update value(s) in the Database under key(s)
+     * @param {{ [key: string]: any }} data data?
+     * @returns {database}
+     * @example .writeMany({ 'bro': 1, nice1: 'huh?' });
+     */
+    writeMany(data) {
+        const scores = world.scoreboard.getObjective(this.fullName).getScores(), keys = Object.keys(data);
+        for (const k of keys) {
+            let j = 1;
+            Object.assign(memory[this.fullName], { [k]: [data[k], new Date().getMinutes() + quick.release] });
+            const valueL = scores.filter(p => p.participant.displayName.startsWith(k) && p.score !== 0).length + 1, value = textToAscii(JSON.stringify(data[k]));
+            if (valueL > value.length)
+                for (let l = 1; l < valueL; l++)
+                    Server.queueCommand(`scoreboard players reset "${k}=${l}" "${this.fullName}"`);
+            for (const hex of value)
+                Server.queueCommand(`scoreboard players set "${k}=${j}" "${this.fullName}" ${hex}`), j++;
+            Server.queueCommand(`scoreboard players set "${k}" "${this.fullName}" 0`);
+        }
         return this;
     }
     /**
      * Get the value of the key
      * @param {string} key
      * @returns {any}
-     * @example .get('Test Key');
+     * @example .read('Test Key');
      */
     read(key) {
-        if (memory[this.fullName][key]?.[1])
+        if (memory[this.fullName].hasOwnProperty(key)) {
+            memory[this.fullName][key][1] = new Date().getMinutes() + quick.release;
             return memory[this.fullName][key][0];
-        const scores = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.startsWith(key) && p.score != 0).map(s => [parseInt(s.participant.displayName.replace(key, '')), s.score]).sort((a, b) => a[0] - b[0]).map(s => s[1]);
-        if (!scores.length)
-            return;
-        const parts = JSON.parse(hexToText(scores));
-        Object.assign(memory[this.fullName], { [key]: [parts, new Date().getTime()] });
-        return parts;
+        }
+        const scores = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.replace(/=\d+/g, '') === key && p.score != 0).map(s => [Number(s.participant.displayName.replace(`${key}=`, '')), s.score]).sort((a, b) => a[0] - b[0]).map(s => s[1]);
+        const value = scores.length ? JSON.parse(asciiToText(scores)) : undefined;
+        Object.assign(memory[this.fullName], { [key]: [value, new Date().getTime()] });
+        return value;
+    }
+    /**
+     * Get the value of many keys
+     * @param {string[]} keys
+     * @returns {any[]}
+     * @example .readMany(['Test Key', 'Rod Wave']);
+     */
+    readMany(keys) {
+        const scores = world.scoreboard.getObjective(this.fullName).getScores();
+        return keys.map(k => {
+            if (memory[this.fullName].hasOwnProperty(k)) {
+                memory[this.fullName][k][1] = new Date().getMinutes() + quick.release;
+                return memory[this.fullName][k][0];
+            }
+            const score = scores.filter(p => p.participant.displayName.replace(/=\d+/g, '') === k && p.score != 0).map(s => [Number(s.participant.displayName.replace(`${k}=`, '')), s.score]).sort((a, b) => a[0] - b[0]).map(s => s[1]);
+            const value = score.length ? JSON.parse(asciiToText(score)) : undefined;
+            Object.assign(memory[this.fullName], { [k]: [value, new Date().getTime()] });
+            return value;
+        });
     }
     /**
      * Check if the key exists in the table
@@ -81,7 +202,9 @@ export class DatabasePaper {
      * @example .has('Test Key');
      */
     has(key) {
-        return Boolean(this.read(key));
+        if (memory[this.fullName].hasOwnProperty(key) && memory[this.fullName][key][0] !== undefined)
+            return true;
+        return world.scoreboard.getObjective(this.fullName)?.getScores().some(s => s.score === 0 && s.participant.displayName === key);
     }
     /**
      * Delete the key from the table
@@ -93,8 +216,25 @@ export class DatabasePaper {
         delete memory[this.fullName][key];
         let length = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.startsWith(key)).length + 1;
         for (let l = 1; l < length; l++)
-            Server.commandQueue(`scoreboard players reset "${key + l}" "${this.fullName}"`);
-        Server.commandQueue(`scoreboard players reset "${key}" "${this.fullName}"`);
+            Server.queueCommand(`scoreboard players reset "${key}=${l}" "${this.fullName}"`);
+        Server.queueCommand(`scoreboard players reset "${key}" "${this.fullName}"`);
+        return this;
+    }
+    /**
+     * Delete the key from the table
+     * @param {string} key
+     * @returns {database}
+     * @example .deleteMany('Test Key');
+     */
+    deleteMany(keys) {
+        const scores = world.scoreboard.getObjective(this.fullName).getScores();
+        for (const k of keys) {
+            delete memory[this.fullName][k];
+            let length = scores.filter(p => p.participant.displayName.startsWith(k)).length + 1;
+            for (let l = 1; l < length; l++)
+                Server.queueCommand(`scoreboard players reset "${k}=${l}" "${this.fullName}"`);
+            Server.queueCommand(`scoreboard players reset "${k}" "${this.fullName}"`);
+        }
         return this;
     }
     /**
@@ -106,14 +246,6 @@ export class DatabasePaper {
         world.scoreboard.removeObjective(this.fullName);
         world.scoreboard.addObjective(this.fullName, '');
         return this;
-    }
-    /**
-     * Drops the database
-     * @returns {void} returns nothing
-     * @example .drop();
-     */
-    drop() {
-        world.scoreboard.removeObjective(this.fullName);
     }
     /**
      * Gets all the  keys in the table
@@ -130,9 +262,9 @@ export class DatabasePaper {
      */
     allValues() {
         const allKeys = this.allKeys();
-        if (!allKeys)
-            return;
-        return allKeys.map(key => this.read(key));
+        if (!allKeys?.length)
+            return [];
+        return this.readMany(allKeys);
     }
     /**
      * Gets every key along their corresponding value in the Database
@@ -140,10 +272,8 @@ export class DatabasePaper {
      * @example .getCollection();
      */
     getCollection() {
-        const allKeys = this.allKeys(), collection = {};
-        if (!allKeys)
-            return;
-        allKeys.forEach((key) => Object.assign(collection, { [key]: this.read(key) }));
+        const allKeys = this.allKeys(), allValues = this.readMany(allKeys), collection = {};
+        allKeys.forEach((key, i) => Object.assign(collection, { [key]: allValues[i] }));
         return collection;
     }
     /**
@@ -189,3 +319,12 @@ export class DatabasePaper {
         return this;
     }
 }
+//Memory release system
+setTickInterval(() => {
+    const minute = new Date().getMinutes();
+    Object.keys(memory).forEach(table => Object.keys(memory[table]).forEach(key => {
+        if (memory[table][key][1] >= 5 && memory[table][key][1] > minute)
+            return;
+        delete memory[table][key];
+    }));
+}, 1200);
