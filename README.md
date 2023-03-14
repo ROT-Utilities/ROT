@@ -1,4 +1,4 @@
-# Rubedo Version 2.7.0-beta
+# ROT V3.0.4 Beta
 
 Welcome to ROT. ROT is one of the bset, if not, the best Minecraft Bedrock server essential addon to use when you are creating a Minecraft server, realm, or world.
 
