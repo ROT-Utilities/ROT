@@ -17,39 +17,74 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world } from '@minecraft/server';
-import { setTickInterval } from '../Papers/paragraphs/ExtrasParagraphs.js';
+import { ID, setTickInterval } from '../Papers/paragraphs/ExtrasParagraphs.js';
+import { listeners } from './main.js';
 import Database from '../Papers/DatabasePaper.js';
 import Player from '../Papers/PlayerPaper.js';
-//The joined player's and their DB table
-export const joined = {};
-world.events.playerJoin.subscribe(data => join(data.player));
+export const connected = {};
+try {
+    world.scoreboard.addObjective('PLRid', '');
+}
+catch { }
+;
 /**
  * The join function
- * @param player The player
+ * @param {player} player The player
  */
-function join(plr) {
-    const player = Player.playerType(plr);
-    const db = Database.register(player.id, 'PLR');
-    Object.assign(joined, { [player.nameTag]: [db.table] });
-    db.write('name', player.nameTag);
-    if (player.isAdmin)
-        db.delete('ban');
+function join(player) {
+    if (!player)
+        return;
+    const nameReg = Database.registry('PLRname'); //, koolReg = Database.registry('PLRkool');
+    //Add last joined. Haven't join in 6 months gone
+    let id = world.scoreboard.getObjective('PLRid').getScores().find(p => p.participant.displayName === player.name)?.score;
+    if (!id) {
+        if (nameReg.has(`$${player.name}`))
+            id = nameReg.read(`$${player.name}`);
+        else
+            id = Number(ID());
+        player.runCommandAsync(`scoreboard players set @s PLRid ${id}`);
+    }
+    else
+        nameReg.delete(Object.entries(nameReg.getCollection()).find(a => a[1] === id)[0]);
+    nameReg.write(`$${player.name}`, id);
+    const db = Database.register(String(id), 'PLR');
+    Object.assign(connected, { [player.name]: [db, {}, String(id)] });
+    listeners.forEach(event => {
+        if (event[0] !== 'playerConnect')
+            return;
+        try {
+            event[1](player);
+        }
+        catch { }
+        ;
+    });
+    if (Player.isAdmin(player))
+        return;
+    if (!db.has('warns'))
+        db.write('warns', 0);
 }
-;
 world.events.playerLeave.subscribe(data => leave(data.playerName));
 /**
  * The leave function
  * @param name Name?
  */
 function leave(name) {
-    joined[name].push(new Date().getTime() + 3600000);
+    connected[name].push(Date.now() + 3600000);
+    listeners.forEach(event => {
+        if (event[0] !== 'playerDisconnect')
+            return;
+        try {
+            event[1](name);
+        }
+        catch { }
+        ;
+    });
 }
-;
 /**
  * Timer?
  */
 setTickInterval(() => {
-    const keys = Object.keys(joined);
-    keys.forEach(p => joined[p][1] && joined[p][1] < new Date().getTime() && delete joined[p]);
-    Array.from(world.getPlayers()).filter(p => !keys.includes(p.nameTag)).forEach(p => join(p));
-}, 100);
+    const keys = Object.keys(connected);
+    keys.forEach(p => connected[p][3] && connected[p][3] < Date.now() && delete connected[p]);
+    world.getAllPlayers().filter(p => !keys.includes(p.name)).forEach(p => join(p));
+}, 25, false);

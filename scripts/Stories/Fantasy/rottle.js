@@ -16,7 +16,7 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import config from '../../main.js';
+import quick from '../../quick.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Server from '../../Papers/ServerPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
@@ -29,54 +29,54 @@ const cmd = Commands.create({
 });
 const rottle = Database.register('rottle');
 cmd.startingArgs(['play', 'try', 'quit', 'stats']);
-cmd.callback((plr) => !rottle.has(plr.id) && rottle.write(plr.id, { inMatch: false }));
+cmd.callback((plr) => !rottle.has(plr.rID) && rottle.write(plr.rID, { inMatch: false }));
 cmd.staticType('play', 'play', (plr) => {
-    if (rottle.read(plr.id).inMatch)
+    if (rottle.read(plr.rID).inMatch)
         return plr.error('You cannot start a game with me if you are already in a game with me! Type "§4!rm quit§c" in chat and give me the win loser');
-    rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
+    rottle.write(plr.rID, Object.assign(rottle.read(plr.rID), {
         inMatch: true,
         word: words[~~(Math.random() * words.length)],
         attempts: 0,
-        matchesPlayed: (rottle.read(plr.id)?.matchesPlayed ?? 0) + 1
+        matchesPlayed: (rottle.read(plr.rID)?.matchesPlayed ?? 0) + 1
     }));
-    plr.send(`The match has started! The word I am thinking of is §c${rottle.read(plr.id).word.length}§7 letters long! You only get §c${config.rottleAttemps}§7 attempts!`);
+    plr.send(`The match has started! The word I am thinking of is §c${rottle.read(plr.rID).word.length}§7 letters long! You only get §c${quick.rottleAttemps}§7 attempts!`);
 }, null, false);
 cmd.staticType('try', 'try', (plr, val) => {
-    if (!rottle.read(plr.id).inMatch)
+    if (!rottle.read(plr.rID).inMatch)
         return plr.error('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
     if (val.split(' ')?.length > 1)
         return plr.error('It\'s only one word, and the word doesn\'t have any numbers or stuff like that. Don\'t worry, I didn\'t count that as a "attempt"');
-    rottle.write(plr.id, Object.assign(rottle.read(plr.id), { attempts: rottle.read(plr.id).attempts + 1 }));
-    if (rottle.read(plr.id).word === val) {
-        rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
+    rottle.write(plr.rID, Object.assign(rottle.read(plr.rID), { attempts: rottle.read(plr.rID).attempts + 1 }));
+    if (rottle.read(plr.rID).word === val) {
+        rottle.write(plr.rID, Object.assign(rottle.read(plr.rID), {
             inMatch: false,
-            wins: (rottle.read(plr.id)?.wins ?? 0) + 1,
-            averageAttempts: (rottle.read(plr.id)?.averageAttempts ?? 0) + rottle.read(plr.id).attempts
+            wins: (rottle.read(plr.rID)?.wins ?? 0) + 1,
+            averageAttempts: (rottle.read(plr.rID)?.averageAttempts ?? 0) + rottle.read(plr.rID).attempts
         }));
-        return plr.send(`Dang, you actally got the word right... GG\n§aWord:§c ${rottle.read(plr.id).word}\n§aAttempts:§c ` + rottle.read(plr.id).attempts);
+        return plr.send(`Dang, you actally got the word right... GG\n§aWord:§c ${rottle.read(plr.rID).word}\n§aAttempts:§c ` + rottle.read(plr.rID).attempts);
     }
-    if (rottle.read(plr.id).attempts >= config.rottleAttemps) {
-        rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
+    if (rottle.read(plr.rID).attempts >= quick.rottleAttemps) {
+        rottle.write(plr.rID, Object.assign(rottle.read(plr.rID), {
             inMatch: false,
-            losses: (rottle.read(plr.id)?.losses ?? 0) + 1
+            losses: (rottle.read(plr.rID)?.losses ?? 0) + 1
         }));
-        if (config.rottleRewards.length)
-            Server.runCommands(config.rottleRewards.map((c) => c.replace('@rottler', `"${plr.name}"`)), true);
-        return plr.send(`§cTen strikes, your OUT!§7 Thanks for the free win! The word was §c${rottle.read(plr.id).word}§7 by the way XD.`);
+        if (quick.rottleRewards.length)
+            Server.runCommands(quick.rottleRewards.map((c) => c.replace('@rottler', `"${plr.name}"`)), true);
+        return plr.send(`§cTen strikes, your OUT!§7 Thanks for the free win! The word was §c${rottle.read(plr.rID).word}§7 by the way XD.`);
     }
-    let tryWord = val.split('').map(letter => rottle.read(plr.id).word.split('').includes(letter) ? `§a${letter}` : `§4${letter}`);
-    plr.send(`§cWrong!§7 Here are the letters that are in that word: §l${tryWord.join('')}§r§7. You have §c${10 - rottle.read(plr.id).attempts}§7 attempts left!`);
+    let tryWord = val.split('').map(letter => rottle.read(plr.rID).word.split('').includes(letter) ? `§a${letter}` : `§4${letter}`);
+    plr.send(`§cWrong!§7 Here are the letters that are in that word: §l${tryWord.join('')}§r§7. You have §c${10 - rottle.read(plr.rID).attempts}§7 attempts left!`);
 });
 cmd.staticType('quit', 'quit', (plr) => {
-    if (!rottle.read(plr.id).inMatch)
+    if (!rottle.read(plr.rID).inMatch)
         return plr.error('You are not in a match with me yet... Type "§4!rm play§c" in chat to start one.');
-    rottle.write(plr.id, Object.assign(rottle.read(plr.id), {
+    rottle.write(plr.rID, Object.assign(rottle.read(plr.rID), {
         inMatch: false,
-        losses: (rottle.read(plr.id)?.losses ?? 0) + 1
+        losses: (rottle.read(plr.rID)?.losses ?? 0) + 1
     }));
     plr.send('Thanks for the free win loser!');
 }, null, false);
-cmd.dynamicType('stats', ['stats', 's', 'sto'], plr => plr.send(`Here are your stats:\n§aWins:§c ${rottle.read(plr.id)?.wins ?? 0}\n§aLosses:§c ${rottle.read(plr.id)?.losses ?? '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(rottle.read(plr.id)?.wins / rottle.read(plr.id)?.losses)}\n§aMatches played:§c ${rottle.read(plr.id)?.matchesPlayed ?? 0}\n§aAverage attemps before a win:§c ` + (rottle.read(plr.id)?.averageAttempts / rottle.read(plr.id)?.wins)));
+cmd.dynamicType('stats', ['stats', 's', 'sto'], plr => plr.send(`Here are your stats:\n§aWins:§c ${rottle.read(plr.rID)?.wins ?? 0}\n§aLosses:§c ${rottle.read(plr.rID)?.losses ?? '0?!?! Impossible!'}\n§aWin-loss ratio:§c ${(rottle.read(plr.rID)?.wins / rottle.read(plr.rID)?.losses)}\n§aMatches played:§c ${rottle.read(plr.rID)?.matchesPlayed ?? 0}\n§aAverage attemps before a win:§c ` + (rottle.read(plr.rID)?.averageAttempts / rottle.read(plr.rID)?.wins)));
 const words = [
     'cattle',
     'resident',

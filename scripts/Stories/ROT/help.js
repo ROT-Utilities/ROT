@@ -18,7 +18,7 @@ Thank you!
 */
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Lang from '../../Papers/LangPaper.js';
-import quick from '../../main.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'help',
     description: 'Get list of all the commands available or input a command name to get information about that specific command',
@@ -36,26 +36,30 @@ cmd.dynamicType('cmd', [Commands.list.map(c => c.name), Commands.list.map(c => c
     if (cmd.description.length)
         hI += `§eDescription:§r§6 ${cmd.description}\n`;
     if (cmd.aliases.length)
-        hI += `§l§eAliases:§r§3 ${cmd.aliases.join(`§e, §6`)}\n`;
-    hI += `§l§eCategory:§3 ${cmd.category.toUpperCase()}\n`;
+        hI += `§l§eAliases:§r§6 ${cmd.aliases.join(`§e, §6`)}\n`;
+    hI += `§l§eCategory:§r§6 ${cmd.category.toUpperCase()}\n`;
     if (cmd.toggle)
-        hI += `§eTogglable:§3 ${cmd.toggle}\n`;
+        hI += `§l§eTogglable:§r§6 ${cmd.toggle}\n`;
     if (cmd.tags)
-        hI += `§eTags(s):§3 ${cmd.tags.join('§e, §6')}`;
+        hI += `§l§eTags(s):§r§6 ${cmd.tags.join('§e, §6')}\n`;
     if (cmd.developers)
-        hI += `§eDeveloper(s):§6 ${cmd.developers.join('§e, §6')}`;
+        hI += `§l§eDeveloper(s):§r§6 ${cmd.developers.join('§e, §6')}\n`;
     if (cmd.notes)
-        hI += `§eNotes:§6 ${cmd.notes}\n§r`;
+        hI += `§eNotes:§r§6 ${cmd.notes}\n§r`;
+    if (cmd.sT[0].length)
+        hI += `§eStarting arguments:§r§6 ${quick.prefix}${cmd.name} < §a${cmd.sT[0].join('§6 | §a')}§6 >`;
     plr.tip(`Join the ROT Discord if you need any more help!§l§d ${quick.discord}`, 'ROT');
-    plr.tell(`§6${hI}§r`);
+    plr.sendMessage(`§6${hI}§r`);
 });
 cmd.numberType('page', (plr, page) => {
-    plr.tip(`Join the ROT Discord if you need any more help!§l§d ${quick.discord}`); //§r
     const commandList = new Array(Math.ceil(Commands.list.length / 35)).fill(0).map(_ => Commands.list.filter(c => plr.isAdmin ? true : !c.admin || (c.tags?.length ? plr.isAdmin : false)).splice(0, 35)), help = [], categoryHold = [];
-    for (const command of commandList[page - 1]) {
+    if (!commandList[page - 1]?.[0])
+        return plr.error('Unable to find this page');
+    for (const command of commandList[page - 1]) { //If admin, show disabled commands. Complete help page, Command UI, and quick today
         if (!categoryHold.includes(command.category))
             help.push(`\n   §6<=-=-=-§e${command.category.toUpperCase()}§6=-=-=->\n`) && categoryHold.push(command.category);
-        help.push(`§e${command.name}§6 - §6${command.description}`); //§r
+        help.push(`§e${command.name[0].toUpperCase() + command.name.slice(1)}§6 - §6${command.description}`);
     }
-    plr.tell(`§l${help.join('\n')}\n   §a§l<=-=-=-=-=-=-=-=-=->\n§6Page:§r §e${page}§a/§e${commandList.length}\nUse "§6${quick.prefix}help §a<Page Number>§e" To see the next page`);
-}, '', { min: 0 });
+    plr.tip(`Join the ROT Discord if you need any more help!§l§d ${quick.discord}`);
+    plr.sendMessage(`§l${help.join('\n')}\n   §a§l<=-=-=-=-=-=-=-=-=->\n§6Page:§r §e${page}§a/§e${commandList.length}\nUse "§6${quick.prefix}help §a<Page Number>§e" To see the next page`);
+}, [], { min: 0 });

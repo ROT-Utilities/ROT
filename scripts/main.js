@@ -16,13 +16,12 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { config } from './config.js';
+import { world, system } from '@minecraft/server';
+system.events.beforeWatchdogTerminate.subscribe(res => res.cancel = true);
 import { updateLang } from './Papers/LangPaper.js';
 import Commands from './Papers/CommandPaper/CommandPaper.js';
-import Database from './Papers/DatabasePaper.js';
 import Server from './Papers/ServerPaper.js';
-import './Stories/ROT/setup.js';
+import quick from './quick.js';
 /*
  * Welcome to the Main page!
  * Main Developer: Mo9ses
@@ -32,29 +31,32 @@ import './Stories/ROT/setup.js';
  * Quick
  * This handles in game configuration
  */
-const quick = config;
-export const db = Database.register('server');
-export default quick;
 updateLang();
 world.events.worldInitialize.subscribe(() => {
-    if (!db.read('setup'))
-        return;
+    Server.runCommands([
+        'gamerule sendcommandfeedback false',
+        'gamerule commandblockoutput false'
+    ]);
     startup();
 });
 //Add system to [$rank] so people can do ranks as they wish
 //Make a warp command
 //Fix chat colors
 //Finish ban command
+//Add the rate limiter
+//Add a way to turn off commands
+//Use Array.every
+//USe enum a lot more. Could be useful in the command handler
 /**
  * The startup function
  */
 export async function startup() {
-    db.write('setup', 1);
     const time = new Date().getTime();
-    Commands.list = [];
-    if (config.useQuick && db.has('ServerConfig'))
-        Object.entries(db.read('ServerConfig')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
+    Server.startServer();
+    if (quick.useQuick && Server.db.has('quick'))
+        Object.entries(Server.db.read('quick')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
     updateLang();
+    await quick.tales.forEach(t => import(`./Tales/${t}.js`).catch(e => console.warn(`Failed to import tale "${e}"     ${e}: ${e.stack}`)));
     await Object.keys(quick.epics).forEach((e) => quick.epics[e].enabled && import(`./Epics/${e}/${quick.epics[e].entry}.js`).catch(e => console.warn(`Failed to import epic "${e}"     ${e}: ${e.stack}`)));
     await Object.keys(quick.toggle).forEach((c) => Object.keys(quick.toggle[c]).forEach((cmd) => quick.toggle[c][cmd] && import(`./Stories/${c}/${cmd}.js`).catch(e => console.warn(`Failed to import command "${cmd}" from category "${c}"     ${e}: ${e.stack}`))));
     //Checks ROT command arguments for imperfections 
@@ -85,12 +87,9 @@ export async function startup() {
             Commands.list.splice(i, 1);
         }
     });
-    /**
-     * Importing all of the events needed for ROT
-     */
-    //Dev stuff
     Server.broadcast(`ROT has been loaded in §6${new Date().getTime() - time}§e milliseconds!`, 'Server');
+    //Dev stuff
+    // import('./Stories/test.js');
+    // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
 }
 ;
-import('./Tales/beforeChat.js');
-import('./Tales/playerConnect.js');

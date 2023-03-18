@@ -16,8 +16,11 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
+import { world } from '@minecraft/server';
+import { setTickInterval } from '../../Papers/paragraphs/ExtrasParagraphs.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
+import Player from '../../Papers/PlayerPaper.js';
 const db = Database.register('ranks');
 const cmd = Commands.create({
     name: 'rank',
@@ -51,7 +54,7 @@ cmd.playerType('plr', (plr, plr2, args) => {
         plr2.addTag(args[1].join(' '));
     else
         plr.removeTag(args[1].join(' '));
-    plr.send(`The rank "§6${args[1].join(' ')}§e" have been ${args[0] === 'add' ? '§agranted§e to' : '§crevoked§e from'} §6${plr2.nameTag}§e!`);
+    plr.send(`The rank "§6${args[1].join(' ')}§e" have been ${args[0] === 'add' ? '§agranted§e to' : '§crevoked§e from'} §6${plr2.name}§e!`);
 }, true, ['add', 'remove']);
 cmd.staticType('add', 'add', null, 'any', false);
 cmd.staticType('remove', 'remove', null, 'any', false);
@@ -61,3 +64,4 @@ cmd.dynamicType('prefix', ['prefix', 'pre', 'before'], null, 'any');
 cmd.staticType('name', 'rename', null, 'any', false);
 cmd.dynamicType('color', ['color', 'namecolor'], null, 'any');
 cmd.unknownType('any');
+setTickInterval(() => world.getAllPlayers().forEach(player => player.nameTag = `§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player)}`), 20);

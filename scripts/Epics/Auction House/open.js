@@ -1,31 +1,11 @@
-/*
-ROT Developers and Contributors:
-Moises (OWNER/CEO/Developer),
-Aex66 (Developer)
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-__________ ___________________
-\______   \\_____  \__    ___/
- |       _/ /   |   \|    |
- |    |   \/    |    \    |
- |____|_  /\_______  /____|
-        \/         \/
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
-Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
-Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
-Thank you!
-*/
-import { world } from "@minecraft/server";
 import { ActionForm, ModalForm } from "../../Papers/FormPaper.js";
 import { hexToNumber, metricNumbers, MS } from "../../Papers/paragraphs/ConvertersParagraphs.js";
 import { confirmForm, errorForm, getPost, openAH, updatePost, verifyPost } from "./main.js";
 import { editPost } from "./edit.js";
 import { checkPosts } from "./interval.js";
-import Server from '../../Papers/ServerPaper.js';
 import Player from '../../Papers/PlayerPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
-import quick from "../../main.js";
+import quick from "../../quick.js";
 //Defining very much needed variables
 const config = quick.epics['Auction House'];
 //Opening the post XD
@@ -51,20 +31,20 @@ export function openPost(player, date, from) {
         `\n §3Amount: §4${post.amount}`,
         `${post.bids[0] ? `\n §3Highest bid: §4${metricNumbers(post.price)}` : ''}`,
         `\n §3Starting price: §c${metricNumbers(post.startPrice)}`,
-        `\n §3Bidders (High to low): §4${post.bidName.length ? post.bidName.map((n, i) => post.bidID[i] === player.id ? '§l§6YOU§r' : post.bidSilent[i] ? `${player.isAdmin ? `${post.creator.nameTag} ` : ''}§c(Hidden)` : n).join('§3, §c') : '§aNobody!'}`,
+        `\n §3Bidders (High to low): §4${post.bidName.length ? post.bidName.map((n, i) => post.bidID[i] === player.rID ? '§l§6YOU§r' : post.bidSilent[i] ? `${player.isAdmin ? `${post.creator.name} ` : ''}§c(Hidden)` : n).join('§3, §c') : '§aNobody!'}`,
         `\n §3Buyers premium: §c${keepersKeep}`,
-        `\n §3By: §c${post.creator.id === player.id ? '§l§6YOU§r' : post.creator.silent ? `${player.isAdmin ? `${post.creator.nameTag} ` : ''}§c(Hidden)` : post.creator.nameTag}`,
+        `\n §3By: §c${post.creator.id === player.rID ? '§l§6YOU§r' : post.creator.silent ? `${player.isAdmin ? `${post.creator.name} ` : ''}§c(Hidden)` : post.creator.name}`,
         `\n §3Ends in: §4${MS(hexToNumber(date) - new Date().getTime())}`,
         '\n§rWant the item? Place a bid below!'
     ].join(''));
-    if (post.bidID[0] === player.id)
+    if (post.bidID[0] === player.rID)
         view.addButton('§4§lRemove bid§r', 'textures/rot/forms/garbage.png');
-    else if (post.creator.id === player.id)
+    else if (post.creator.id === player.rID)
         view.addButton('§9§lEdit Auction§r', 'textures/rot/forms/change.png');
     else
         view.addButton('§6§lBid!§r', 'textures/rot/forms/bid.png');
     view.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
-    if (player.isAdmin && post.creator.id !== player.id)
+    if (player.isAdmin && post.creator.id !== player.rID)
         view.addButton('§4§lDev menu§r', 'textures/rot/forms/dev.png');
     view.send(player, async (res) => {
         if (res.selection === 1)
@@ -73,24 +53,24 @@ export function openPost(player, date, from) {
             return openAH(player);
         if (res.selection === 2)
             return editPost(player, date, from);
-        if (post.creator.id === player.id)
+        if (post.creator.id === player.rID)
             return editPost(player, date, from);
         const price = post.price + 1;
         //Remove bid code
-        if (post.bidID[0] === player.id) {
-            if (post.removedIDs.includes(player.id) || (post.bidID[1] && !world.getAllPlayers().some(p => p.id === post.bidID[1])))
+        if (post.bidID[0] === player.rID) {
+            if (post.removedIDs.includes(player.rID) || (post.bidID[1] && !Player.getBy({ id: post.bidID[1] })))
                 return await confirmForm(player, '§4§lCannot remove§r', '§cRemember, you can only remove a bid from a auction once, and only if the last bidder is online.§r', '§eOk ;(§r', '§l§4Close§r') ? openPost(player, date, from) : player.send('Come back soon!');
             if (await confirmForm(player, '§c§lRemove bid?§r', `Are you sure you want to remove your bid from §c${post.name}§r? This may be the §4§llast chance§r you get to win this item.\n\nYou can only remove your bid §4§lONCE§r and if the last bidder is §a§lonline§r.`, '§a§lOpps! Wrong button...§r', '§c§lYeah, I need the money...§r'))
                 return openPost(player, date, from);
             if (!verifyPost(date, post))
                 return errorForm(player, from);
-            const lastBidder = Player.getByID(post.bidID[1]);
+            const lastBidder = Player.getBy({ id: post.bidID[1] });
             if (lastBidder) {
-                lastBidder.send(`§c${post.bidSilent[0] ? '§cHidden' : player.nameTag}§e just removed their bid on the auction "§l§6${post.name}§r§e" and you are now the top bidder!§r`);
-                Server.queueCommand(`scoreboard players remove "${lastBidder.nameTag}" "${config.obj}" ${post.bids[1]}`);
+                lastBidder.send(`§c${post.bidSilent[0] ? '§cHidden' : player.name}§e just removed their bid on the auction "§l§6${post.name}§r§e" and you are now the top bidder!§r`);
+                lastBidder.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${post.bids[1]}`);
             }
             //Deletes player from post
-            updatePost(date, { bidData: removeBid(date, post, player), removedIDs: [post.removedIDs, player.id].flat() });
+            updatePost(date, { bidData: removeBid(date, post, player), removedIDs: [post.removedIDs, player.rID].flat() });
             return openPost(player, date, from);
         }
         //Add bid screen
@@ -130,11 +110,11 @@ export function openPost(player, date, from) {
 }
 ;
 function addBid(date, post, player, sent, silent) {
-    const lastBidder = Player.getByID(post.bidID[0], { from: config.npcName });
-    Server.queueCommand(`scoreboard players remove "${player.nameTag}" "${config.obj}" ${sent}`);
+    const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: config.npcName });
+    player.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${sent}`);
     if (lastBidder) {
-        lastBidder.send(`§c${silent ? '§c(Hidden)' : player.nameTag}§e just outbidded you on the auction §l§6${post.name}§r§e!§r`);
-        Server.queueCommand(`scoreboard players add "${lastBidder.nameTag}" "${config.obj}" ${post.bids[0]}`);
+        lastBidder.send(`§c${silent ? '§c(Hidden)' : player.name}§e just outbidded you on the auction §l§6${post.name}§r§e!§r`);
+        lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     }
     else if (post.bidID[0]) {
         const oldBid = Database.register(post.bidID[0], 'PLR');
@@ -142,16 +122,16 @@ function addBid(date, post, player, sent, silent) {
     }
     if (!player.read('AHB')?.includes(date))
         player.write('AHB', [player.has('AHB') ? player.read('AHB') : [], date].flat());
-    delete post.bidData[player.id];
-    return Object.assign(post.bidData, { [player.id]: [player.nameTag, sent, silent ? 1 : 0] });
+    delete post.bidData[player.rID];
+    return Object.assign(post.bidData, { [player.rID]: [player.name, sent, silent ? 1 : 0] });
 }
 ;
 function removeBid(date, post, player) {
     const clientBids = player.read('AHB');
-    Server.queueCommand(`scoreboard players add "${player.nameTag}" "${config.obj}" ${post.bids[0]}`);
+    player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     clientBids.splice(clientBids.indexOf(date), 1);
     player.write('AHB', clientBids);
-    delete post.bidData[player.id];
+    delete post.bidData[player.rID];
     return post.bidData;
 }
 ;

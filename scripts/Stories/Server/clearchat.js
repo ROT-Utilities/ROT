@@ -28,5 +28,5 @@ const cmd = Commands.create({
 });
 cmd.callback(plr => {
     Server.broadcast('\n\n\n\n\n'.repeat(100), undefined, false);
-    Server.broadcast(`The chat has been cleared by §6${plr.nameTag}§r§e!`, 'ROT');
+    Server.broadcast(`The chat has been cleared by §6${plr.name}§r§e!`, 'ROT');
 });

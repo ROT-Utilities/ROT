@@ -36,14 +36,14 @@ cmd.playerType('player', (plr, val, args) => {
         date: [date.getFullYear(), date.getMonth() + 1, date.getDate()],
         unban: args[0] + date.getTime(),
         res: args[1],
-        by: plr.nameTag,
+        by: plr.name,
         id: val.database?.table
     };
     if (val.database)
         val.write('ban', banData);
     else
-        db.write(val.nameTag, banData);
-    Server.broadcast(`§6${val.nameTag}§e was banned for §6${banData.date.join('§e, §6')}§e${banData.res ? ` for "§6${banData.res}§r§e"` : ''}!`);
+        db.write(val.name, banData);
+    Server.broadcast(`§6${val.name}§e was banned for §6${banData.date.join('§e, §6')}§e${banData.res ? ` for "§6${banData.res}§r§e"` : ''}!`);
 }, false, 'time', null, false);
 cmd.timeType('time', null, 'reason', null, false);
-cmd.dynamicType('reason', '*');
+cmd.unknownType('reason', null);

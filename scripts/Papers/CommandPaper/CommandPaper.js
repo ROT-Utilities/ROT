@@ -16,13 +16,13 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { Location, world } from '@minecraft/server';
+import { world } from '@minecraft/server';
 import { MS, timeRegex } from '../paragraphs/ConvertersParagraphs.js';
-import { staticBook, staticValues } from './CommandTypes.js';
-import lang from '../LangPaper.js';
-import quick from '../../main.js';
+import { staticBook, staticValues } from './argumentTypes.js';
+import { ActionForm } from '../FormPaper.js';
 import Player from '../PlayerPaper.js';
-import Database from '../DatabasePaper.js';
+import lang from '../LangPaper.js';
+import quick from '../../quick.js';
 /*
  * Welcome to the CommandPaper!
  * Main Developer: Mo9ses
@@ -44,11 +44,11 @@ export class CommandPaper {
      */
     create(info) {
         if (info.name.replace(/[a-zA-Z0-9-_ ]/g, '').length)
-            throw Error(`Cannot create command "${info.name}". Command names cannot have special symbols or characters.`);
+            throw console.warn(`Cannot create command "${info.name}". Command names cannot have special symbols or characters.`);
         if (this.list.some(cmd => cmd.name === info.name))
-            throw Error(`Cannot create command "${info.name}" because there is already a command with that name.`);
+            throw console.warn(`Cannot create command "${info.name}" because there is already a command with that name.`);
         if (info.aliases && this.list.some(cmd => cmd.aliases && cmd.aliases.some(a => info.aliases.some(c => a === c))))
-            throw Error(`Cannot create command "${info.name}" because there is already a command with that alias.`);
+            throw console.warn(`Cannot create command "${info.name}" because there is already a command with that alias.`);
         return new command(Object.assign(info, {
             name: info.name.toLowerCase(),
             description: info.description ?? 'Basic command description',
@@ -111,8 +111,8 @@ export class CommandPaper {
         const allTypes = Object.keys(argTypes);
         if (allTypes.includes('plr')) {
             if (args[0] === '@s' && (cmd.aR[argTypes['plr']].tV[0]?.self ?? true))
-                return { aRN: argTypes['plr'], tV: cmd.aR[argTypes['plr']].tV[1] ? player : Player.offlinePlayer(player.nameTag), nA: args.slice(1) };
-            const val = cmd.aR[argTypes['plr']].tV[1] ? Player.playerType(Array.from(world.getPlayers()).find(p => p.nameTag.toLowerCase() === args[0].toLowerCase()), cmd.aR[argTypes['plr']].tV[0]) : Player.offlinePlayer(args[0]);
+                return { aRN: argTypes['plr'], tV: cmd.aR[argTypes['plr']].tV[1] ? player : Player.offlinePlayer(player.name), nA: args.slice(1) };
+            const val = cmd.aR[argTypes['plr']].tV[1] ? Player.playerType(world.getAllPlayers().find(p => p.name.toLowerCase() === args[0].toLowerCase()), cmd.aR[argTypes['plr']].tV[0]) : Player.offlinePlayer(args[0]);
             if (val)
                 return { aRN: argTypes['plr'], tV: val, nA: args.slice(1) };
         }
@@ -130,14 +130,13 @@ export class CommandPaper {
                     continue;
                 if (num.startsWith('~'))
                     loc[i] = Number(num.replace('~', '')) + player.location[i == 0 ? 'x' : i == 1 ? 'y' : 'z'];
-                else if (num.startsWith('^'))
-                    loc[i] = Number(num.replace('^', '')) + player.viewVector[i == 0 ? 'x' : i == 1 ? 'y' : 'z']; //To be finished
                 else
+                    //if(num.startsWith('^')) loc[i] = Number(num.replace('^', '')) + player.viewVector[i == 0 ? 'x' : i == 1 ? 'y' : 'z'] else //To be finished
                     loc[i] = Number(num);
                 left = left.replace(`${num}`, '').trim();
             }
             if (loc.length === 3)
-                return { aRN: argTypes['loc'], tV: new Location(loc[0], loc[1], loc[2]), nA: args.slice(3) };
+                return { aRN: argTypes['loc'], tV: { x: loc[0], y: loc[1], z: loc[2] }, nA: args.slice(3) };
         }
         if (allTypes.includes('num') && !isNaN(Number(args[0])) && (cmd.aR[argTypes['num']].tV?.float ? true : !`${Number(args[0])}`.includes('.')))
             return { aRN: argTypes['num'], tV: Number(args[0]), nA: args.slice(1) };
@@ -156,8 +155,12 @@ export class CommandPaper {
             if (left !== args[0] && (minMax?.min ?? 0) <= time && minMax?.max ? time <= minMax.max : true)
                 return { aRN: argTypes['tim'], tV: time, nA: args.slice(1) };
         }
-        if (allTypes.includes('ukn') && args.length)
-            return { aRN: argTypes['ukn'], tV: cmd.aR[argTypes['ukn']].tV === 1 ? args[0] : args.slice(0, cmd.aR[argTypes['ukn']].tV), nA: args.slice(cmd.aR[argTypes['ukn']].tV) };
+        if (allTypes.includes('ukn') && args.length) {
+            const text = cmd.aR[argTypes['ukn']].tV[0] === 1 ? args[0] : args.slice(0, cmd.aR[argTypes['ukn']].tV[0]);
+            if (cmd.aR[argTypes['ukn']].tV[1] && [text].flat().join(' ').replace(/[\w!#$&*',.-_~ ]/g, '') !== '')
+                return;
+            return { aRN: argTypes['ukn'], tV: text, nA: args.slice(cmd.aR[argTypes['ukn']].tV[0]) };
+        }
     }
     findExample(type, player) {
         if (!type)
@@ -169,7 +172,7 @@ export class CommandPaper {
         if (type.tY === 'ukn')
             return ['bruh', 'ok', 'monkey', '"michael jackson"', 'idk', 'minecraft?'][~~(Math.random() * 6)];
         if (type.tY === 'plr')
-            return Array.from(world.getPlayers(), plr => plr.nameTag).find(n => n !== player.nameTag) || '@s';
+            return Array.from(world.getPlayers(), plr => plr.name).find(n => n !== player.name) || '@s';
         if (type.tY === 'num')
             return `${type.tV ? ~~(Math.random() * (type.tV?.max || (type.tV?.min + 5) || 15)) + type.tV?.min || (type.tV?.max - 5) || -15 : ~~(Math.random() * 100)}`;
         if (type.tY === 'loc')
@@ -190,7 +193,7 @@ export class CommandPaper {
      */
     run(cmd, player, args) {
         if (!cmd)
-            return player.error(Database.register('server').read('setup') ? lang.cmd.unknown : lang.setup.notSetup, 'ROT');
+            return player.error(lang.cmd.unknown, 'ROT');
         if (!cmd.rM.cM)
             return player.error(lang.cmd.useForm, 'ROT');
         if (player.isAdmin ? false : cmd.admin || (cmd.tags?.length ? !player.hasTags(cmd.tags) : false))
@@ -245,7 +248,7 @@ export class CommandPaper {
                 cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], []);
             for (let i = 0; i < keys.length; i++) {
                 if (Object.keys(this.endQueue).includes(cmd.name))
-                    return this.endQueue[cmd.name](player);
+                    return this.endQueue[cmd.name] && this.endQueue[cmd.name](player);
                 if (cmd.aR[keys[i]].cB)
                     cmd.aR[keys[i]].cB(player, cls[keys[i]], values);
                 if (Object.keys(this.forceQueue).includes(cmd.name))
@@ -269,8 +272,16 @@ export class CommandPaper {
     form(cmd, player) {
         if ((cmd.admin && !player.hasTag(quick.adminTag)) || (cmd.tags?.length && !cmd.tags.some(t => player.hasTag(t))))
             return player.error(lang.cmd.noPerms, 'ROT');
-        if (!cmd.sT[0].length)
-            return;
+        const cL = {};
+        let args = cmd.sT[0];
+        async function trying() {
+            const form = new ActionForm();
+            form.setTitle(`§6§l${cmd.name}`);
+            args.forEach(a => form.addButton(`§a${a}`));
+            form.addButton('§4§lClose');
+            console.warn('sent');
+            await form.send(player);
+        }
     }
     /**
      * Register a command into ROT
@@ -335,7 +346,7 @@ class command {
         let arg = [args].flat(), test = [];
         arg.forEach(a => !test.includes(a) && test.push(a));
         if (arg.length !== test.length)
-            throw Error(`Please check your starting args for "${this.name}"!`);
+            throw console.warn(`Please check your starting args for "${this.name}"!`);
         Commands.list[this.index].sT = [arg, needArg ?? true];
         return this;
     }
@@ -372,7 +383,7 @@ class command {
      */
     staticType(name, type, callback, nextArgs, needValue, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'sta',
@@ -396,7 +407,7 @@ class command {
      */
     booleanType(name, callback, nextArgs, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'boo',
@@ -420,7 +431,7 @@ class command {
      */
     locationType(name, callback, nextArgs, loaded, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'loc',
@@ -445,9 +456,9 @@ class command {
      */
     numberType(name, callback, nextArgs, data, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         if (data && data.min > data.max)
-            throw Error(`Argument "${name}" from command "${this.name}" cannot have a min value greater than the max.`);
+            throw console.warn(`Argument "${name}" from command "${this.name}" cannot have a min value greater than the max.`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'num',
@@ -473,7 +484,7 @@ class command {
      */
     playerType(name, callback, online, nextArgs, data, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'plr',
@@ -498,7 +509,7 @@ class command {
      */
     timeType(name, callback, nextArgs, data, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'tim',
@@ -525,14 +536,14 @@ class command {
      */
     dynamicType(name, value, callback, nextArgs, needValue, length, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const val = [value].flat();
         if (val.some(v => staticValues.includes(v)))
-            throw Error(`Dynamic argument "${name}" from command "${this.name}" can't have a value that is already in a static type.`);
+            throw console.warn(`Dynamic argument "${name}" from command "${this.name}" can't have a value that is already in a static type.`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'dyn',
-                tV: [val, needValue ?? false, length ?? 1],
+                tV: [val, needValue, length ?? 1],
                 cB: callback ?? null,
                 nA: nA,
                 nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false,
@@ -546,19 +557,20 @@ class command {
      * @param {ArrowFunction | Function} callback The function that runs after the argument is found
      * @param {string | string[]} nextArgs The name of the next argument(s) that will run afther this
      * @param {number} length The number of args it will return as a value (Will not be processed if needValue is false or undefined)
+     * @param {boolean} filter Check if the argument(s) have characters that aren't allowed
      * @param {boolean} needNextArg If the next argument(s) from before are needed
      * @example .unknownType('hello', (plr, str, args) => {
      * <tab> console.warn(string); //Output: Shiii, idk...
      * }, ['hi 2.0']);
      * @returns {command}
      */
-    unknownType(name, callback, length, nextArgs, needNextArg) {
+    unknownType(name, callback, length, filter, nextArgs, needNextArg) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add argument "${name}" to "${this.name}". This argument/type already exists!`);
         const nA = nextArgs ? [nextArgs].flat() : [];
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'ukn',
-                tV: length ?? 256,
+                tV: [length ?? 256, filter ?? true],
                 cB: callback ?? null,
                 nA: nA,
                 nN: nA.length ? needNextArg ?? Boolean(nA?.length) : false,
@@ -568,7 +580,7 @@ class command {
     }
     bridge(name, value, argNames, callback, needArgs) {
         if (Object.keys(Commands.list[this.index].aR).includes(name))
-            throw Error(`Failed to add bridge "${name}" to "${this.name}". This argument/type already exists!`);
+            throw console.warn(`Failed to add bridge "${name}" to "${this.name}". This argument/type already exists!`);
         const val = [argNames].flat();
         Object.assign(Commands.list[this.index].aR, { [name]: {
                 tY: 'dyn',
@@ -593,7 +605,7 @@ class command {
             if (info.admin)
                 tags.push(quick.adminTag);
             if (!arg)
-                throw Error(`Failed editing argument "${a}" from command "${this.name}" because it does not exist!`);
+                throw console.warn(`Failed editing argument "${a}" from command "${this.name}" because it does not exist!`);
             Object.assign(Commands.list[this.index].aR[a], {
                 nA: info.nextArgs ?? arg.nA,
                 tG: tags,

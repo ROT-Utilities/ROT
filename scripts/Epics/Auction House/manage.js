@@ -20,9 +20,8 @@ import { ActionForm, MessageForm } from "../../Papers/FormPaper.js";
 import { MS, numberToHex } from "../../Papers/paragraphs/ConvertersParagraphs.js";
 import { confirmForm, errorForm, getPost, openAH } from "./main.js";
 import Database from "../../Papers/DatabasePaper.js";
-import quick from "../../main.js";
 import Player from "../../Papers/PlayerPaper.js";
-import Server from "../../Papers/ServerPaper.js";
+import quick from "../../quick.js";
 const config = quick.epics['Auction House'];
 export function managementForm(player) {
     if (!player.isAdmin)
@@ -54,14 +53,14 @@ export function managementForm(player) {
                     d: p,
                     a: post.amount,
                     p: post.startPrice,
-                    c: [post.creator.id, post.creator.nameTag, post.creator.silent ? 1 : 0]
+                    c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
                 });
                 const player = Database.register(post.creator.id, 'PLR');
                 player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());
                 Database.drop(p, 'AHP');
-                const lastBidder = Player.getByID(post.bidID[0], { from: config.npcName });
+                const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: config.npcName });
                 if (lastBidder)
-                    Server.queueCommand(`scoreboard players add "${lastBidder.nameTag}" "${config.obj}" ${post.bids[0]}`);
+                    lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
                 else if (post.bidID[0]) {
                     const oldBid = Database.register(post.bidID[0], 'PLR');
                     oldBid.write('AHR', (oldBid.read('AHR') || 0) + post.bids[0]);
@@ -90,7 +89,7 @@ export function managementForm(player) {
                     d: p,
                     a: post.amount,
                     p: post.startPrice,
-                    c: [post.creator.id, post.creator.nameTag, post.creator.silent ? 1 : 0]
+                    c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
                 });
                 const player = Database.register(post.bidID[0] ? post.bidID[0] : post.creator.id, 'PLR');
                 player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());

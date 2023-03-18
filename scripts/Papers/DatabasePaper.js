@@ -20,7 +20,7 @@ import { world } from '@minecraft/server';
 import { textToAscii, asciiToText } from './paragraphs/ConvertersParagraphs.js';
 import { setTickInterval } from './paragraphs/ExtrasParagraphs.js';
 import Server from './ServerPaper.js';
-import quick from '../main.js';
+import quick from '../quick.js';
 /*
  * Welcome to the DatabasePaper!
  * Main Developer: Mo9ses
@@ -32,8 +32,26 @@ try {
 }
 catch { }
 ;
-const memory = {};
 class DatabasePaper {
+    /**
+     * Creates a raw scoreboard database that uses player names and number values
+     * @param table The table
+     * @returns {registry}
+     */
+    registry(file) {
+        try {
+            world.scoreboard.addObjective(file, '');
+        }
+        catch { }
+        ;
+        return new registry(file);
+    }
+    /**
+     * This registers or creates a table inside a database. The database's name will be the identifier
+     * @param table Table name for the database
+     * @param identifier The database name
+     * @returns {database}
+     */
     register(table, identifier) {
         if (!identifier)
             identifier = 'ROT';
@@ -59,7 +77,7 @@ class DatabasePaper {
      * @returns {boolean}
      */
     has(table, identifier) {
-        return Boolean(world.scoreboard.getObjective(`${identifier ?? 'ROT'}:${table}`));
+        return Boolean(world.scoreboard.getObjective(`${identifier ?? 'ROT'}:${table}`)?.id);
     }
     /**
      * Drops a table
@@ -103,11 +121,170 @@ class DatabasePaper {
 }
 const Database = new DatabasePaper();
 export default Database;
+const regMemory = {};
+class registry {
+    /**
+     * Creating a objective
+     * @param file The file
+     */
+    constructor(file) {
+        this.file = file;
+        if (regMemory.hasOwnProperty(file))
+            return;
+        Object.assign(regMemory, { [file]: [{}, new Date().getMinutes() + quick.release] });
+        for (const score of world.scoreboard.getObjective(file).getScores())
+            regMemory[file][0][score.participant.displayName] = score.score;
+    }
+    /**
+     * Save a value or update a value in the registry under a key
+     * @param {string} key The key you want to save the value as
+     * @param {number} value The number value you want to save
+     * @example .write('Test Key', 1);
+     * @returns {this}
+     */
+    write(key, value) {
+        regMemory[this.file][0][key] = value;
+        Server.queueCommand(`scoreboard players set "${key}" "${this.file}" ${value}`);
+        return this;
+    }
+    /**
+     * Save value(s) or update value(s) in the registry under key(s)
+     * @param {{ [key: string]: number }} data data?
+     * @example .writeMany({ 'bro': 1, nice1: 25 });
+     * @returns {this}
+     */
+    writeMany(data) {
+        Object.keys(data).forEach(key => {
+            regMemory[this.file][0][key] = data[key];
+            Server.queueCommand(`scoreboard players set "${key}" "${this.file}" ${data[key]}`);
+        });
+        return this;
+    }
+    /**
+     * Get the value of the key
+     * @param {string} key
+     * @example .read('Test Key');
+     * @returns {number}
+     */
+    read(key, stringify) {
+        if (stringify)
+            return (regMemory[this.file][0].hasOwnProperty(key) ? String(regMemory[this.file][0][key]) : undefined);
+        return (regMemory[this.file][0][key]);
+    }
+    /**
+     * Get the value of many keys
+     * @param {string[]} keys
+     * @example .readMany(['Test Key', 'Sweater Weather']);
+     * @returns {any[]}
+     */
+    readMany(keys, stringify) {
+        return keys.map(key => {
+            if (stringify)
+                regMemory[this.file][0].hasOwnProperty(key) ? String(regMemory[this.file][0][key]) : undefined;
+            return regMemory[this.file][0][key];
+        });
+    }
+    /**
+     * Check if the key exists in the file
+     * @param {string} key
+     * @example .has('Test Key');
+     * @returns {boolean}
+     */
+    has(key) {
+        return regMemory[this.file][0].hasOwnProperty(key);
+    }
+    /**
+     * Delete a key from the table
+     * @param {string} key
+     * @example .delete('Test Key');
+     * @returns {this}
+     */
+    delete(key) {
+        delete regMemory[this.file][0][key];
+        Server.queueCommand(`scoreboard players reset "${key}" "${this.file}"`);
+        return this;
+    }
+    /**
+     * Delete the key from the table
+     * @param {string[]} keys
+     * @returns {database}
+     * @example .deleteMany('Test Key');
+     */
+    deleteMany(keys) {
+        for (const k of keys) {
+            delete regMemory[this.file][0][k];
+            Server.queueCommand(`scoreboard players reset "${k}" "${this.file}"`);
+        }
+        return this;
+    }
+    /**
+     * Deletes every key along their corresponding value in the registry file
+     * @example .clear();
+     * @returns {this}
+     */
+    clear() {
+        delete regMemory[this.file];
+        try {
+            world.scoreboard.removeObjective(this.file);
+        }
+        catch { }
+        ;
+        try {
+            world.scoreboard.addObjective(this.file, '');
+        }
+        catch { }
+        ;
+        return this;
+    }
+    /**
+     * Gets all the keys in the registry
+     * @example .allKeys();
+     * @returns {(string | number)[]} A array with all the keys
+     */
+    allKeys() {
+        return Object.keys(regMemory[this.file][0]);
+    }
+    /**
+     * Gets all the of values for each key in the registry
+     * @example .allValues();
+     * @returns {number[]} A array with all the values
+     */
+    allValues() {
+        return Object.values(regMemory[this.file][0]);
+    }
+    /**
+     * Find a the first key assigned to said value
+     * @param {number} value The number value
+     * @example .find(893724);
+     * @returns {string | number} The key
+     */
+    find(value) {
+        return Object.keys(regMemory[this.file][0]).find(k => regMemory[this.file][0][k] === value);
+    }
+    /**
+     * Find a the first key assigned to said value
+     * @param {number} value The number value
+     * @example .find(893724);
+     * @returns {string | number} The key
+     */
+    findMany(value) {
+        return Object.keys(regMemory[this.file][0]).filter(k => regMemory[this.file][0][k] === value);
+    }
+    /**
+     * Gets every key along their corresponding number value in the registry
+     * @example .getCollection();
+     * @returns {{ [key: string | number]: number }}
+     */
+    getCollection() {
+        return regMemory[this.file][0];
+    }
+}
+const memory = {};
 class database {
     /**
      * Creating a database!
      * @param table The name of the table
-     * @param identifier The id of the table. Used like this "id:table"
+     * @param identifier The database name. Used like this "id:table"
      */
     constructor(identifier, table) {
         this.table = table;
@@ -124,8 +301,8 @@ class database {
      * Save a value or update a value in the Database under a key
      * @param {string} key The key you want to save the value as
      * @param {any} value The value you want to save. If you type null, it will not take any space
-     * @returns {database}
      * @example .write('Test Key', 'Test Value');
+     * @returns {this}
      */
     write(key, value) {
         Object.assign(memory[this.fullName], { [key]: [value, new Date().getMinutes() + quick.release] });
@@ -142,8 +319,8 @@ class database {
     /**
      * Save value(s) or update value(s) in the Database under key(s)
      * @param {{ [key: string]: any }} data data?
-     * @returns {database}
      * @example .writeMany({ 'bro': 1, nice1: 'huh?' });
+     * @returns {this}
      */
     writeMany(data) {
         const scores = world.scoreboard.getObjective(this.fullName).getScores(), keys = Object.keys(data);
@@ -163,8 +340,8 @@ class database {
     /**
      * Get the value of the key
      * @param {string} key
-     * @returns {any}
      * @example .read('Test Key');
+     * @returns {any}
      */
     read(key) {
         if (memory[this.fullName].hasOwnProperty(key)) {
@@ -179,8 +356,8 @@ class database {
     /**
      * Get the value of many keys
      * @param {string[]} keys
-     * @returns {any[]}
      * @example .readMany(['Test Key', 'Rod Wave']);
+     * @returns {any[]}
      */
     readMany(keys) {
         const scores = world.scoreboard.getObjective(this.fullName).getScores();
@@ -198,8 +375,8 @@ class database {
     /**
      * Check if the key exists in the table
      * @param {string} key
-     * @returns {boolean}
      * @example .has('Test Key');
+     * @returns {boolean}
      */
     has(key) {
         if (memory[this.fullName].hasOwnProperty(key) && memory[this.fullName][key][0] !== undefined)
@@ -207,10 +384,10 @@ class database {
         return world.scoreboard.getObjective(this.fullName)?.getScores().some(s => s.score === 0 && s.participant.displayName === key);
     }
     /**
-     * Delete the key from the table
+     * Delete a key from the table
      * @param {string} key
-     * @returns {database}
      * @example .delete('Test Key');
+     * @returns {this}
      */
     delete(key) {
         delete memory[this.fullName][key];
@@ -222,7 +399,7 @@ class database {
     }
     /**
      * Delete the key from the table
-     * @param {string} key
+     * @param {string[]} keys
      * @returns {database}
      * @example .deleteMany('Test Key');
      */
@@ -239,8 +416,8 @@ class database {
     }
     /**
      * Deletes every key along their corresponding value in the Database
-     * @returns {database}
      * @example .clear();
+     * @returns {database}
      */
     clear() {
         world.scoreboard.removeObjective(this.fullName);
@@ -249,16 +426,16 @@ class database {
     }
     /**
      * Gets all the  keys in the table
-     * @returns {string[]} A array with all the keys
      * @example .allKeys();
+     * @returns {string[]} A array with all the keys
      */
     allKeys() {
         return world.scoreboard.getObjective(this.fullName).getScores().filter(s => s.score === 0).map(n => n.participant.displayName);
     }
     /**
      * Gets all the of keys in the table then gets their value
-     * @returns {string[]} A array with all the values
      * @example .allValues();
+     * @returns {string[]} A array with all the values
      */
     allValues() {
         const allKeys = this.allKeys();
@@ -268,8 +445,8 @@ class database {
     }
     /**
      * Gets every key along their corresponding value in the Database
-     * @returns {object} { [key]: value }
      * @example .getCollection();
+     * @returns {object} { [key]: value }
      */
     getCollection() {
         const allKeys = this.allKeys(), allValues = this.readMany(allKeys), collection = {};
@@ -319,6 +496,14 @@ class database {
         return this;
     }
 }
+// regMemory release system
+// setTickInterval(() => {
+//     const minute = new Date().getMinutes();
+//     Object.keys(regMemory).forEach(file => {
+//         if(regMemory[file][1] >= 5 && regMemory[file][1] > minute) return;
+//         delete regMemory[file];
+//     });
+// }, 1200, false);
 //Memory release system
 setTickInterval(() => {
     const minute = new Date().getMinutes();
@@ -327,4 +512,4 @@ setTickInterval(() => {
             return;
         delete memory[table][key];
     }));
-}, 1200);
+}, 1200, false);

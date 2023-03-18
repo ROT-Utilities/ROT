@@ -22,8 +22,7 @@ import { confirmForm, errorForm, getPost, openAH, publishPost, updatePost, verif
 import { checkPosts } from "./interval.js";
 import { openPost } from "./open.js";
 import { clientCollect } from "./client.js";
-import Server from "../../Papers/ServerPaper.js";
-import quick from "../../main.js";
+import quick from "../../quick.js";
 import Database from "../../Papers/DatabasePaper.js";
 import Player from "../../Papers/PlayerPaper.js";
 //Defining very much needed variables
@@ -44,7 +43,7 @@ export function editPost(player, date, from) {
         const post = getPost(date);
         if (!post)
             return errorForm(player, from);
-        if (post.creator.id !== player.id && !player.isAdmin)
+        if (post.creator.id !== player.rID && !player.isAdmin)
             return errorForm(player, from, 'Unable to verify that you have permission to edit this post');
         if (!verifyPost(date, post))
             return errorForm(player, from);
@@ -84,10 +83,10 @@ export function editPost(player, date, from) {
                 //Checks starting bid
                 if (startPrice !== post.startPrice) {
                     if (startPrice > post.bids[0]) {
-                        const lastBidder = Player.getByID(post.bidID[0], { from: config.npcName });
+                        const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: config.npcName });
                         if (lastBidder) {
                             lastBidder.send(`The owner of the auction "§l§6${post.name}§r§e" has changed the starting bid of their auction so your bid has been returned.§r`);
-                            Server.queueCommand(`scoreboard players add "${lastBidder.nameTag}" "${config.obj}" ${post.bids[0]}`);
+                            lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
                         }
                         else if (post.bidID[0]) {
                             const oldBid = Database.register(post.bidID[0], 'PLR');
@@ -135,13 +134,13 @@ export function editPost(player, date, from) {
                 d: date,
                 a: post.amount,
                 p: post.startPrice,
-                c: [post.creator.id, post.creator.nameTag, post.creator.silent ? 1 : 0]
+                c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
             });
             player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());
             Database.drop(date, 'AHP');
-            const lastBidder = Player.getByID(post.bidID[0], { from: config.npcName });
+            const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: config.npcName });
             if (lastBidder)
-                Server.queueCommand(`scoreboard players add "${lastBidder.nameTag}" "${config.obj}" ${post.bids[0]}`);
+                lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
             else if (post.bidID[0]) {
                 const oldBid = Database.register(post.bidID[0], 'PLR');
                 oldBid.write('AHR', (oldBid.read('AHR') || 0) + post.bids[0]);
@@ -150,7 +149,7 @@ export function editPost(player, date, from) {
             success.setBody(`§l§aSuccess!§r This item will be returned.`);
             success.setButton1('§aOk!§r');
             success.setButton2('§c§lClose§r');
-            return success.send(player, res => res.selection && post.creator.id === player.id ? clientCollect(player) : from(player, openAH));
+            return success.send(player, res => res.selection && post.creator.id === player.rID ? clientCollect(player) : from(player, openAH));
         }
         //End auction now
         if (res.selection === 2) {
@@ -164,7 +163,7 @@ export function editPost(player, date, from) {
                 d: date,
                 a: post.amount,
                 p: post.startPrice,
-                c: [post.creator.id, post.creator.nameTag, post.creator.silent ? 1 : 0]
+                c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
             });
             const bidDB = Database.register(post.bidID[0] ? post.bidID[0] : post.creator.id, 'PLR');
             bidDB.write('AHC', [bidDB.has('AHC') ? bidDB.read('AHC') : [], id].flat());

@@ -67,7 +67,7 @@ export const staticBook = {
     },
     play: {
         des: '',
-        val: ['play', 'p', 'start', 'st'],
+        val: ['play', 'p', 'start'],
         con: (val) => val ? val.replace(/[a-zA-Z0-9-_ ]/g, '') === '' : true,
         err: 'You cannot use special characters!'
     },
@@ -104,6 +104,12 @@ export const staticBook = {
     replace: {
         desc: '',
         val: ['replace'],
+        con: () => true,
+        err: 'You cannot use special characters!'
+    },
+    toggle: {
+        desc: '',
+        val: ['toggle'],
         con: () => true,
         err: 'You cannot use special characters!'
     },

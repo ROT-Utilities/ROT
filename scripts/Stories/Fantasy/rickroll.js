@@ -24,4 +24,4 @@ const cmd = Commands.create({
     developers: ['Aex66']
 });
 cmd.startingArgs('name');
-cmd.playerType('name', (plr, plr2) => plr2.tell(`§aNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you\nRickroll requested by §c${plr.name}§8!`));
+cmd.playerType('name', (plr, plr2) => plr2.sendMessage(`§aNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you\nRickroll requested by §c${plr.name}§8!`));

@@ -20,17 +20,17 @@ import { world } from "@minecraft/server";
 import { setTickInterval } from "../../Papers/paragraphs/ExtrasParagraphs.js";
 import { hexToNumber, numberToHex } from "../../Papers/paragraphs/ConvertersParagraphs.js";
 import { getPost, openAH } from "./main.js";
-import Server from "../../Papers/ServerPaper.js";
 import Player from "../../Papers/PlayerPaper.js";
-import quick from "../../main.js";
 import Database from "../../Papers/DatabasePaper.js";
+import quick from "../../quick.js";
 const config = quick.epics['Auction House'];
 let color = 0;
+try {
+    world.scoreboard.addObjective(config.obj, config.obj);
+}
+catch (e) { }
+;
 setTickInterval(() => {
-    Server.runCommands([
-        `scoreboard objectives add "${config.obj}" dummy`,
-        `scoreboard players add @a "${config.obj}" 0`
-    ]);
     if (config.tag.length)
         world.getAllPlayers().forEach(player => player.hasTag(config.tag) && openAH(Player.playerType(player, { from: config.npcName, sound: false })));
     if (!config.coolHouseNames)
@@ -77,7 +77,7 @@ export function checkPosts() {
             d: p,
             a: post.amount,
             p: post.startPrice,
-            c: [post.creator.id, post.creator.nameTag, post.creator.silent ? 1 : 0]
+            c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
         });
         const player = Database.register(post.bidID[0] ? post.bidID[0] : post.creator.id, 'PLR');
         player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());

@@ -20,7 +20,6 @@ import { ItemStack, MinecraftEnchantmentTypes, Items, Enchantment } from "@minec
 export const getItemData = (item) => {
     const itemData = {
         id: item.typeId,
-        data: item.data,
         amount: item.amount,
         nameTag: item.nameTag,
         lore: item.getLore(),
@@ -49,7 +48,7 @@ export const getItemData = (item) => {
    * @returns {itemStack}
 */
 export const newItem = (itemData, optionalAmount) => {
-    const item = new ItemStack(Items.get(itemData.id), optionalAmount ?? itemData.amount, itemData.data);
+    const item = new ItemStack(Items.get(itemData.id), optionalAmount ?? itemData.amount);
     item.nameTag = itemData.nameTag;
     item.setLore(itemData.lore);
     const enchComp = item.getComponent("enchantments");

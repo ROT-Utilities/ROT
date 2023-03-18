@@ -59,7 +59,7 @@ cmd.playerType('g:player', null, true, 'g:amount', { self: true });
 //give player amount arg
 cmd.numberType('g:amount', null, 'g:id', { min: 1, float: false });
 //give player amount id arg
-cmd.unknownType('g:id', null, 1, 'g:silent', false);
+cmd.unknownType('g:id', null, 1, false, 'g:silent', false);
 //give player amount id silent arg
 cmd.booleanType('g:silent', null);
 cmd.dynamicType('help', 'help', () => { }, null, false);

@@ -15,14 +15,14 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { world, system } from '@minecraft/server';
-import { MessageForm } from '../FormPaper';
+import { system } from '@minecraft/server';
+import { MessageForm } from '../FormPaper.js';
 /**
 * Defines:
 */
 const tickTimeoutMap = new Map(), tickIntervalMap = new Map();
-let totalTick = 0, tickIntervalID = 0, tickTimeoutID = 0;
-world.events.tick.subscribe(() => {
+let totalTick = 0, tickIntervalID = 0;
+system.runInterval(() => {
     totalTick++;
     for (const [ID, tickTimeout] of tickTimeoutMap) {
         tickTimeout.tick--;
@@ -31,16 +31,15 @@ world.events.tick.subscribe(() => {
             tickTimeoutMap.delete(ID);
         }
     }
-    for (const [, tickInterval] of tickIntervalMap) {
+    for (const [, tickInterval] of tickIntervalMap)
         if (totalTick % tickInterval.tick === 0)
             tickInterval.callback(...tickInterval.args);
-    }
-});
+}, 1);
 /**
 * Welcome to the ROT's Extras!
-* Main Developer: notbeer
+* Main Developer: Mo9ses
 * Notes: I don't really know what goes on down here...
-* Sub developer: Mo9ses
+* Sub developer: Nobody!
 * Link to name: Miscellaneous
 */
 export const 
@@ -55,11 +54,15 @@ export const
 betweenXYZ = (XYZa, XYZb, XYZc) => XYZc.length === XYZc.filter((c, i) => (c >= Math.min(XYZa[i], XYZb[i])) && (c <= Math.max(XYZa[i], XYZb[i]))).length, 
 /**
  * Caculates the distance from one pos to another and tests if its greater than max
- * @param {Location | BlockLocation} pos1 Either block location, or location
- * @param {Location | BlockLocation} pos2 Either a block location, or location
+ * @param {Location} pos1 Either block location, or location
+ * @param {Location} pos2 Either a block location, or location
  * @returns {Boolean} If it was reach
  */
 isReach = (pos1, pos2) => Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2) > 7, 
+/**
+ * GET RANDOM DIGIT ID
+ */
+ID = () => `${new Date().getTime()}`.split('').reverse().slice(0, 9).join('').replace(/0/, `${~~(Math.random() * 9)}`);
 /**
  * Delay executing a function, REPEATEDLY
  * @param {string | Function} handler Function you want to execute
@@ -67,25 +70,19 @@ isReach = (pos1, pos2) => Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) *
  * @param {any[]} args Function parameters for your handler
  * @returns {number}
  */
-setTickInterval = (handler, timeout, ...args) => {
+export function setTickInterval(handler, timeout, firstTick, ...args) {
     const tickInterval = { callback: handler, tick: timeout, args };
     tickIntervalID++;
     tickIntervalMap.set(tickIntervalID, tickInterval);
+    if (firstTick ?? true)
+        try {
+            handler(0);
+        }
+        catch (e) {
+            console.warn(e + e.stack);
+        }
     return tickIntervalID;
-}, 
-/**
- * Delay executing a function
- * @param {string | Function} handler Function you want to execute
- * @param {number} [timeout] Time delay in ticks. 20 ticks is 1 second
- * @param {any[]} args Function parameters for your handler
- * @returns {number}
- */
-setTickTimeout = (handler, timeout, ...args) => {
-    const tickTimeout = { callback: handler, tick: timeout, args };
-    tickTimeoutID++;
-    tickIntervalMap.set(tickTimeoutID, tickTimeout);
-    return tickTimeoutID;
-}, 
+}
 /**
  * Confirm or cancel an action
  * @param {PlayerType} player Player you want to send the confirm action
@@ -94,34 +91,39 @@ setTickTimeout = (handler, timeout, ...args) => {
  * @param {(res: simpleFormResponse) => void} onAccept function to execute when the player confirms
  * @param {(res: simpleFormResponse) => void} onCancel function to execute when the player cancels
  */
-confirmAction = (player, body, title, onAccept, onCancel) => {
+export async function confirmAction(player, body, title, onAccept, onCancel) {
     const form = new MessageForm();
     form.setTitle(title ?? 'CONFIRM ACTION');
     form.setBody(body);
     form.setButton1('CONFIRM');
     form.setButton2('CANCEL');
-    form.send(player, (res) => {
+    await form.send(player, (res) => {
         if (!res.selection)
-            return onCancel ? onCancel(res) : false;
-        return onAccept(res);
+            return onCancel ? onCancel() : false;
+        return onAccept();
     });
-}, 
+}
+;
 /**
  * Stop the code for a certain amount of time
  * @param {number} ticks How long do you want the code to stop in ```ticks```
  */
-sleep = (ticks) => {
+export async function sleep(ticks, callback) {
     return new Promise((resolve) => {
-        const id = system.runSchedule(() => {
+        const id = system.runInterval(() => {
             resolve();
-            system.clearRunSchedule(id);
+            system.clearRun(id);
+            if (callback)
+                callback();
         }, ticks);
     });
-}, 
+}
 /**
- * Get facing direction
+ * Get the direction the player is facing
+ * @param angle The angle (-180 to 180)
+ * @returns {string}
  */
-compass = (angle) => {
+export function compass(angle) {
     let face = '';
     if (Math.abs(angle) > 112.5)
         face += 'North ';
@@ -132,8 +134,4 @@ compass = (angle) => {
     if (angle > -157.5 && angle < -22.5)
         face += 'East';
     return face.trim();
-};
-/**
- * GET RANDOM DIGIT ID
- */
-export const ID = () => new Date().getTime() - 16000000000;
+}

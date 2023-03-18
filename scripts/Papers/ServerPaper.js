@@ -17,8 +17,9 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world } from '@minecraft/server';
-import Player from './PlayerPaper.js';
 import { setTickInterval } from './paragraphs/ExtrasParagraphs.js';
+import Player from './PlayerPaper.js';
+import Database from './DatabasePaper.js';
 /*
  * ROT's command queue system
 */
@@ -43,6 +44,13 @@ setTickInterval(() => {
 */
 class ServerPaper {
     /**
+     * Starts the database server
+     */
+    startServer() {
+        if (!this.db)
+            this.db = Database.register('server');
+    }
+    /**
      * Broadcast a message to everyone in game
      * @param {string} message Message you want to broadcast in chat
      * @param {string} use The name of the use?
@@ -50,10 +58,9 @@ class ServerPaper {
      * @example .broadcast('Hello World!', 'Computer');
      */
     broadcast(message, use, sound, tag) {
-        const players = Array.from(world.getPlayers(), p => Player.playerType(p));
         if (tag)
-            return players.forEach(p => p.hasTag(tag) && p.send(message, use, sound));
-        players.forEach(p => p.send(message, use, sound));
+            return world.getAllPlayers().forEach(p => p.hasTag(tag) && Player.send(p, message, use, sound));
+        world.getAllPlayers().forEach(p => Player.send(p, message, use, sound));
     }
     /**
     * Push commands to the command queue
@@ -70,7 +77,7 @@ class ServerPaper {
     * @param command The command you want to run
     * @param dimension The dimension you want the command run
     * @returns {string} command had error
-    * @example .runAsyncCMD('say Hello World!');
+    * @example .runCommand('say Hello World!');
     */
     async runCommand(command, dimension) {
         let value = '';

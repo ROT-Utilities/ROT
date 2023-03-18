@@ -16,7 +16,7 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { ItemStack, MinecraftEnchantmentTypes, MinecraftItemTypes } from "@minecraft/server";
+import { MinecraftEnchantmentTypes } from "@minecraft/server";
 import { MessageForm, ModalForm } from "../../Papers/FormPaper.js";
 import { metricNumbers } from "../../Papers/paragraphs/ConvertersParagraphs.js";
 import { getItemData } from "../../Papers/paragraphs/itemParagraph.js";
@@ -24,8 +24,7 @@ import { publishPost, openAH, confirmForm } from "./main.js";
 import { serverPosts } from "./server.js";
 import { getPlayerKey } from "./client.js";
 import Database from "../../Papers/DatabasePaper.js";
-import Server from "../../Papers/ServerPaper.js";
-import quick from "../../main.js";
+import quick from "../../quick.js";
 const config = quick.epics['Auction House'];
 //The form that opens when you are creating a auction
 export async function createPost(player, from, data) {
@@ -97,9 +96,10 @@ export async function createPost(player, from, data) {
             silent: res.formValues[3]
         });
         //Taking item and removing money
-        inventory.setItem(player.selectedSlot, new ItemStack(MinecraftItemTypes.cookie));
-        Server.queueCommand(`clear "${player.nameTag}" minecraft:cookie 0 1`);
-        Server.queueCommand(`scoreboard players remove "${player.nameTag}" "${config.obj}" ${keepersKeep}`);
+        inventory.clearItem(player.selectedSlot);
+        // inventory.setItem(player.selectedSlot, new ItemStack(MinecraftItemTypes.cookie));
+        // player.runCommandAsync(`clear @s minecraft:cookie 0 1`);
+        player.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${keepersKeep}`);
         //Just a screen that tells them everything worked out!
         const success = new MessageForm();
         success.setTitle('§a§lCongratulations!§r');

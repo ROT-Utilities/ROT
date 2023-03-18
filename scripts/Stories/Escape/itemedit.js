@@ -1,6 +1,24 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer),
+Aex66 (Developer)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |
+ |    |   \/    |    \    |
+ |____|_  /\_______  /____|
+        \/         \/
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Website: https://www.rotmc.ml
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Thank you!
+*/
 import { Enchantment, Items, ItemStack, MinecraftEnchantmentTypes } from "@minecraft/server";
-import quick from "../../main.js";
 import Commands from "../../Papers/CommandPaper/CommandPaper.js";
+import quick from "../../quick.js";
 const cmd = Commands.create({
     name: 'itemedit',
     description: 'Edit some aspects of an item',
@@ -67,7 +85,6 @@ cmd.staticType('l:set', 'set', (plr, num, args) => {
         lore.push('');
     lore.splice(line, 0, text);
     lore = lore.flat();
-    console.warn(JSON.stringify(lore));
     item.setLore(lore);
     inv.setItem(plr.selectedSlot, item);
 }, 'any');
@@ -111,7 +128,7 @@ cmd.dynamicType('l:replace:from', '*', (plr, val, args) => {
 cmd.dynamicType('l:reset', 'reset', (plr) => {
     if (!item)
         return;
-    const newItem = new ItemStack(Items.get(item.typeId), item.amount, item.data);
+    const newItem = new ItemStack(Items.get(item.typeId), item.amount);
     newItem.nameTag = item.nameTag;
     newItem.getComponent('enchantments').enchantments = item.getComponent('enchantments').enchantments;
     inv.setItem(plr.selectedSlot, newItem);
@@ -130,19 +147,19 @@ cmd.dynamicType('l:copy', 'copy', (plr, _, args) => {
         return;
     if (!item.getLore().length)
         return plr.error('You can\'t copy this lore!', 'ItemEdit');
-    clipboard[plr.id] = [item.getLore(), args?.[0] ?? false];
+    clipboard[plr.rID] = [item.getLore(), args?.[0] ?? false];
     return plr.send('Lore copied', 'ItemEdit');
 }, 'anybool', true, 1, false);
 //lore paste
 cmd.dynamicType('l:paste', 'paste', (plr) => {
     if (!item)
         return;
-    if (!clipboard[plr.id])
+    if (!clipboard[plr.rID])
         return plr.error('You have nothing saved on your clipboard!', 'ItemEdit');
-    item.setLore(clipboard[plr.id][0]);
+    item.setLore(clipboard[plr.rID][0]);
     inv.setItem(plr.selectedSlot, item);
-    if (!clipboard[plr.id][1])
-        delete clipboard[plr.id];
+    if (!clipboard[plr.rID][1])
+        delete clipboard[plr.rID];
     return plr.send('Lore pasted', 'ItemEdit');
 });
 //enchant <enchantmentName: Enchant> <level: number>
@@ -178,4 +195,4 @@ cmd.dynamicType('amount', 'amount', (plr, _, args) => {
     inv.setItem(plr.selectedSlot, newItem);
 }, 'number');
 //help command
-cmd.dynamicType('help', 'help', (plr) => plr.tell(`§e_____.[ §6HELP "ie"§e ]._______\n§6${quick.prefix}help§r\n§6${quick.prefix}ie rename §b<name: string> §eSet item nameTag§r\n§6${quick.prefix}ie lore add §b<text: string> §eAdd a new lore line§r\n§6${quick.prefix}ie lore set §b<line: number> <text: string> §ePlace text at a specific position§r\n§6${quick.prefix}ie lore remove §b<line: number> §eRemoves a specific lore line§r\n§6${quick.prefix}ie lore reset §eRemove the item's lore§r\n§6${quick.prefix}ie lore copy §b[keep: boolean] §eCopy the lore of the item you have in hand§r\n§6${quick.prefix}ie lore paste §ePaste the lore you have saved on your clipboard§r\n§6${quick.prefix}ie enchant §b<enchantmentName: Enchant> <level: number> §eAdd or remove enchantments from your item§r\n§6${quick.prefix}ie amount §b<amount: number> §eSet the item amount§r`));
+cmd.dynamicType('help', 'help', (plr) => plr.sendMessage(`§e_____.[ §6HELP "ie"§e ]._______\n§6${quick.prefix}help§r\n§6${quick.prefix}ie rename §b<name: string> §eSet item nameTag§r\n§6${quick.prefix}ie lore add §b<text: string> §eAdd a new lore line§r\n§6${quick.prefix}ie lore set §b<line: number> <text: string> §ePlace text at a specific position§r\n§6${quick.prefix}ie lore remove §b<line: number> §eRemoves a specific lore line§r\n§6${quick.prefix}ie lore reset §eRemove the item's lore§r\n§6${quick.prefix}ie lore copy §b[keep: boolean] §eCopy the lore of the item you have in hand§r\n§6${quick.prefix}ie lore paste §ePaste the lore you have saved on your clipboard§r\n§6${quick.prefix}ie enchant §b<enchantmentName: Enchant> <level: number> §eAdd or remove enchantments from your item§r\n§6${quick.prefix}ie amount §b<amount: number> §eSet the item amount§r`));

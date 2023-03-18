@@ -1,21 +1,3 @@
-/*
-ROT Developers and Contributors:
-Moises (OWNER/CEO/Developer),
-Aex66 (Developer)
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-__________ ___________________
-\______   \\_____  \__    ___/
- |       _/ /   |   \|    |
- |    |   \/    |    \    |
- |____|_  /\_______  /____|
-        \/         \/
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
-Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
-Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
-Thank you!
-*/
 import { metricNumbers } from '../../Papers/paragraphs/ConvertersParagraphs.js';
 import { ActionForm, MessageForm } from '../../Papers/FormPaper.js';
 import { newItem } from '../../Papers/paragraphs/itemParagraph.js';
@@ -23,8 +5,7 @@ import { confirmForm, errorForm, getPost, openAH } from './main.js';
 import { serverPosts } from './server.js';
 import { createPost } from './create.js';
 import { openPost } from './open.js';
-import Server from "../../Papers/ServerPaper.js";
-import quick from "../../main.js";
+import quick from "../../quick.js";
 import Database from '../../Papers/DatabasePaper.js';
 //Config?
 const config = quick.epics['Auction House'];
@@ -73,7 +54,7 @@ export async function clientBids(player, from) {
     allBids.forEach(p => {
         const post = getPost(p);
         if (post)
-            ah.addButton(`§c§l${post.name.length > 10 ? post.name.slice(0, 12) + '...' : post.name}\n${post.bidID[0] === player.id ? '§aWinning' : '§cLosing'}§r`, `textures/rot/forms/random${~~(Math.random() * 8) + 1}.png`);
+            ah.addButton(`§c§l${post.name.length > 10 ? post.name.slice(0, 12) + '...' : post.name}\n${post.bidID[0] === player.rID ? '§aWinning' : '§cLosing'}§r`, `textures/rot/forms/random${~~(Math.random() * 8) + 1}.png`);
     });
     ah.addButton('§c§lView all Auctions§r', 'textures/rot/forms/global.png');
     ah.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
@@ -98,7 +79,7 @@ export async function clientCollect(player) {
     form.setTitle('§8§lCollect items§r');
     form.setBody('§aHere are all of the auctions you won and made a profit from.§r');
     collect?.forEach(c => {
-        const values = Database.register(c, 'AHC').readMany(['n', 'i', 'w']), won = values[2]?.[0] === player.id;
+        const values = Database.register(c, 'AHC').readMany(['n', 'i', 'w']), won = values[2]?.[0] === player.rID;
         form.addButton(`§c§l${values[0] ?? values[1]}\n§6${won ? 'Collect items' : '§4Failed Auction!'}§r`, `textures/rot/forms/${won ? 'collect' : 'fail'}.png`);
     });
     sold?.forEach(s => form.addButton(`§c§l${s[0]}\n§6Collect $${metricNumbers(s[1])}§r`, `textures/rot/forms/coins.png`));
@@ -121,7 +102,7 @@ export async function clientCollect(player) {
             profit.setButton2('§c§lNah...§r');
             return profit.send(player, res => {
                 res.selection ? both === 1 ? openAH(player) : clientCollect(player) : player.send('Come back soon!');
-                Server.runCommand(`scoreboard players add "${player.nameTag}" "${config.obj}" ${sold[index][1]}`);
+                player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${sold[index][1]}`);
                 sold.splice(index, 1);
                 player.write('AHS', sold);
             });
@@ -147,7 +128,7 @@ export async function clientCollect(player) {
                 success.setButton1('§a§lSee other auctions§r');
                 success.setButton2('§4§lClose§r');
                 if (res.selection) {
-                    player.getComponent('minecraft:inventory').container.addItem(newItem(Database.register(db.d, 'AHI').read('')));
+                    player.getComponent('inventory').container.addItem(newItem(Database.register(db.d, 'AHI').read('')));
                     success.setBody('The auction has been removed, and the item has been returned to your inventory.');
                 }
                 success.send(player, res => res.selection ? both === 1 ? serverPosts(player, openAH) : clientCollect(player) : player.send('Come back soon!'));
@@ -158,7 +139,7 @@ export async function clientCollect(player) {
             });
         }
         //People bidded
-        if (db?.w[0] !== player.id)
+        if (db?.w[0] !== player.rID)
             return errorForm(player, clientCollect, 'Unable to verify you are the top bidder');
         let keepersKeep = ~~(db.w[1] / 100) * config.buyersPremiumPercent[0];
         if (keepersKeep > config.buyersPremiumPercent[1])
@@ -185,10 +166,10 @@ export async function clientCollect(player) {
             const done = new MessageForm();
             done.setTitle('§a§lAlrightly!§r');
             if (player.getScore(config.obj) < keepersKeep)
-                return Server.broadcast(`§c§lError §7-§r You don\'t have enough money to pay the Buyers premium. You owe me §c$${Math.abs(player.getScore(config.obj) - keepersKeep)}§6 ${config}§r!`);
-            Server.runCommand(`scoreboard players remove "${player.nameTag}" "${config.obj}" ${keepersKeep}`);
+                return player.send(`§c§lError §7-§r You don\'t have enough money to pay the Buyers premium. You owe me §c$${Math.abs(player.getScore(config.obj) - keepersKeep)}§6 ${config}§r!`);
+            player.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${keepersKeep}`);
             done.setBody('§l§6Wooo!§r Your item has been given to you!!!');
-            player.getComponent('minecraft:inventory').container.addItem(newItem(Database.register(db.d, 'AHI').read('')));
+            player.getComponent('inventory').container.addItem(newItem(Database.register(db.d, 'AHI').read('')));
             Database.drop(db.d, 'AHI');
             Database.drop(collect[index], 'AHC');
             collect.splice(index, 1);
@@ -215,7 +196,7 @@ export function getPlayerKey(player, key, id) {
 }
 //These are for the ping icon
 export function bidPING(player) {
-    return getPlayerKey(player, 'AHB', 'AHP')?.some((p) => getPost(p)?.bidID[0] !== player.id);
+    return getPlayerKey(player, 'AHB', 'AHP')?.some((p) => getPost(p)?.bidID[0] !== player.rID);
 }
 export function collectPING(player) {
     return Boolean(getPlayerKey(player, 'AHC', 'AHC').length || player.read('AHS')?.length);

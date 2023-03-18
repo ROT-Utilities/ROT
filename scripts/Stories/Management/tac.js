@@ -16,8 +16,8 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import config from '../../main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'tac',
     description: 'Clears all of the tags off of a player. (expect the admin tag if they have it)',
@@ -27,4 +27,4 @@ const cmd = Commands.create({
     developers: ['Aex66']
 });
 cmd.startingArgs('name');
-cmd.playerType('name', (plr, plr2) => plr.send(`Removed §6${plr2.getTags().filter(tag => tag !== config.adminTag && plr2.removeTag(tag)).length}§e tag(s) from §a${plr2.nameTag}`));
+cmd.playerType('name', (plr, plr2) => plr.send(`Removed §6${plr2.getTags().filter(tag => tag !== quick.adminTag && plr2.removeTag(tag)).length}§e tag(s) from §a${plr2.name}`));

@@ -1,0 +1,71 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer),
+notbeer (ROT's base code),
+baboonie (!inven code)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |   
+ |    |   \/    |    \    |   
+ |____|_  /\_______  /____|   
+        \/         \/         
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2023 all rights reserved by Moisesgamingtv9. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Website: https://www.rotmc.ml
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Thank you
+*/
+{
+	"format_version": "1.16.0",
+	"minecraft:entity": {
+		"description": {
+			"identifier": "rot:chunk",
+			"is_spawnable": true,
+			"is_summonable": true,
+			"is_experimental": false
+		},
+		"component_groups": {
+			"despawn": {
+				"minecraft:instant_despawn": {}
+			}
+		},
+		"components": {
+			"minecraft:timer": {
+                "time": [ 5.0, 5.0 ],
+                "looping": false,
+                "time_down_event": {
+                    "event": "rot:despawn",
+                    "target": "self"
+                }
+            },
+			"minecraft:damage_sensor": {
+				"triggers": [
+					{
+						"cause": "all",
+						"deals_damage": false
+					}
+				]
+			},
+			"minecraft:collision_box": {
+				"width": 0.1,
+				"height": 0.1
+			},
+			"minecraft:physics": {
+				"has_collision": false,
+				"has_gravity": false
+			},
+			"minecraft:health": {
+				"value": 20
+			}
+		},
+		"events": {
+			"rot:despawn": {
+				"add": {
+				  "component_groups": ["despawn"]
+				}
+			}
+		}
+	}
+}

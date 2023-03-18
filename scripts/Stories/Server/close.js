@@ -17,7 +17,7 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
-import quick from '../../main.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'close',
     description: `When you type ${quick.prefix}close in chat, time will end!`,

@@ -24,8 +24,7 @@ import { clientBids, clientPosts, bidPING, clientCollect, collectPING } from "./
 import { managementForm } from "./manage.js";
 import Player from '../../Papers/PlayerPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
-import Server from "../../Papers/ServerPaper.js";
-import quick from "../../main.js";
+import quick from "../../quick.js";
 //Defining very much needed variables
 const config = quick.epics['Auction House'];
 import './interval.js';
@@ -50,10 +49,8 @@ if (config.npc)
 //Main form / home page
 export function openAH(player) {
     player.removeTag(config.tag);
-    if (player.read('AHR')) {
-        Server.queueCommand(`scoreboard players add "${player.nameTag}" "${config.obj}" ${player.read('AHR')}`);
-        player.delete('AHR');
-    }
+    player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${player.has('AHR') ? player.read('AHR') : 0}`);
+    player.delete('AHR');
     const choose = new ActionForm();
     choose.setTitle('§8§lAuction House§r');
     choose.setBody('§7Welcome to Black Hat Matt\'s auction house!§r');
@@ -95,7 +92,7 @@ export function getPost(date) {
         price: bidData?.[bidKeys[0]]?.[1] ?? data.p,
         startPrice: data.p,
         time: data.t,
-        creator: { id: data.c[0], nameTag: data.c[1], silent: Boolean(data.c[2]) },
+        creator: { id: data.c[0], name: data.c[1], silent: Boolean(data.c[2]) },
         bidData: data?.b ?? {},
         bidID: bidKeys,
         bidName: bidKeys.map(n => bidData[n][0]),
@@ -111,7 +108,7 @@ export function verifyPost(date, data) {
     const many = Database.register(date, 'AHP').readMany(['i', 'b']);
     if (many[0] !== data.itemName)
         return;
-    if (Object.values(many[1] ?? {})?.[0]?.[1] !== data.bids[0])
+    if (Object.values(many[1] ?? {})?.reverse()?.[0]?.[1] !== data.bids[0])
         return;
     return true;
 }
@@ -156,11 +153,12 @@ export function publishPost(player, item, data) {
         amount: item.amount,
         time: data.time,
         startPrice: data.price,
-        creator: [player.id, player.nameTag, data.silent],
+        creator: [player.rID, player.name, data.silent],
         enchants: item?.enchantments?.map(e => [e.id, e.level]) ?? []
     });
-    Database.register(date, 'AHI').write('', item);
+    AHP.push(date);
     player.write('AHP', AHP);
+    Database.register(date, 'AHI').write('', item);
     return date;
 }
 ;
