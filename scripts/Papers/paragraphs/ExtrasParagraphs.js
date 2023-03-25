@@ -84,26 +84,24 @@ export function setTickInterval(handler, timeout, firstTick, ...args) {
     return tickIntervalID;
 }
 /**
- * Confirm or cancel an action
- * @param {PlayerType} player Player you want to send the confirm action
- * @param {string} body Body message
- * @param {string} title title message
- * @param {(res: simpleFormResponse) => void} onAccept function to execute when the player confirms
- * @param {(res: simpleFormResponse) => void} onCancel function to execute when the player cancels
+ * Creates a conformation screen
+ * @param {PlayerType} player The player you want to open the form for
+ * @param {string} title The title of the form
+ * @param {string} body The body
+ * @param {string} yes The accept button
+ * @param {string} no The decline button
+ * @returns {Promise<boolean>} remeber to use async
  */
-export async function confirmAction(player, body, title, onAccept, onCancel) {
-    const form = new MessageForm();
-    form.setTitle(title ?? 'CONFIRM ACTION');
-    form.setBody(body);
-    form.setButton1('CONFIRM');
-    form.setButton2('CANCEL');
-    await form.send(player, (res) => {
-        if (!res.selection)
-            return onCancel ? onCancel() : false;
-        return onAccept();
-    });
+export async function confirmForm(player, title, body, yes, no) {
+    let confirm = false;
+    const c = new MessageForm();
+    c.setTitle(title);
+    c.setBody(body);
+    c.setButton1(yes ?? '§aSure!§r');
+    c.setButton2(no ?? '§cNah...§r');
+    await c.send(player, res => confirm = Boolean(res.selection));
+    return confirm;
 }
-;
 /**
  * Stop the code for a certain amount of time
  * @param {number} ticks How long do you want the code to stop in ```ticks```

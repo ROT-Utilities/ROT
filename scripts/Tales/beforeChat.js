@@ -49,17 +49,8 @@ world.events.beforeChat.subscribe(data => {
                 return data.cancel = false;
             const message = data.message.charAt(0).toUpperCase() + data.message.slice(1), rank = `§7[${player.getPrefixes().join('§r§7, ')}§r§7] ${player.getNameColor()}`;
             return Array.from(world.getPlayers()).forEach(plr => {
-                let timezone = Player.getScore(plr, 'ROTTimezone');
-                if (!timezone)
-                    timezone = 0;
-                let currentHour = timezone ? eval(`${time.getUTCHours()}${(Math.sign(timezone) !== -1) ? `+ ${timezone}` : timezone}`) : time.getUTCHours(), AMPM = '';
-                if (currentHour < 0)
-                    currentHour = currentHour + 24;
-                if (currentHour <= 12)
-                    AMPM = currentHour === 12 ? 'PM' : 'AM', currentHour === 0 ? currentHour = 12 : null;
-                else
-                    currentHour = currentHour - 12, AMPM = 'PM';
-                plr.sendMessage(`${rank}§r§7 ${currentHour}:${time.getUTCMinutes() < 10 ? '0' + time.getUTCMinutes() : time.getUTCMinutes()} ${AMPM}: §f${message}§r`);
+                const tz = Player.getScore(plr, 'ROTTimezone'), hour = time.getUTCHours() + tz > 24 ? Math.abs(tz - time.getUTCHours()) : time.getUTCHours() + tz;
+                plr.sendMessage(`${rank}§r§7 ${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour}:${time.getUTCMinutes() < 10 ? '0' + time.getUTCMinutes() : time.getUTCMinutes()} ${hour >= 12 ? 'pm' : 'am'}: §f${message}§r`);
             });
         }
         const args = data.message.slice(quick.prefix.length).trim().split(/\s+/), command = args.shift().toLowerCase(), cmd = Commands.list.find(cmd => cmd.name === command || cmd.aliases && cmd.aliases.includes(command));

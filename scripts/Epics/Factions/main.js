@@ -16,10 +16,13 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
+import { world } from '@minecraft/server';
 import { addListener } from '../../Tales/main.js';
 import Database from "../../Papers/DatabasePaper.js";
 import Player from '../../Papers/PlayerPaper.js';
+import quick from '../../quick.js';
 //Make a faction entity where you can easily edit the faction
+export const config = quick.epics.Factions;
 export const fac = {
     chunks: Database.registry('FTNclaims'),
     names: Database.registry('FTNnames'),
@@ -32,6 +35,11 @@ export const fac = {
     invites: [],
 };
 addListener('playerConnect', res => Player.memory(res).write('FTNtimer', Date.now() + 3600000));
+try {
+    world.scoreboard.addObjective(config.obj, config.obj);
+}
+catch { }
+;
 import('./chunk/place.js');
 import('./chunk/break.js');
 import('./power.js');

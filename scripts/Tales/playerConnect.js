@@ -34,8 +34,7 @@ catch { }
 function join(player) {
     if (!player)
         return;
-    const nameReg = Database.registry('PLRname'); //, koolReg = Database.registry('PLRkool');
-    //Add last joined. Haven't join in 6 months gone
+    const nameReg = Database.registry('PLRname');
     let id = world.scoreboard.getObjective('PLRid').getScores().find(p => p.participant.displayName === player.name)?.score;
     if (!id) {
         if (nameReg.has(`$${player.name}`))
@@ -48,7 +47,7 @@ function join(player) {
         nameReg.delete(Object.entries(nameReg.getCollection()).find(a => a[1] === id)[0]);
     nameReg.write(`$${player.name}`, id);
     const db = Database.register(String(id), 'PLR');
-    Object.assign(connected, { [player.name]: [db, {}, String(id)] });
+    connected[player.name] = { memory: {}, rID: String(id), release: 0 };
     listeners.forEach(event => {
         if (event[0] !== 'playerConnect')
             return;
@@ -69,7 +68,7 @@ world.events.playerLeave.subscribe(data => leave(data.playerName));
  * @param name Name?
  */
 function leave(name) {
-    connected[name].push(Date.now() + 3600000);
+    connected[name].release = Date.now() + 3600000;
     listeners.forEach(event => {
         if (event[0] !== 'playerDisconnect')
             return;
@@ -85,6 +84,6 @@ function leave(name) {
  */
 setTickInterval(() => {
     const keys = Object.keys(connected);
-    keys.forEach(p => connected[p][3] && connected[p][3] < Date.now() && delete connected[p]);
+    keys.forEach(p => connected[p].release && connected[p].release < Date.now() && delete connected[p]);
     world.getAllPlayers().filter(p => !keys.includes(p.name)).forEach(p => join(p));
 }, 25, false);

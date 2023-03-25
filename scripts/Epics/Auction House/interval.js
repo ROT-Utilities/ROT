@@ -19,20 +19,20 @@ Thank you!
 import { world } from "@minecraft/server";
 import { setTickInterval } from "../../Papers/paragraphs/ExtrasParagraphs.js";
 import { hexToNumber, numberToHex } from "../../Papers/paragraphs/ConvertersParagraphs.js";
-import { getPost, openAH } from "./main.js";
+import { AH } from "./main.js";
 import Player from "../../Papers/PlayerPaper.js";
 import Database from "../../Papers/DatabasePaper.js";
 import quick from "../../quick.js";
-const config = quick.epics['Auction House'];
 let color = 0;
+const config = quick.epics['Auction House'];
 try {
     world.scoreboard.addObjective(config.obj, config.obj);
 }
-catch (e) { }
+catch { }
 ;
 setTickInterval(() => {
     if (config.tag.length)
-        world.getAllPlayers().forEach(player => player.hasTag(config.tag) && openAH(Player.playerType(player, { from: config.npcName, sound: false })));
+        world.getAllPlayers().forEach(player => player.hasTag(config.tag) && AH.openAH(Player.playerType(player, { from: config.npcName, sound: false })));
     if (!config.coolHouseNames)
         return;
     if (color > config.houseName.length)
@@ -44,10 +44,10 @@ setTickInterval(() => {
     name.splice(color + 2, 0, config.color2);
     name.splice(color + 4, 0, config.color1);
     color !== 0 && name.splice(color - 1, 0, config.color2);
-    name = '§l' /*§r*/ + config.color1 + name.join('');
+    name = '§l' + config.color1 + name.join('');
     for (const dim of ['overworld', 'nether', 'the end'])
         Array.from(world.getDimension(dim).getEntities({ type: 'rot:ah' })).forEach(entity => entity.nameTag = name);
-}, 5);
+}, 5, false);
 /** Identifers
  * AHP {postData}
  * AHI {itemData}
@@ -63,7 +63,7 @@ export function checkPosts() {
     Database.allTables('AHP').forEach(p => {
         if (hexToNumber(p) > date)
             return;
-        const post = getPost(p), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6));
+        const post = AH.getPost(p), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6));
         ;
         if (!post)
             return;
@@ -79,21 +79,22 @@ export function checkPosts() {
             p: post.startPrice,
             c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
         });
-        const player = Database.register(post.bidID[0] ? post.bidID[0] : post.creator.id, 'PLR');
-        player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());
+        const target = post.bidID[0] ? post.bidID[0] : post.creator.id;
+        AH.AHC.write(target, [AH.AHC.read(target) || [], id].flat());
         Database.drop(p, 'AHP');
     });
     //Trying to give people items if nobody accepts it, or delete it
     Database.allTables('AHC').forEach(c => {
         if (hexToNumber(c) > date)
             return;
-        const collect = Database.register(c, 'AHC').getCollection(), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6));
+        const collect = Database.register(c, 'AHC').getCollection(), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6)), ahc = AH.AHC.read(collect.w[0]);
         if (!collect.w) {
             Database.drop(collect.d, 'AHI');
             return Database.drop(c, 'AHC');
         }
-        const bidder = Database.register(collect.w[0], 'PLR'), db = Database.register(id, 'AHC');
-        bidder.write('AHC', bidder.read('AHC').splice(bidder.read('AHC').indexOf(c), 1));
+        ahc.splice(ahc.indexOf(c), 1);
+        AH.AHC.write(collect.w[0], ahc);
+        const db = Database.register(id, 'AHC');
         if (collect.hasOwnProperty('n'))
             db.write('n', collect.n);
         db.writeMany({
@@ -103,9 +104,7 @@ export function checkPosts() {
             p: collect.p,
             c: collect.c
         });
-        const player = Database.register(collect.c[0], 'PLR');
-        player.write('AHC', [player.has('AHC') ? player.read('AHC') : [], id].flat());
+        AH.AHC.write(collect.c[0], [AH.AHC.read(collect.c[0]) || [], id].flat());
         Database.drop(c, 'AHC');
     });
 }
-;

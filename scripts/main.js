@@ -51,7 +51,6 @@ world.events.worldInitialize.subscribe(() => {
  * The startup function
  */
 export async function startup() {
-    const time = new Date().getTime();
     Server.startServer();
     if (quick.useQuick && Server.db.has('quick'))
         Object.entries(Server.db.read('quick')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
@@ -87,9 +86,8 @@ export async function startup() {
             Commands.list.splice(i, 1);
         }
     });
-    Server.broadcast(`ROT has been loaded in §6${new Date().getTime() - time}§e milliseconds!`, 'Server');
     //Dev stuff
     // import('./Stories/test.js');
     // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
 }
-;
+//Put "Welcome back" in members story

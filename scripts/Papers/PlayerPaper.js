@@ -47,11 +47,7 @@ class PlayerPaper {
             from: data?.from,
             isAdmin: this.isAdmin(plr),
             memory: this.memory(plr),
-            rID: connected[plr.name][2],
-            write: (key, value) => this.write(plr, key, value),
-            read: (key) => this.read(plr, key),
-            has: (key) => this.has(plr, key),
-            delete: (key) => this.delete(plr, key),
+            rID: connected[plr.name].rID,
             send: (msg, frm, sund) => this.send(plr, msg, frm ?? data?.from ?? undefined, sund ?? sound),
             tip: (msg, frm, sund) => {
                 if (sund ?? sound)
@@ -102,29 +98,12 @@ class PlayerPaper {
     isAdmin(plr) {
         return plr.hasTag(quick.adminTag);
     }
-    database(plr) {
-        return connected[plr.name]?.[0];
-    }
-    write(plr, key, value) {
-        connected[plr.name]?.[0]?.write(key, value);
-        return connected[plr.name]?.[0];
-    }
-    read(plr, key) {
-        return connected[plr.name]?.[0]?.read(key);
-    }
-    has(plr, key) {
-        return connected[plr.name]?.[0]?.has(key);
-    }
-    delete(plr, key) {
-        connected[plr.name]?.[0]?.delete(key);
-        return connected[plr.name]?.[0];
-    }
     memory(plr) {
         return {
-            write: (key, value) => Object.assign(connected[plr.name]?.[1], { [key]: value }),
-            read: (key) => connected[plr.name]?.[1]?.[key],
-            has: (key) => Boolean(connected[plr.name]?.[1]?.[key]),
-            release: (key) => delete connected[plr.name]?.[1]?.[key]
+            write: (key, value) => connected[plr.name].memory[key] = value,
+            read: (key) => connected[plr.name].memory?.[key],
+            has: (key) => Boolean(connected[plr.name].memory?.[key]),
+            release: (key) => delete connected[plr.name].memory?.[key]
         };
     }
     send(plr, msg, frm, sund) {
@@ -178,12 +157,6 @@ class PlayerPaper {
         if (name)
             return this.playerType(world.getAllPlayers().find(p => p?.name.toLowerCase() === name?.toLowerCase()), typeData);
     }
-    getID({ player, name }) {
-        if (player)
-            return connected[player.name][2];
-        if (name)
-            return connected[name]?.[2];
-    }
     veiwBlock(player, getBlock) {
         const l = player.getBlockFromViewDirection({ includeLiquidBlocks: true, maxDistance: 300 });
         return getBlock ? l : { x: l.x, y: l.y, z: l.z };
@@ -201,23 +174,18 @@ class PlayerPaper {
             name: name,
             memory: this.memory(plr),
             player: this.playerType(player ?? name),
-            database: connected[name]?.[0],
-            rID: connected[name][2],
-            write: (key, value) => connected[name]?.[0]?.write(key, value),
-            read: (key) => connected[name]?.[0]?.read(key),
-            has: (key) => connected[name]?.[0]?.has(key),
-            delete: (key) => connected[name]?.[0]?.delete(key),
+            rID: connected[name].rID[2],
             send: (msg, frm) => {
                 plr.runCommandAsync('playsound random.toast @s ~~~ 1 0.5');
-                plr.sendMessage({ 'rawtext': [{ 'text': `§l§6${frm ? `${frm} ` : from ? `${from} ` : ''}§6>>§r§e ` }, { 'text': msg }] }); //§r
+                plr.sendMessage({ 'rawtext': [{ 'text': `§l§6${frm ? `${frm} ` : from ? `${from} ` : ''}§6>>§r§e ` }, { 'text': msg }] });
             },
             tip: (msg, frm) => {
                 plr.runCommandAsync('playsound random.toast @s ~~~ 1 0.5');
-                plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : from ? `${from} ` : ''}§6TIP §a>>§r§e ` }, { 'text': msg }] }); //§r
+                plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : from ? `${from} ` : ''}§6TIP §a>>§r§e ` }, { 'text': msg }] });
             },
             error: (msg, frm) => {
                 plr.runCommandAsync('playsound random.glass @s ~~~ 1 0.5');
-                plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : from ? `${from} ` : ''}§6Error >>§r§e ` }, { 'text': msg }] }); //§r
+                plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : from ? `${from} ` : ''}§6Error >>§r§e ` }, { 'text': msg }] });
             },
         };
     }

@@ -25,7 +25,7 @@ import Database from "../../Papers/DatabasePaper.js";
 import quick from "../../quick.js";
 const config = quick.epics.Factions;
 setTickInterval(() => world.getAllPlayers().forEach(plr => {
-    if (!fac.player.read(connected[plr.name]?.[2]))
+    if (!fac.player.has(connected[plr.name]?.rID))
         return;
     const score = Player.getScore(plr, quick.epics.Factions.powerObj), memory = Player.memory(plr);
     if (!memory.has('FTN'))
@@ -33,8 +33,8 @@ setTickInterval(() => world.getAllPlayers().forEach(plr => {
     if (score === memory.read('FTN'))
         return;
     memory.write('FTN', score);
-    const db = Database.register(fac.player.read(connected[plr.name]?.[2], true), 'FTN'), user = db.read(`u${fac.playerI.read(connected[plr.name]?.[2])}`), newP = db.allKeys().filter(key => key.startsWith('u'));
-    db.write(`u${fac.playerI.read(connected[plr.name]?.[2])}`, [connected[plr.name][2], plr.name, user[2], score, user[4]]);
+    const db = Database.register(fac.player.read(connected[plr.name].rID, true), 'FTN'), user = db.read(`u${fac.playerI.read(connected[plr.name].rID)}`), newP = db.allKeys().filter(key => key.startsWith('u'));
+    db.write(`u${fac.playerI.read(connected[plr.name].rID)}`, [connected[plr.name].rID, plr.name, user[2], score, user[4]]);
     fac.power.write(db.read('n'), parseInt(`${newP.map(u => db.read(`u${u.replace('u', '')}`)[3]).reduce((a, b) => a + b, 0) / newP.length}`));
 }), 60, true);
 setTickInterval(() => world.getAllPlayers().forEach(plr => {

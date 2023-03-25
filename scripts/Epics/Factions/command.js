@@ -17,21 +17,21 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world } from '@minecraft/server';
-import { createFaction, deleteFaction, get, getRole, has } from './faction.js';
 import { MS } from '../../Papers/paragraphs/ConvertersParagraphs.js';
+import { createFaction, deleteFaction, get, getRole, has } from './faction.js';
 import { claimChunk, getChunk, getOwner } from './chunk/claim.js';
 import { connected } from '../../Tales/playerConnect.js';
+import { AsciiMap } from './AsciiMap.js';
 import { fac } from './main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
 import quick from '../../quick.js';
-import { AsciiMap } from './AsciiMap.js';
 const config = quick.epics.Factions;
 const cmd = Commands.create({
-    name: 'fac',
+    name: 'ftn',
     description: 'Factions commands!',
-    aliases: ['f', 'ftn', 'faction', 'factions'],
+    aliases: ['f', 'fac', 'faction', 'factions'],
     category: 'Epics',
     developers: ['Mo9ses', 'Aex66']
 });
@@ -52,7 +52,7 @@ cmd.bridge('set', 'set', ['set:home', 'set:description', 'set:permissions'], plr
 });
 cmd.dynamicType('set:home', ['home', 'h', 'spawn', 's'], plr => {
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
-    if (getRole(plr) === 'member', db)
+    if (getRole(plr, db) === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
     //Add min max spawn
     const loc = [parseInt(`${plr.location.z}`), parseInt(`${plr.location.y}`), parseInt(`${plr.location.z}`), plr.dimension.id];
@@ -61,7 +61,7 @@ cmd.dynamicType('set:home', ['home', 'h', 'spawn', 's'], plr => {
 });
 cmd.dynamicType('set:description', ['description', 'des', 'd'], (plr, _, args) => {
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
-    if (getRole(plr) === 'member', db)
+    if (getRole(plr, db) === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
     db.write('d', args[0]);
     plr.send(`The faction description has been set to "§a${args[0]}§r§e".`);
@@ -69,7 +69,7 @@ cmd.dynamicType('set:description', ['description', 'des', 'd'], (plr, _, args) =
 //Static type
 cmd.dynamicType('set:permissions', ['permissions', 'perm', 'p-'], (plr, _, args) => {
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
-    if (getRole(plr) === 'member', db)
+    if (getRole(plr, db) === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
     db.write('d', args[0]);
     plr.send(`The faction description has been set to "§a${args[0]}§r§e".`);
@@ -90,7 +90,7 @@ cmd.dynamicType('info', ['info', 'information'], plr => {
         owner = fac.player.read(plr.rID, true);
     if (!owner || !Database.has(owner, 'FTN'))
         return plr.error('The chunk that you are in currently isn\'t protected by a faction, and you aren\'t in one. No information.');
-    const faction = get({ id: owner }), IDs = world.getAllPlayers().map(p => connected[p.name]?.[2]), time = Date.now(), info = {
+    const faction = get({ id: owner }), IDs = world.getAllPlayers().map(p => connected[p.name].rID), time = Date.now(), info = {
         Name: `§a${faction.name}`,
         Description: `§g${faction.description ? faction.description : 'Basic faction description.'}`,
         Open: `§g${faction.open}`,
@@ -115,7 +115,7 @@ cmd.dynamicType('members', ['members', 'member', 'mem', 'm'], plr => {
         owner = fac.player.read(plr.rID, true);
     if (!owner || !Database.has(owner, 'FTN'))
         return plr.error('The chunk that you are in currently isn\'t protected by a faction, and you aren\'t in one. No information.');
-    const db = Database.register(owner, 'FTN'), IDs = world.getAllPlayers().map(p => connected[p.name]?.[2]), time = Date.now();
+    const db = Database.register(owner, 'FTN'), IDs = world.getAllPlayers().map(p => connected[p.name].rID), time = Date.now();
     plr.send(`Here are the members in the "§g${db.read('n')}§e" faction (§g${db.read('m')}§e/§6${config.maxPlayers}§e):\n${Array.from(db.allKeys().filter(k => k.startsWith('u')).map(m => db.read(m)), (m) => `${IDs.includes(m[0]) ? '§a[online]' : '§c[offline]'} §g${m[1]}§e, role: §g${m[2] === 2 ? 'owner' : m[2] ? 'admin' : 'member'}§e,${owner === fac.player.read(plr.rID, true) ? ` power: §g${m[3]}§e,` : ''} join date: §g${MS(time - m[4])} ago`).join('\n')}`);
 });
 cmd.dynamicType('invite', 'invite', (plr, _, args) => {
@@ -124,14 +124,14 @@ cmd.dynamicType('invite', 'invite', (plr, _, args) => {
     if (fac.invites.find(i => fac.player.read(plr.rID, true) === i[0] && i[2] === args[0].name))
         return plr.error('You already sent a invite to this player.');
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
-    if (getRole(plr) === 'member', db)
+    if (getRole(plr, db) === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
     if (db.read('m') >= config.maxPlayers)
         return plr.error('The faction you are in has reached the maximum amount of players.');
     if (fac.player.read(args[0].rID))
         return plr.error('This player is already in a faction.');
     plr.send(`A invite has been sent to §c${args[0].name}§e.`);
-    args[0].send(`§c${plr.name}§e sent you a invite to join their faction. Type "§g${quick.prefix}f join ${db.read('n')}§e" in chat to join.`);
+    args[0].send(`§c${plr.name}§e sent you a invite to join their faction. Type "§g${quick.prefix}f join ${db.read('n')}§e" in chat to join.`, 'FTN');
     fac.invites.push([fac.player.read(plr.rID, true), plr.name, args[0].name]);
 }, 'player', true);
 cmd.staticType('join', 'join', (plr, name) => {
@@ -148,8 +148,8 @@ cmd.staticType('join', 'join', (plr, name) => {
             continue;
     if (u === 0 || db.has(`u${u}`))
         return plr.error('Unable to find you a player slot. Please report this error.');
-    world.getAllPlayers().forEach(p => String(fac.player.read(connected[p.name]?.[2])) === id && Player.send(p, `Alert! §c${plr.name}§e just joined your faction.`));
-    db.write(`u${u}`, [plr.rID, plr.name, 2, plr.getScore(config.powerObj), new Date().getTime()]);
+    world.getAllPlayers().forEach(p => String(fac.player.read(connected[p.name].rID)) === id && Player.send(p, `Hey! §c${plr.name}§e just joined your faction.`));
+    db.write(`u${u}`, [plr.rID, plr.name, 0, plr.getScore(config.powerObj), new Date().getTime()]);
     fac.invites.splice(fac.invites.findIndex(i => i[0] === id && i[2] === plr.name), 1);
     fac.player.write(plr.rID, Number(id));
     fac.playerI.write(plr.rID, u);
@@ -160,7 +160,7 @@ cmd.dynamicType('leave', ['leave', 'l'], plr => {
     if (!has({ player: plr }))
         return plr.error('You aren\'t even in a faction!');
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
-    if (getRole(plr) === 'owner', db)
+    if (getRole(plr, db) === 'owner')
         return plr.error(`You cannot leave the faction you created. You have to delete it using "§c${quick.prefix}f delete§e"`);
     db.delete(`u${fac.playerI.read(plr.rID)}`);
     fac.chunks.findMany(Number(plr.rID)).forEach(c => fac.chunks.delete(c));
@@ -180,7 +180,7 @@ cmd.dynamicType('kick', ['kick'], (plr, _, args) => {
     const db = Database.register(fac.player.read(plr.rID, true), 'FTN'), role = getRole(plr, db);
     if (role === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
-    if (getRole(args[0]) !== 'member', db && role !== 'owner')
+    if (getRole(args[0], db) !== 'member' && role !== 'owner')
         return plr.error('You can only kick members out of the faction if you are the owner.');
     db.delete(`u${fac.playerI.read(args[0].rID)}`);
     fac.chunks.findMany(Number(args[0].rID)).forEach(c => fac.chunks.delete(c));

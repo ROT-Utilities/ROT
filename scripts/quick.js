@@ -40,19 +40,6 @@ export const quick = {
     defaultChatColor: '§f',
     hiveArrow: true,
     bannedPlayers: {},
-    automod: {
-        //validValues: 'block' | 'warn' | 'ban' | 'disable'
-        /**
-         * Block: Blocks the cheat. No ban or warns
-         * Warn: Warns the player, if the player reach maxWarms will be auto-banned from the server forever
-         * Ban: The player will be banned immediately
-         * Disable: The protection will be disabled, it will not protect your server from this cheat.
-         */
-        crasher: 'block',
-        cbe: 'warn',
-        nuker: 'warn',
-        unobtainable: 'warn',
-    },
     toggle: {
         Server: {
             broadcast: true,
@@ -61,14 +48,11 @@ export const quick = {
             spawn: true,
         },
         Management: {
-            ban: true,
             rank: true,
             tac: true,
-            kicktags: true,
         },
         Structure: {
             leaderboard: true,
-            text: true
         },
         Escape: {
         // feed: true,
@@ -148,15 +132,8 @@ export const quick = {
             claimCost: 1,
             minPower: 1,
             maxPower: 10,
-            startPower: 5,
-            upgradePrice: 5000,
-            maxPowerPerUpgrade: 5,
-            upgrades: 5,
-            inviteExpireTime: 30000,
-            starterPowerAmount: 5,
             minFacClaimLand: 3,
             minClaimLand: 1,
-            chat: true,
             mostPowerClaims: true,
             containers: [
                 MinecraftBlockTypes.chest.id,
@@ -164,27 +141,8 @@ export const quick = {
                 MinecraftBlockTypes.barrel.id,
                 MinecraftBlockTypes.shulkerBox.id,
                 MinecraftBlockTypes.undyedShulkerBox.id
-            ]
-        },
-        "Slappers": {
-            enabled: false,
-            entry: "main",
-            editItem: ['minecraft:blaze_rod', '§eEDIT SLAPPER§r'],
-            killItem: ['minecraft:barrier', '§cKILL SLAPPER§r']
-        },
-        "Automod": {
-            enabled: false,
-            entry: "main",
-            bypass: "c",
-            maxWarns: 3,
-            automod: {
-                crasher: true
-            },
-            crasher: 30000000 //Don't change this number
-        },
-        "Director": {
-            enabled: false,
-            entry: "main",
+            ],
+            chat: true, //If true your faction name will appear in chat
         }
     },
     tales: [

@@ -1,22 +1,3 @@
-/*
-ROT Developers and Contributors:
-Moises (OWNER/CEO/Developer),
-Aex66 (Developer)
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-__________ ___________________
-\______   \\_____  \__    ___/
- |       _/ /   |   \|    |
- |    |   \/    |    \    |
- |____|_  /\_______  /____|
-        \/         \/
--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
-Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
-Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
-Thank you!
-*/
-import { world } from '@minecraft/server';
 import { ID } from "../../Papers/paragraphs/ExtrasParagraphs.js";
 import { connected } from '../../Tales/playerConnect.js';
 import { fac } from './main.js';
@@ -52,7 +33,7 @@ export function createFaction(player, name) {
         c: time,
         s: [],
         cc: [],
-        u0: [connected[player.name][2], player.name, 2, power, time] //members (owner will be the first member) m0
+        u0: [connected[player.name].rID, player.name, 2, power, time] //members (owner will be the first member) m0
     });
     fac.value.write(name, 0);
     fac.kills.write(name, 0);
@@ -68,8 +49,6 @@ export function createFaction(player, name) {
  * @returns {boolean}
  */
 export function deleteFaction(player) {
-    const name = 'Mo9ses';
-    const isPlayer = world.getAllPlayers().some(p => p.name === name);
     if (!has({ player: player }))
         return player.error('How are you going to delete your faction if you\'re not even in one?', 'FTN');
     const faction = get({ player: player });
@@ -94,7 +73,7 @@ export function has({ name, id, player }) {
     if (name)
         return fac.names.has(name);
     if (player)
-        return Boolean(fac.player.read(connected[player.name]?.[2]));
+        return Boolean(fac.player.read(connected[player.name]?.rID));
 }
 export function find({ name, id, player }) {
     let realID;
@@ -103,7 +82,7 @@ export function find({ name, id, player }) {
     if (name)
         realID = String(fac.names.read(name));
     if (player)
-        realID = String(fac.player.read(connected[player.name]?.[2]));
+        realID = String(fac.player.read(connected[player.name]?.rID));
     if (realID && Database.has(realID, 'FTN'))
         return realID;
 }
@@ -156,7 +135,7 @@ export function getRole(player, db) {
         return 'member';
     if (!db)
         db = Database.register(realID, 'FTN');
-    const role = db.read(`u${fac.playerI.read(connected[player.name]?.[2])}`)?.[2];
+    const role = db.read(`u${fac.playerI.read(connected[player.name]?.rID)}`)?.[2];
     if (!role)
         return 'member';
     return role === 2 ? 'owner' : 'admin';

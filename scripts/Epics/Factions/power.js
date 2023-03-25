@@ -17,25 +17,25 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Thank you!
 */
 import { world, Player as IPlayer } from "@minecraft/server";
-import Player from "../../Papers/PlayerPaper.js";
-import quick from "../../quick.js";
 import { connected } from "../../Tales/playerConnect.js";
-import { fac } from "./main.js";
-const config = quick.epics.Factions;
-world.events.entityHurt.subscribe(res => {
-    if (!(res.hurtEntity instanceof IPlayer) || res.hurtEntity.getComponent('health').current > 0)
+import { config, fac } from "./main.js";
+import Player from "../../Papers/PlayerPaper.js";
+world.events.entityDie.subscribe(res => {
+    if (!(res.deadEntity instanceof IPlayer))
         return;
-    const dPower = Player.getScore(res.hurtEntity, config.powerObj);
+    const dPower = Player.getScore(res.deadEntity, config.powerObj);
     if (dPower > 0) {
         let nPower = dPower - config.powerDeath;
         if (config.maxPower && (0 > nPower))
             nPower = 0;
-        res.hurtEntity.runCommandAsync(`scoreboard players set @s "${config.powerObj}" ${nPower}`);
-        res.hurtEntity.sendMessage(`§c§l-${dPower - nPower} power`);
+        res.deadEntity.runCommandAsync(`scoreboard players set @s "${config.powerObj}" ${nPower}`);
+        res.deadEntity.sendMessage(`§c§l-${dPower - nPower} power`);
     }
     if (!(res.damageSource.damagingEntity instanceof IPlayer))
         return;
-    const sPower = Player.getScore(res.damageSource.damagingEntity, config.powerObj);
+    const id = fac.player.read(connected[res.damageSource.damagingEntity.name].rID), sPower = Player.getScore(res.damageSource.damagingEntity, config.powerObj);
+    if (id === fac.player.read(connected[res.deadEntity.name].rID))
+        return Player.send(res.damageSource.damagingEntity, 'The more you kill people in your faction, the more power you\'ll lose...', 'FTN');
     if (config.maxPower && config.maxPower <= sPower)
         return;
     let nPower = sPower + config.powerKill;
@@ -43,8 +43,8 @@ world.events.entityHurt.subscribe(res => {
         nPower = config.maxPower;
     res.damageSource.damagingEntity.runCommandAsync(`scoreboard players set @s "${config.powerObj}" ${nPower}`);
     res.damageSource.damagingEntity.sendMessage(`§a§l+${nPower - sPower} power`);
-    if (fac.player.has(connected[res.damageSource.damagingEntity.name][2]))
+    if (!id)
         return;
-    const name = fac.names.find(fac.player.read(connected[res.damageSource.damagingEntity.name][2]));
+    const name = fac.names.find(id);
     fac.kills.write(name, fac.kills.read(name) + 1);
 });

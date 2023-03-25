@@ -18,7 +18,6 @@ Thank you!
 */
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
-import Server from '../../Papers/ServerPaper.js';
 const db = Database.register('ban');
 const cmd = Commands.create({
     name: 'ban',
@@ -32,18 +31,15 @@ cmd.startingArgs('player');
 cmd.playerType('player', (plr, val, args) => {
     if (val.player?.isAdmin)
         return plr.send('You cannot ban a administrator');
-    const date = new Date(), banData = {
-        date: [date.getFullYear(), date.getMonth() + 1, date.getDate()],
-        unban: args[0] + date.getTime(),
-        res: args[1],
-        by: plr.name,
-        id: val.database?.table
-    };
-    if (val.database)
-        val.write('ban', banData);
-    else
-        db.write(val.name, banData);
-    Server.broadcast(`§6${val.name}§e was banned for §6${banData.date.join('§e, §6')}§e${banData.res ? ` for "§6${banData.res}§r§e"` : ''}!`);
+    // const date = new Date(), banData = {
+    //     date: [date.getFullYear(), date.getMonth() + 1, date.getDate()],
+    //     unban: args[0] + date.getTime(),
+    //     res: args[1],
+    //     by: plr.name,
+    //     id: val.database?.table
+    // };
+    // if(val.database) val.write('ban', banData); else db.write(val.name, banData);
+    // Server.broadcast(`§6${val.name}§e was banned for §6${banData.date.join('§e, §6')}§e${banData.res ? ` for "§6${banData.res}§r§e"` : ''}!`);
 }, false, 'time', null, false);
 cmd.timeType('time', null, 'reason', null, false);
 cmd.unknownType('reason', null);

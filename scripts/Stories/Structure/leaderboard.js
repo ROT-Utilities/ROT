@@ -103,19 +103,17 @@ function getLeaderboard(objective) {
     let before = {}, after = {};
     Object.keys(top).forEach(i => { Object.assign(before, { [i]: top[i][2] }); Object.assign(after, { [i]: top[i][2] }); });
     for (const player of players)
-        Object.assign(after, { [Player.getID({ player: player })]: Player.getScore(player, objective) });
-    let after2 = {}, before2 = {};
-    Object.entries(after).sort((a, b) => b[1] - a[1]).slice(0, 32).forEach(p => after2[p[0]] = p[1]);
-    Object.entries(before).sort((a, b) => b[1] - a[1]).forEach(p => before2[p[0]] = p[1]);
-    if (JSON.stringify(before2) === JSON.stringify(after2))
+        Object.assign(after, { [connected[player.name].rID]: Player.getScore(player, objective) });
+    if (Object.keys(after).every(a => before.hasOwnProperty(a) && before[a] === after[a]))
         return;
+    console.warn('Pointed');
     const writeMany = {}, leaderboard = [];
-    db.deleteMany(Object.keys(before2).filter(id => !after2.hasOwnProperty(id)));
-    Object.keys(after2).forEach((id, i) => {
-        const player = players.find(plr => Player.getID({ player: plr }) === id);
-        if (player && JSON.stringify(before2[id]) !== JSON.stringify(after2[id]))
-            Object.assign(writeMany, { [id]: [Player.getNameColor(player), Player.getPrefixes(player).join('§r§7, ' /*§r*/), after2[id]] });
-        leaderboard.push(`§9${i + 1} §7[${player ? Player.getPrefixes(player).join('§r§7, ') : top[id][1]}§r§7] ${player ? Player.getNameColor(player) : top[id][0]} §r§7- §c${metricNumbers(after2[id])}§r`);
+    db.deleteMany(Object.keys(before).filter(id => !after.hasOwnProperty(id)));
+    Object.entries(after).sort((a, b) => b[1] - a[1]).slice(0, 32).forEach((p, i) => {
+        const player = players.find(plr => connected[plr.name].rID === p[0]);
+        if (player && before[p[0]] !== p[1])
+            Object.assign(writeMany, { [p[0]]: [Player.getNameColor(player), Player.getPrefixes(player).join('§r§7, '), p[1]] });
+        leaderboard.push(`§9${i + 1} §7[${player ? Player.getPrefixes(player).join('§r§7, ') : top[p[0]][1]}§r§7] ${player ? Player.getNameColor(player) : top[p[0]][0]} §r§7- §c${metricNumbers(p[1])}§r`);
     });
     db.writeMany(writeMany);
     return leaderboard;

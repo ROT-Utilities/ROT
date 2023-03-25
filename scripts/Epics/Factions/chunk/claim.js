@@ -23,6 +23,7 @@ import { fac } from "../main.js";
 import Player from "../../../Papers/PlayerPaper.js";
 import quick from "../../../quick.js";
 import Database from "../../../Papers/DatabasePaper.js";
+import Server from "../../../Papers/ServerPaper.js";
 const config = quick.epics.Factions;
 /**
  * Gets the location of the player's current
@@ -55,6 +56,11 @@ export function inClaim(player) {
  * @returns {void}
  */
 export function claimChunk(player) {
+    const spawn = Server.db.read('spawn');
+    if (spawn?.length && Array.from(player.dimension.getEntities({ type: 'minecraft:player', location: { x: spawn[0], y: spawn[1], z: spawn[2] }, maxDistance: config.radius })).some(p => p.id === player.id))
+        return player.error(`You have to be further than §c${config.radius}§e blocks from spawn.`);
+    if (spawn?.length && !Array.from(player.dimension.getEntities({ type: 'minecraft:player', location: { x: spawn[0], y: spawn[1], z: spawn[2] }, maxDistance: config.maxRadius })).some(p => p.id === player.id))
+        return player.error(`You have to be within §c${config.maxRadius}§e blocks from spawn.`);
     if (!has({ player: player }))
         return Player.error(player, 'You aren\'t even in a faction!');
     const db = Database.register(fac.player.read(player.rID, true), 'FTN'), power = player.getScore(config.powerObj);
@@ -82,7 +88,7 @@ export function claimChunk(player) {
         occ.splice(occ.indexOf(chunk), 1);
         ownerDB.write('cc', occ);
         player.send(`Watch out! You have stolen §6${ownerDB.read('n')}'s §eclaim at §6${chunk[0]}, ${chunk[1]}§e and they have been alerted!`);
-        world.getAllPlayers().forEach(p => String(fac.player.read(connected[p.name]?.[2])) === ownerID && Player.send(p, `Alert! Someone stole your one of your faction\'s claims at §6${chunk[0]}, ${chunk[1]}§e!`));
+        world.getAllPlayers().forEach(p => String(fac.player.read(connected[p.name].rID)) === ownerID && Player.send(p, `Alert! Someone stole your one of your faction\'s claims at §6${chunk[0]}, ${chunk[1]}§e!`));
     }
     player.runCommandAsync(`scoreboard players remove @s "${config.powerObj}" ${config.claimCost}`);
     fac.playerC.write(player.rID, (fac.playerC.has(player.rID) ? fac.playerC.read(player.rID) : 0) + 1);
@@ -92,5 +98,5 @@ export function claimChunk(player) {
 }
 export function showBorder(player, chunks, y, check) {
     let claims = (typeof chunks[0] === 'number' ? [chunks] : chunks).filter(c => check ? fac.chunks.has(`${c[0]}_${c[1]}`) : true);
-    claims.forEach(c => player.dimension.spawnEntity('rot:chunk', { x: 16 * c[0] + 7, y: player.location.y <= y ? player.location.y : y + 1, z: 16 * c[1] + 7 }));
+    claims.forEach(c => player.dimension.spawnEntity('rot:chunk', { x: 16 * c[0] + (c[0] > -1 ? 7 : -7), y: player.location.y <= y ? player.location.y : y + 1, z: 16 * c[1] + (c[0] > -1 ? 7 : -7) }));
 }

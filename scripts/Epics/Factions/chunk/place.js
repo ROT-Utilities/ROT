@@ -32,7 +32,7 @@ world.events.blockPlace.subscribe(res => {
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
     const owner = getOwner(chunk);
-    if (owner === `${fac.player.read(connected[res.player.name]?.[2])}`)
+    if (owner === `${fac.player.read(connected[res.player.name].rID)}`)
         return;
     Player.send(res.player, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
     showBorder(res.player, chunk, res.block.location.y, false);
@@ -48,7 +48,7 @@ world.events.beforeItemUseOn.subscribe(res => {
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
     const owner = getOwner(chunk);
-    if (owner === `${fac.player.read(connected[res.source.name]?.[2])}`)
+    if (owner === `${fac.player.read(connected[res.source.name].rID)}`)
         return;
     if ((block.typeId.endsWith('door') || block.typeId.endsWith('button') || block.typeId === MinecraftBlockTypes.lever.id))
         return;

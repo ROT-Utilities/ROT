@@ -30,7 +30,7 @@ world.events.blockBreak.subscribe((res) => {
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
     const owner = getOwner(chunk);
-    if (owner === `${fac.player.read(connected[res.player.name]?.[2])}`)
+    if (owner === `${fac.player.read(connected[res.player.name].rID)}`)
         return;
     Player.send(res.player, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
     res.block.setPermutation(res.brokenBlockPermutation);
@@ -45,7 +45,7 @@ world.events.entityHit.subscribe(res => {
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
     const owner = getOwner(chunk);
-    if (owner === `${fac.player.read(connected[res.entity.name]?.[2])}`)
+    if (owner === `${fac.player.read(connected[res.entity.name].rID)}`)
         return;
     Player.send(res.entity, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
     showBorder(res.entity, chunk, res.hitBlock.location.y, false);

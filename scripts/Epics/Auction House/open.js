@@ -1,10 +1,28 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer),
+Aex66 (Developer)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |
+ |    |   \/    |    \    |
+ |____|_  /\_______  /____|
+        \/         \/
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Website: https://www.rotmc.ml
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Thank you!
+*/
 import { ActionForm, ModalForm } from "../../Papers/FormPaper.js";
 import { hexToNumber, metricNumbers, MS } from "../../Papers/paragraphs/ConvertersParagraphs.js";
-import { confirmForm, errorForm, getPost, openAH, updatePost, verifyPost } from "./main.js";
-import { editPost } from "./edit.js";
+import { confirmForm } from "../../Papers/paragraphs/ExtrasParagraphs.js";
 import { checkPosts } from "./interval.js";
+import { editPost } from "./edit.js";
+import { AH } from "./main.js";
 import Player from '../../Papers/PlayerPaper.js';
-import Database from '../../Papers/DatabasePaper.js';
 import quick from "../../quick.js";
 //Defining very much needed variables
 const config = quick.epics['Auction House'];
@@ -13,9 +31,9 @@ export function openPost(player, date, from) {
     if (hexToNumber(date) - new Date().getTime() <= 0)
         checkPosts();
     //Checks if post now exists
-    const post = getPost(date);
+    const post = AH.getPost(date);
     if (!post)
-        return errorForm(player, from);
+        return AH.errorForm(player, from);
     //Calculating price?
     let keepersKeep = ~~(post.price / 100) * config.buyersPremiumPercent[0];
     if (keepersKeep > config.buyersPremiumPercent[1])
@@ -48,9 +66,9 @@ export function openPost(player, date, from) {
         view.addButton('§4§lDev menu§r', 'textures/rot/forms/dev.png');
     view.send(player, async (res) => {
         if (res.selection === 1)
-            return from(player, openAH);
+            return from(player, AH.openAH);
         if (res.canceled)
-            return openAH(player);
+            return AH.openAH(player);
         if (res.selection === 2)
             return editPost(player, date, from);
         if (post.creator.id === player.rID)
@@ -62,15 +80,15 @@ export function openPost(player, date, from) {
                 return await confirmForm(player, '§4§lCannot remove§r', '§cRemember, you can only remove a bid from a auction once, and only if the last bidder is online.§r', '§eOk ;(§r', '§l§4Close§r') ? openPost(player, date, from) : player.send('Come back soon!');
             if (await confirmForm(player, '§c§lRemove bid?§r', `Are you sure you want to remove your bid from §c${post.name}§r? This may be the §4§llast chance§r you get to win this item.\n\nYou can only remove your bid §4§lONCE§r and if the last bidder is §a§lonline§r.`, '§a§lOpps! Wrong button...§r', '§c§lYeah, I need the money...§r'))
                 return openPost(player, date, from);
-            if (!verifyPost(date, post))
-                return errorForm(player, from);
+            if (!AH.verifyPost(date, post))
+                return AH.errorForm(player, from);
             const lastBidder = Player.getBy({ id: post.bidID[1] });
             if (lastBidder) {
                 lastBidder.send(`§c${post.bidSilent[0] ? '§cHidden' : player.name}§e just removed their bid on the auction "§l§6${post.name}§r§e" and you are now the top bidder!§r`);
                 lastBidder.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${post.bids[1]}`);
             }
             //Deletes player from post
-            updatePost(date, { bidData: removeBid(date, post, player), removedIDs: [post.removedIDs, player.rID].flat() });
+            AH.updatePost(date, { bidData: removeBid(date, post, player), removedIDs: [post.removedIDs, player.rID].flat() });
             return openPost(player, date, from);
         }
         //Add bid screen
@@ -89,21 +107,21 @@ export function openPost(player, date, from) {
                 return openPost(player, date, from);
             if (hexToNumber(date) - new Date().getTime() <= 0)
                 checkPosts();
-            const post = getPost(date), sent = Number(res.formValues[0]), silent = res.formValues[1];
+            const post = AH.getPost(date), sent = Number(res.formValues[0]), silent = res.formValues[1];
             if (!post)
-                return errorForm(player, from);
+                return AH.errorForm(player, from);
             //Checks if the money they inputted is a number
             if (res.formValues[0].replace(/\d/g, '') !== '' || isNaN(sent))
-                return await confirmForm(player, '§5Not a number§r', `"§5${res.formValues[0]}§r" is not a number. Would you like to try again?`) ? openPost(player, date, from) : from(player, openAH);
+                return await confirmForm(player, '§5Not a number§r', `"§5${res.formValues[0]}§r" is not a number. Would you like to try again?`) ? openPost(player, date, from) : from(player, AH.openAH);
             //Check if they have the moeny and if it's vaild
             if (sent < price || sent > player.getScore(config.obj))
-                return await confirmForm(player, '§5Size matters?§r', `"§5${res.formValues[0]}§r" is either too small or too big! Choose a number between §6${price}-${player.getScore(config.obj)}`) ? openPost(player, date, from) : from(player, openAH);
+                return await confirmForm(player, '§5Size matters?§r', `"§5${res.formValues[0]}§r" is either too small or too big! Choose a number between §6${price}-${player.getScore(config.obj)}`) ? openPost(player, date, from) : from(player, AH.openAH);
             //Confirming and updating the post
             if (!(await confirmForm(player, `§a§lYou sure?§r`, `Are you sure you want to bid §a$${metricNumbers(sent)} §6${config.currency}§r on §c§l${post.name}§r?`)))
                 return openPost(player, date, from);
-            if (!verifyPost(date, post))
-                return errorForm(player, from);
-            await updatePost(date, { bidData: addBid(date, post, player, sent, silent) });
+            if (!AH.verifyPost(date, post))
+                return AH.errorForm(player, from);
+            await AH.updatePost(date, { bidData: addBid(date, post, player, sent, silent) });
             openPost(player, date, from);
         });
     });
@@ -116,22 +134,18 @@ function addBid(date, post, player, sent, silent) {
         lastBidder.send(`§c${silent ? '§c(Hidden)' : player.name}§e just outbidded you on the auction §l§6${post.name}§r§e!§r`);
         lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     }
-    else if (post.bidID[0]) {
-        const oldBid = Database.register(post.bidID[0], 'PLR');
-        oldBid.write('AHR', (oldBid.read('AHR') || 0) + post.bids[0]);
-    }
-    if (!player.read('AHB')?.includes(date))
-        player.write('AHB', [player.has('AHB') ? player.read('AHB') : [], date].flat());
+    else if (post.bidID[0])
+        AH.AHR.write(post.bidID[0], (AH.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
+    if (!AH.AHB.read(player.rID)?.includes(date))
+        AH.AHB.write(player.rID, [AH.AHB.read(player.rID) || [], date].flat());
     delete post.bidData[player.rID];
     return Object.assign(post.bidData, { [player.rID]: [player.name, sent, silent ? 1 : 0] });
 }
-;
 function removeBid(date, post, player) {
-    const clientBids = player.read('AHB');
+    const clientBids = AH.AHB.read(player.rID);
     player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     clientBids.splice(clientBids.indexOf(date), 1);
-    player.write('AHB', clientBids);
+    AH.AHB.write(player.rID, clientBids);
     delete post.bidData[player.rID];
     return post.bidData;
 }
-;
