@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
@@ -52,7 +52,7 @@ cmd.dynamicType('cmd', [Commands.list.map(c => c.name), Commands.list.map(c => c
     plr.sendMessage(`§6${hI}§r`);
 });
 cmd.numberType('page', (plr, page) => {
-    const commandList = new Array(Math.ceil(Commands.list.length / 35)).fill(0).map(_ => Commands.list.filter(c => plr.isAdmin ? true : !c.admin || (c.tags?.length ? plr.isAdmin : false)).splice(0, 35)), help = [], categoryHold = [];
+    const fakeList = Commands.list, commandList = new Array(Math.ceil(Commands.list.length / 35)).fill(0).map(_ => fakeList.filter(c => plr.isAdmin ? true : !c.admin || (c.tags?.length ? plr.isAdmin : false)).splice(0, 35)), help = [], categoryHold = [];
     if (!commandList[page - 1]?.[0])
         return plr.error('Unable to find this page');
     for (const command of commandList[page - 1]) { //If admin, show disabled commands. Complete help page, Command UI, and quick today

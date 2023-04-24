@@ -239,7 +239,7 @@ class registry {
     /**
      * Gets all the keys in the registry
      * @example .allKeys();
-     * @returns {(string | number)[]} A array with all the keys
+     * @returns {string[]} A array with all the keys
      */
     allKeys() {
         return Object.keys(regMemory[this.file][0]);
@@ -256,16 +256,16 @@ class registry {
      * Find a the first key assigned to said value
      * @param {number} value The number value
      * @example .find(893724);
-     * @returns {string | number} The key
+     * @returns {string} The key
      */
     find(value) {
         return Object.keys(regMemory[this.file][0]).find(k => regMemory[this.file][0][k] === value);
     }
     /**
-     * Find a the first key assigned to said value
+     * Find any key assigned to said value
      * @param {number} value The number value
-     * @example .find(893724);
-     * @returns {string | number} The key
+     * @example .find(897232);
+     * @returns {string[]} The keys
      */
     findMany(value) {
         return Object.keys(regMemory[this.file][0]).filter(k => regMemory[this.file][0][k] === value);

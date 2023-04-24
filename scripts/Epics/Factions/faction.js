@@ -117,18 +117,6 @@ export function get({ name, id, player }) {
         u0: members.find(m => m.role === 'owner')
     };
 }
-export function readProperty({ name, id, player } = {}, property) {
-    const realID = find({ name, id, player });
-    if (!realID)
-        return;
-    return Database.register(realID, 'FTN').read(property);
-}
-export function writeProperty({ name, id, player } = {}, key, value) {
-    const realID = find({ name, id, player });
-    if (!realID)
-        return;
-    Database.register(realID, 'FTN').write(key, value);
-}
 export function getRole(player, db) {
     const realID = find({ player });
     if (!realID)

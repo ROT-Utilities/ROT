@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { MinecraftEnchantmentTypes } from "@minecraft/server";
@@ -21,16 +21,15 @@ import { metricNumbers } from "../../Papers/paragraphs/ConvertersParagraphs.js";
 import { confirmForm } from "../../Papers/paragraphs/ExtrasParagraphs.js";
 import { getItemData } from "../../Papers/paragraphs/itemParagraph.js";
 import { MessageForm, ModalForm } from "../../Papers/FormPaper.js";
-import { getPlayerKey } from "./client.js";
 import { serverPosts } from "./server.js";
 import { AH } from "./main.js";
 import Database from "../../Papers/DatabasePaper.js";
 //The form that opens when you are creating a auction
 export async function createPost(player, from, data) {
     //Checks if the player has reached their max auction limit
-    const playerKey = getPlayerKey(player, 'AHP', 'AHP');
-    if (playerKey.length >= AH.config.maxClientPosts)
-        player.send('§c§lError §7-§r You have reached the maximum amount of auctions you can have running at time. Remove one auctions or wait for the item to be auctioned off.');
+    const clientPosts = AH.client.read(player.rID, 'AHP');
+    if (clientPosts.length >= AH.config.maxClientPosts)
+        return player.send('§c§lError §7-§r You have reached the maximum amount of auctions you can have running at time. Remove one auctions or wait for the item to be auctioned off.');
     const allPosts = Database.allTables('AHP');
     //Checks if we reached the max auctions
     if (allPosts?.length >= AH.config.maxPosts)
@@ -41,14 +40,14 @@ export async function createPost(player, from, data) {
         return player.send('§c§lError §7-§r You have to be holding the item you want to put up for auction.');
     //Checks if the item ID is not on the list of prohibited items
     if (AH.config.bannedItems.includes(item.typeId))
-        player.send('§c§lError §7-§r You cannot put this item up for auction XD');
-    // @ts-ignore Confirm create auction screen
-    const itemName = item.typeId.match(/:([\s\S]*)$/)[1].replace(/[\W_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), itemData = getItemData(item);
+        return player.send('§c§lError §7-§r You cannot put this item up for auction XD');
     // @ts-ignore Check enchants
     if (itemData.enchantments?.some(e => e.level > MinecraftEnchantmentTypes[e.id].maxLevel))
         return player.send('§c§lError §7-§r This item has illegal enchantment values.');
-    if (!(await confirmForm(player, '§8§lAuction off this item?§r', `Do you really want to put §l§c${item.amount} ${itemName}(s)§r up for auction? You can only auction the items you are holding!`)))
-        return AH.AHP.read(player.rID).length ? from(player, AH.openAH) : AH.openAH(player);
+    // @ts-ignore Confirm create auction screen
+    const itemName = item.typeId.match(/:([\s\S]*)$/)[1].replace(/[\W_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), itemData = getItemData(item);
+    if (!(await confirmForm(player, '§8§lAuction off this item?§r', `Do you really want to put §l§c${item.amount} ${itemName}(s)§r up for auction? You can only auction the items you are holding.`)))
+        return clientPosts.length ? from(player, AH.openAH) : AH.openAH(player);
     //Creating the auction Modalform
     const auction = new ModalForm(), oldData = data ?? {};
     auction.setTitle('§a§lCreate auction§r');
@@ -61,7 +60,7 @@ export async function createPost(player, from, data) {
     auction.addToggle('Silent auction? (hide name)', oldData?.silent ?? false);
     auction.send(player, async (res) => {
         if (res.canceled)
-            return AH.AHP.read(player.rID).length ? from(player, AH.openAH) : AH.openAH(player);
+            return clientPosts.length ? from(player, AH.openAH) : AH.openAH(player);
         const newData = { name: res.formValues[0], price: res.formValues[1], close: res.formValues[2], silent: res.formValues[3] };
         const money = Number(res.formValues[1]);
         //Checks if money is NaN

@@ -13,8 +13,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Moisesgamingtv9. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you
 */
 {
@@ -22,7 +22,7 @@ Thank you
 	"minecraft:entity": {
 		"description": {
 			"identifier": "rot:chunk",
-			"is_spawnable": true,
+			"is_spawnable": false,
 			"is_summonable": true,
 			"is_experimental": false
 		},

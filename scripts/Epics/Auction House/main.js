@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from "@minecraft/server";
@@ -26,30 +26,24 @@ import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
 import quick from "../../quick.js";
 //Add a next page to the AH or a show limiter
-//Add a profile page
 //Add a search button 
 //Add a way to buyout auctions
 export const AH = {
     config: quick.epics['Auction House'],
-    AHR: Database.registry('AHreturn'),
-    AHP: Database.register('playerPosts', 'AH'),
-    AHB: Database.register('playerBids', 'AH'),
-    AHC: Database.register('playerCollect', 'AH'),
-    AHS: Database.register('playerSold', 'AH'),
     //Main form / home page
     openAH(player) {
         player.removeTag(AH.config.tag);
-        player.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${AH.AHR.read(player.rID)}`);
-        AH.AHR.delete(player.rID);
+        player.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${AH.client.AHR.read(player.rID)}`);
+        AH.client.AHR.delete(player.rID);
         const choose = new ActionForm();
         choose.setTitle('§8§lAuction House§r');
         choose.setBody('§7Welcome to Black Hat Matt\'s auction house!§r');
-        choose.addButton('All auctions', 'textures/rot/forms/serverAuctions.png');
-        choose.addButton('Your auctions', 'textures/rot/forms/clientAuctions.png');
-        choose.addButton('Your bids', `textures/rot/forms/bid${bidPING(player) ? 'PING' : ''}.png`);
-        choose.addButton('Collect items & money', `textures/rot/forms/win${collectPING(player) ? 'PING' : ''}.png`);
-        player.isAdmin && choose.addButton('§cDev menu§r', 'textures/rot/forms/dev.png');
-        choose.addButton('§4§lClose§r', 'textures/rot/forms/leave.png');
+        choose.addButton('All auctions', 'textures/ROT/forms/Auction House/serverAuctions.png');
+        choose.addButton('Your auctions', 'textures/ROT/forms/Auction House/clientAuctions.png');
+        choose.addButton('Your bids', `textures/ROT/forms/Auction House/bid${bidPING(player) ? 'PING' : ''}.png`);
+        choose.addButton('Collect items & money', `textures/ROT/forms/Auction House/win${collectPING(player) ? 'PING' : ''}.png`);
+        player.isAdmin && choose.addButton('§cDev menu§r', 'textures/ROT/forms/Auction House/dev.png');
+        choose.addButton('§4§lClose§r', 'textures/ROT/forms/Auction House/leave.png');
         choose.send(player, res => {
             if (res.selection === 0)
                 return serverPosts(player, AH.openAH);
@@ -79,6 +73,7 @@ export const AH = {
             amount: data.a,
             price: bidData?.[bidKeys[0]]?.[1] ?? data.p,
             startPrice: data.p,
+            buyout: data.o,
             time: data.t,
             creator: { id: data.c[0], name: data.c[1], silent: Boolean(data.c[2]) },
             bidData: data?.b ?? {},
@@ -117,6 +112,8 @@ export const AH = {
             Object.assign(update, { b: data.bidData });
         if (data.hasOwnProperty('startPrice'))
             Object.assign(update, { p: data.startPrice });
+        if (data.hasOwnProperty('buyout'))
+            Object.assign(update, { o: data.buyout });
         if (data.hasOwnProperty('time'))
             Object.assign(update, { t: data.time });
         if (data.hasOwnProperty('creator'))
@@ -134,7 +131,7 @@ export const AH = {
      * @param {writeData} data Additional data
      */
     publishPost(player, item, data) {
-        const date = numberToHex(new Date().getTime() + (data.time * 3.6e+6)), ahp = AH.AHP.read(player.rID) || [];
+        const date = numberToHex(new Date().getTime() + (data.time * 3.6e+6));
         AH.updatePost(date, {
             name: data.name,
             itemName: data.itemName,
@@ -144,8 +141,7 @@ export const AH = {
             creator: [player.rID, player.name, data.silent],
             enchants: item?.enchantments?.map(e => [e.id, e.level]) ?? []
         });
-        ahp.push(date);
-        AH.AHP.write(player.rID, ahp);
+        AH.client.update(player.rID, 'AHP', 'add', date);
         Database.register(date, 'AHI').write('', item);
         return date;
     },
@@ -159,10 +155,45 @@ export const AH = {
     errorForm(player, from, error) {
         const err = new MessageForm();
         err.setTitle('§4§lOops!§r');
-        err.setBody(`§4${error ? error : 'Oops!§c A error occurred and we are usable to parse formData'}. §r§4Please try again or come back later.\n\nIf you are seeing error again please report it to a Administrator. Thank you!§r`);
+        err.setBody(`§4${error || 'Oops!§c A error occurred and we are usable to parse formData'}. §r§4Please try again or come back later.\n\nIf you are seeing error again please report it to a Administrator. Thank you!§r`);
         err.setButton1('§e§lTry again§r');
         err.setButton2('§4§lClose§r');
         err.send(player, res => res.selection && from(player, AH.openAH));
+    },
+    reg: {
+        AHP: ['AHP', Database.registry('AH:AHP')],
+        AHB: ['AHP', Database.registry('AH:AHB')],
+        AHC: ['AHC', Database.registry('AH:AHC')],
+        AHS: [undefined, Database.registry('AH:AHS')]
+    },
+    client: {
+        AHR: Database.registry('AH:AHR'),
+        read(rID, key) {
+            let value = AH.reg[key][1].allKeys().find(k => k.startsWith(rID));
+            if (!value)
+                return [];
+            return JSON.parse(value.replace(rID, '').replace(/\$-\$/g, '"')).filter(e => {
+                if (!AH.reg[key][0] || Database.has(e, key))
+                    return true;
+                AH.client.update(rID, key, 'remove', e);
+            });
+        },
+        update(rID, key, operation, value) {
+            let regKey = AH.reg[key][1].allKeys().find(k => k.startsWith(rID)), data;
+            if (regKey) {
+                AH.reg[key][1].delete(regKey);
+                data = JSON.parse(regKey.replace(rID, '').replace(/\$-\$/g, '"'));
+            }
+            else
+                data = [];
+            if (operation === 'add')
+                !data.includes(value) && data.push(value);
+            else
+                data.splice(data.indexOf(value), 1);
+            if (!data.length)
+                return;
+            AH.reg[key][1].write(`${rID}${JSON.stringify(data).replace(/"/g, '$-$')}`, 0);
+        }
     }
 };
 //Opening methods

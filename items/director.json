@@ -1,0 +1,67 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer),
+Aex66 (Developer)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |   
+ |    |   \/    |    \    |   
+ |____|_  /\_______  /____|   
+        \/         \/         
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
+Thank you!
+*/
+{
+  "format_version": "1.16.100",
+  "minecraft:item": {
+    "description": {
+      "identifier": "rot:director",
+      "category": "equipment"
+    },
+    "components": {
+      "minecraft:icon": {
+        "texture": "rot:director"
+      },
+      "minecraft:display_name": {
+        "value": "§b§lDirector Mode"
+      },
+      "minecraft:hand_equipped": true,
+      "minecraft:max_stack_size": 1,
+      "minecraft:allow_off_hand": false,
+      "minecraft:render_offsets": {
+        "main_hand": {
+          "first_person": {
+            "position": [
+              0.405,
+              -0.145,
+              -0.8
+            ],
+            "scale": [
+              0.002,
+              0.002,
+              0.002
+            ]
+          },
+          "third_person": {
+            "position": [
+              0.13,
+              0.76,
+              -0.5
+            ],
+            "scale": [
+              0.003,
+              0.003,
+              0.003
+            ]
+          }
+        }
+      }
+    },
+    "events": {}
+  }
+}

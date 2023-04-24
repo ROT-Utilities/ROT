@@ -21,13 +21,16 @@ Thank you
 	"format_version": "1.16.0",
 	"minecraft:entity": {
 		"description": {
-			"identifier": "rot:ah",
+			"identifier": "rot:hologram",
 			"is_spawnable": true,
 			"is_summonable": true,
 			"is_experimental": false
 		},
 		"component_groups": {},
 		"components": {
+			"minecraft:scale": {
+				"value": 0.0
+			},
             "minecraft:nameable": {
                 "alwaysShow": true,
                 "allowNameTagRenaming": true
@@ -41,15 +44,15 @@ Thank you
 				]
 			},
 			"minecraft:collision_box": {
-				"width": 0.6,
-				"height": 1.8
+				"width": 0.3,
+				"height": 0.3
 			},
 			"minecraft:physics": {
-				"has_collision": true,
-				"has_gravity": true
+				"has_collision": false,
+				"has_gravity": false
 			},
 			"minecraft:health": {
-				"value": 20
+				"value": 1
 			}
 		}
 	}

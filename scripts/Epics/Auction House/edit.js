@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { ActionForm, MessageForm, ModalForm } from "../../Papers/FormPaper.js";
@@ -28,11 +28,11 @@ import Player from "../../Papers/PlayerPaper.js";
 export function editPost(player, date, from) {
     const dev = new ActionForm();
     dev.setTitle('§c§lEdit Menu§r');
-    dev.addButton('§7§lEdit auction§r', 'textures/rot/forms/change2.png');
-    dev.addButton('§c§lReturn item§r', 'textures/rot/forms/block.png');
-    dev.addButton('§e§lEnd auction now§r', 'textures/rot/forms/ultra.png');
-    dev.addButton('§c§lDelete auction§r', 'textures/rot/forms/garbage.png');
-    dev.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
+    dev.addButton('§7§lEdit auction§r', 'textures/ROT/forms/Auction House/change2.png');
+    dev.addButton('§c§lReturn item§r', 'textures/ROT/forms/Auction House/block.png');
+    dev.addButton('§e§lEnd auction now§r', 'textures/ROT/forms/Auction House/ultra.png');
+    dev.addButton('§c§lDelete auction§r', 'textures/ROT/forms/Auction House/garbage.png');
+    dev.addButton('§c§lBack§r', 'textures/ROT/forms/Auction House/leave.png');
     dev.send(player, async (res) => {
         if (res.selection === 4 || res.canceled)
             return openPost(player, date, from);
@@ -87,7 +87,7 @@ export function editPost(player, date, from) {
                             lastBidder.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${post.bids[0]}`);
                         }
                         else if (post.bidID[0])
-                            AH.AHR.write(post.bidID[0], (AH.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
+                            AH.client.AHR.write(post.bidID[0], (AH.client.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
                         Object.assign(update, { bidData: {} });
                     }
                     Object.assign(update, { startPrice: startPrice });
@@ -122,7 +122,7 @@ export function editPost(player, date, from) {
             return openPost(player, date, from);
         //Return item
         if (res.selection === 1) {
-            const id = numberToHex(new Date().getTime() + (AH.config.maxHoldTime * 3.6e+6)), success = new MessageForm(), db = Database.register(id, 'AH.AHC');
+            const id = numberToHex(new Date().getTime() + (AH.config.maxHoldTime * 3.6e+6)), success = new MessageForm(), db = Database.register(id, 'AHC');
             if (post.name !== post.itemName)
                 db.write('n', post.name);
             db.writeMany({
@@ -132,13 +132,13 @@ export function editPost(player, date, from) {
                 p: post.startPrice,
                 c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
             });
-            AH.AHC.write(player.rID, [AH.AHC.read(player.rID) || [], id].flat());
+            AH.client.update(player.rID, 'AHC', 'add', id);
             Database.drop(date, 'AHP');
             const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: AH.config.npcName });
             if (lastBidder)
                 lastBidder.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${post.bids[0]}`);
             else if (post.bidID[0])
-                AH.AHR.write(post.bidID[0], (AH.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
+                AH.client.AHR.write(post.bidID[0], (AH.client.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
             success.setTitle('§a§lCongratulations :)!§r');
             success.setBody(`§l§aSuccess!§r This item will be returned.`);
             success.setButton1('§aOk!§r');
@@ -147,7 +147,7 @@ export function editPost(player, date, from) {
         }
         //End auction now
         if (res.selection === 2) {
-            const id = numberToHex(new Date().getTime() + (AH.config.maxHoldTime * 3.6e+6)), db = Database.register(id, 'AH.AHC'), target = post.bidID[0] ? post.bidID[0] : post.creator.id;
+            const id = numberToHex(new Date().getTime() + (AH.config.maxHoldTime * 3.6e+6)), db = Database.register(id, 'AHC'), target = post.bidID[0] ? post.bidID[0] : post.creator.id;
             if (post.name !== post.itemName)
                 db.write('n', post.name);
             if (post.bidID[0])
@@ -159,7 +159,7 @@ export function editPost(player, date, from) {
                 p: post.startPrice,
                 c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
             });
-            AH.AHC.write(target, [AH.AHC.read(target) || [], id].flat());
+            AH.client.update(target, 'AHC', 'add', id);
             Database.drop(date, 'AHP');
             const success = new MessageForm();
             success.setTitle('§4§lCongratulations :)!§r');

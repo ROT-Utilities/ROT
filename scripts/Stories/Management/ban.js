@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
@@ -40,6 +40,6 @@ cmd.playerType('player', (plr, val, args) => {
     // };
     // if(val.database) val.write('ban', banData); else db.write(val.name, banData);
     // Server.broadcast(`§6${val.name}§e was banned for §6${banData.date.join('§e, §6')}§e${banData.res ? ` for "§6${banData.res}§r§e"` : ''}!`);
-}, false, 'time', null, false);
+}, false, 'time', { self: false }, false);
 cmd.timeType('time', null, 'reason', null, false);
 cmd.unknownType('reason', null);

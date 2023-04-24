@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world, system } from '@minecraft/server';
@@ -40,8 +40,6 @@ world.events.worldInitialize.subscribe(() => {
     startup();
 });
 //Add system to [$rank] so people can do ranks as they wish
-//Make a warp command
-//Fix chat colors
 //Finish ban command
 //Add the rate limiter
 //Add a way to turn off commands
@@ -87,7 +85,5 @@ export async function startup() {
         }
     });
     //Dev stuff
-    // import('./Stories/test.js');
     // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
 }
-//Put "Welcome back" in members story

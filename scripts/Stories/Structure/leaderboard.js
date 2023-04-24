@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
@@ -44,12 +44,12 @@ cmd.staticType('create', 'create', (player, value, args) => {
         db.write('l', (db.has('l') ? db.read('l') : 0) + 1);
         world.events.entitySpawn.unsubscribe(rabbit);
     });
-    player.dimension.spawnEntity('minecraft:rabbit', player.toLocation());
+    player.dimension.spawnEntity('rot:hologram', player.toLocation());
     player.send(`Successfully created a leaderboard displaying the objective "§6${value}§r§e".§r`);
 }, 'length', true, false);
 cmd.numberType('length', null, null, { min: 4, max: 16 });
 cmd.staticType('delete', 'delyeet', (plr) => {
-    let entity = Array.from(plr.dimension.getEntities({ type: "minecraft:rabbit", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
+    let entity = Array.from(plr.dimension.getEntities({ type: 'rot:hologram', tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
     if (!entity)
         return plr.error('Unable to locate a leaderboard within the radius of §a2§e blocks. Maybe move a bit closer?§r');
     const obj = entity.getTags().find(tag => tag.startsWith('o:')).replace('o:', ''), db = Database.register(obj, 'ROTLB');
@@ -60,16 +60,16 @@ cmd.staticType('delete', 'delyeet', (plr) => {
     entity.kill();
 }, null, false);
 cmd.bridge('set', 'set', ['long', 'head']);
-cmd.dynamicType('long', ['length', 'long', 'l'], (plr, val, args) => {
-    let entity = Array.from(plr.dimension.getEntities({ type: "minecraft:rabbit", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
+cmd.dynamicType('long', ['length', 'long', 'l'], (plr, _, args) => {
+    let entity = Array.from(plr.dimension.getEntities({ type: "rot:hologram", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
     if (!entity)
         return plr.error('Unable to locate a leaderboard within the radius of §a2§e blocks. Maybe move a bit closer?§r');
     entity.removeTag(entity.getTags().find(tag => tag.startsWith('l:')));
     entity.addTag(`l:${args[0]}`);
     plr.send(`Successfully changed the length of the leaderboard "§c${entity.getTags().find(tag => tag.startsWith('o:')).replace('o:', '')}§r§e".`);
 }, 'length');
-cmd.dynamicType('head', ['head', 'header', 'h'], (plr, val, args) => {
-    let entity = Array.from(plr.dimension.getEntities({ type: "minecraft:rabbit", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
+cmd.dynamicType('head', ['head', 'header', 'h'], (plr, _, args) => {
+    let entity = Array.from(plr.dimension.getEntities({ type: "rot:hologram", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
     if (!entity)
         return plr.error('Unable to locate a leaderboard within the radius of §a2§e blocks. Maybe move a bit closer?§r');
     entity.removeTag(entity.getTags().find(tag => tag.startsWith('h:')));
@@ -79,7 +79,7 @@ cmd.dynamicType('head', ['head', 'header', 'h'], (plr, val, args) => {
 cmd.unknownType('name');
 setTickInterval(() => {
     const leaderboards = {};
-    Array.from(world.getDimension('overworld').getEntities({ type: 'minecraft:rabbit', tags: ['ROTLB'] })).forEach(entity => {
+    Array.from(world.getDimension('overworld').getEntities({ type: 'rot:hologram', tags: ['ROTLB'] })).forEach(entity => {
         const objective = entity.getTags().find(t => t.startsWith('o:')).replace('o:', '');
         if (!objective || !world.scoreboard.getObjective(objective))
             entity.nameTag = `§c§lObjective: "${objective || null}" has no records§r`;
@@ -106,7 +106,6 @@ function getLeaderboard(objective) {
         Object.assign(after, { [connected[player.name].rID]: Player.getScore(player, objective) });
     if (Object.keys(after).every(a => before.hasOwnProperty(a) && before[a] === after[a]))
         return;
-    console.warn('Pointed');
     const writeMany = {}, leaderboard = [];
     db.deleteMany(Object.keys(before).filter(id => !after.hasOwnProperty(id)));
     Object.entries(after).sort((a, b) => b[1] - a[1]).slice(0, 32).forEach((p, i) => {

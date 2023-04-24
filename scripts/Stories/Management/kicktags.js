@@ -12,56 +12,51 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
 import { setTickInterval, sleep } from '../../Papers/paragraphs/ExtrasParagraphs.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
-import Database from '../../Papers/DatabasePaper.js';
-const db = Database.register('server');
+import Server from '../../Papers/ServerPaper.js';
+import Player from '../../Papers/PlayerPaper.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
-    name: 'kicktags',
+    name: 'kt',
     description: 'This command will kick any players from the game with a certain tag',
-    aliases: ['ktag', 'ktags', 'kicktag'],
+    aliases: ['ktag', 'ktags', 'kicktag', 'kicktags'],
     category: 'Management',
     admin: true,
-    developers: ['Aex66']
+    developers: ['Aex66', 'Mo9ses']
 });
 cmd.startingArgs(['set', 'toggle', 'msg']);
-cmd.unknownType('any', null);
+cmd.unknownType('any', null, 1, false);
 cmd.staticType('set', 'set', (plr, tag) => {
-    if (['v'].includes(tag))
-        return plr.send('§cYou cannot put this tag', 'KICK TAGS');
-    plr.send(`The ROT's kick tag is now "§c${tag}§r§7"!`, 'KICK TAGS');
-    db.write('KTTAG', tag);
+    if (tag === quick.adminTag)
+        return plr.error('You cannot put this tag');
+    plr.send(`The kick tag is now "§c${tag}§r§e".`);
+    Server.db.write('KT', tag);
 });
 cmd.staticType('toggle', 'toggle', (plr) => {
-    if (db.read('KTT'))
-        db.write('KTT', 0);
-    else
-        db.write('KTT', 1);
-    return plr.send(`Kick tags is now §c${db.read('KTT') ? 'on' : 'off'}§7!`, 'KICK TAGS');
+    Server.db.write('KTT', !Boolean(Server.db.read('KTT')));
+    plr.send(`Kick tags is now §${Server.db.read('KTT') ? 'con' : 'aoff'}§e.`);
 }, null, false);
 cmd.dynamicType('msg', ['message', 'msg', 'text', 'mess', 'reason', 'reasons'], (plr, _, args) => {
-    let reason = args[0].join(' ');
-    db.write('KTMsg', reason);
-    return plr.send(`The new kick message is now "§c${reason}§r§7"!`, 'KICK TAGS');
+    const reason = args[0];
+    Server.db.write('KTM', reason);
+    plr.send(`The new kick message is now "§c${reason}§r§e".`);
 }, 'any');
 setTickInterval(async () => {
-    if (!db.read('KTT'))
+    if (!Server.db.read('KTT'))
         return;
-    const tag = db.read('KTTAG');
-    let reason = db.read('KTMsg');
+    const tag = Server.db.read('KT'), reason = Server.db.read('KTM');
     if (!tag)
         return;
-    if (!reason)
-        reason = 'No reason!';
     for (const player of world.getPlayers()) {
-        if (!player.hasTag(tag))
+        if (!player.hasTag(tag) || Player.isAdmin(player))
             continue;
-        world.getDimension('overworld').runCommandAsync(`kick ${player.name} ${reason}`);
-        await sleep(1);
+        player.dimension.runCommandAsync(`kick "${player.name}" ${reason ?? 'No reason!'}`);
+        await sleep(10);
     }
-}, 10);
+}, 25, false);

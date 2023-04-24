@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
@@ -21,6 +21,7 @@ import { setTickInterval } from '../../Papers/paragraphs/ExtrasParagraphs.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
+import quick from '../../quick.js';
 const db = Database.register('ranks');
 const cmd = Commands.create({
     name: 'rank',
@@ -63,5 +64,8 @@ cmd.staticType('set', 'set', (plr, val, args) => {
 cmd.dynamicType('prefix', ['prefix', 'pre', 'before'], null, 'any');
 cmd.staticType('name', 'rename', null, 'any', false);
 cmd.dynamicType('color', ['color', 'namecolor'], null, 'any');
-cmd.unknownType('any');
-setTickInterval(() => world.getAllPlayers().forEach(player => player.nameTag = `§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player)}`), 20);
+cmd.unknownType('any', null, 255, true);
+setTickInterval(() => world.getAllPlayers().forEach(player => {
+    const health = player.getComponent('health').current;
+    player.nameTag = `§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player)}${quick.displayHealth ? `\n§r§4❤ §c${~~(health)}` : ''}`;
+}), 20);

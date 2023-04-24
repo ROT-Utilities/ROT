@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docServer.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world, Player as IPlayer, GameMode } from '@minecraft/server';
@@ -174,7 +174,7 @@ class PlayerPaper {
             name: name,
             memory: this.memory(plr),
             player: this.playerType(player ?? name),
-            rID: connected[name].rID[2],
+            rID: connected[name]?.rID,
             send: (msg, frm) => {
                 plr.runCommandAsync('playsound random.toast @s ~~~ 1 0.5');
                 plr.sendMessage({ 'rawtext': [{ 'text': `§l§6${frm ? `${frm} ` : from ? `${from} ` : ''}§6>>§r§e ` }, { 'text': msg }] });

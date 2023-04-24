@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
@@ -30,17 +30,19 @@ world.events.beforeChat.subscribe(data => {
         data.cancel = true;
         if (!data.message.startsWith(quick.prefix)) {
             const player = Player.playerType(data.sender, { from: 'CHAT' }), time = new Date();
-            listeners.forEach(event => {
+            for (const event of listeners) {
                 if (event[0] !== 'beforeChat')
-                    return;
+                    continue;
                 try {
                     event[1]({ message: data.message, player: player });
                 }
-                catch { }
-                ;
-            });
+                catch {
+                    return data.cancel = true;
+                }
+            }
+            ;
             if (data.message.startsWith(quick.prefix))
-                return player.error(Lang.cmd.wrongPrefix);
+                return player.error(Lang.cmd.wrongPrefix(quick.prefix));
             if (data.sender.hasTag('mute'))
                 return player.error(Lang.chat.mutted);
             if (data.message.trim() === '')

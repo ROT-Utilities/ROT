@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { MinecraftBlockTypes } from "@minecraft/server";
@@ -27,7 +27,7 @@ export const quick = {
     chatRanks: true,
     rankStyle: '',
     defaultRank: '§bMember',
-    ROTDiscord: 'https://discord.gg/2ADBWfcC6S',
+    YourDiscord: 'https://discord.gg/2ADBWfcC6S',
     discord: 'https://discord.gg/2ADBWfcC6S',
     adminTag: 'v',
     hideAdminTag: false,
@@ -38,31 +38,27 @@ export const quick = {
     rateLimit: 2,
     defaultNameColor: '§e',
     defaultChatColor: '§f',
-    hiveArrow: true,
+    displayHealth: true,
     bannedPlayers: {},
     toggle: {
         Server: {
             broadcast: true,
             clearchat: true,
             scoreboard: true,
+            members: true,
             spawn: true,
+            warp: true,
         },
         Management: {
+            ban: true,
             rank: true,
             tac: true,
+            inventory: true,
+            kicktags: true,
         },
         Structure: {
             leaderboard: true,
-        },
-        Escape: {
-        // feed: true,
-        // heal: true,
-        // home: true,
-        // kill: true,
-        // repair: true,
-        // sudo: true,
-        // top: true,
-        // vanish: true,
+            text: true
         },
         Fantasy: {
             rickroll: true,
@@ -142,6 +138,7 @@ export const quick = {
                 MinecraftBlockTypes.shulkerBox.id,
                 MinecraftBlockTypes.undyedShulkerBox.id
             ],
+            blockObi: false,
             chat: true, //If true your faction name will appear in chat
         }
     },

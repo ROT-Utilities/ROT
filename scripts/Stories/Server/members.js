@@ -1,4 +1,27 @@
+/*
+ROT Developers and Contributors:
+Moises (OWNER/CEO/Developer),
+Aex66 (Developer)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+__________ ___________________
+\______   \\_____  \__    ___/
+ |       _/ /   |   \|    |
+ |    |   \/    |    \    |
+ |____|_  /\_______  /____|
+        \/         \/
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
+Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
+Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
+Thank you!
+*/
+import { metricNumbers } from '../../Papers/paragraphs/ConvertersParagraphs.js';
+import { addListener } from '../../Tales/main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
+import Database from '../../Papers/DatabasePaper.js';
+import Player from '../../Papers/PlayerPaper.js';
+const nameReg = Database.registry('PLRname');
 const cmd = Commands.create({
     name: 'members',
     description: 'List all of the members that have joined the server before',
@@ -7,14 +30,15 @@ const cmd = Commands.create({
     category: 'Server',
     developers: ['Mo9ses']
 });
+cmd.startingArgs('page', false);
+cmd.callback((_, args) => !args.length && cmd.force('page', 1));
 cmd.numberType('page', (plr, page) => {
-    // try {
-    //     //@ts-ignore
-    //     const allMembers = new Array(Math.ceil(members.allKeys().length / 30)).fill().map(() => members.allKeys().splice(0, 30)), allMembersPage = allMembers[page - 1].map(id => {
-    //         return `Member name:§6 ${members.read(id).playerName}§c, Join date:§6 ${new Date(members.read(id).joinDate).toString()}§c, MEMBER ID:§6 ${id}§c,`;
-    //     }).join('\n')
-    //     plr.send(`§aCongratulations§7! This server has §c${metricNumbers(members.read('memberCount'))}§7 members! Here is a list of them:\n§c${allMembersPage.slice(0, allMembersPage.length - 1)}.\n§7Page §c${page}§6/§4${allMembers.length}§7!`)
-    // } catch {
-    //    plr.error(`Page "§4${page}§r§c" does not exist!`);
-    // }
+    const key = Object.entries(nameReg.getCollection()), len = key.length, memberList = new Array(Math.ceil(key.length / 35)).fill(0).map(_ => key.splice(0, 35)), members = [];
+    if (!memberList[page - 1]?.[0])
+        return plr.error('Unable to find this page');
+    for (const member of memberList[page - 1])
+        members.push(`§eMember name: §a${member[0].slice(1)}§e, join date: §a${new Date().toString()}§e, member ID:§a ${member[1]}`);
+    plr.send(`§aCongratulations§e! This server has §c${metricNumbers(len)}§e members! Here is a list of them:\n${members.join('\n')}\n§ePage §a${page}§e/§a${memberList.length}§e.`);
 });
+addListener('playerConnect', plr => Player.send(plr, `Welcome back §c${plr.name}§e!`, 'ROT'));
+//Use this for the ban command as well

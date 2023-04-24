@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { ActionForm, MessageForm } from "../../Papers/FormPaper.js";
@@ -28,10 +28,10 @@ export function managementForm(player) {
     const dev = new ActionForm();
     dev.setTitle('§c§lManagement Page§r');
     dev.setBody('§c§cWelcome to the management page!§r');
-    dev.addButton('§c§lReturn all items§r', 'textures/rot/forms/block.png');
-    dev.addButton('§e§lEnd all auctions§r', 'textures/rot/forms/ultra.png');
-    dev.addButton('§8§lDelete all auctions§r', 'textures/rot/forms/garbage.png');
-    dev.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
+    dev.addButton('§c§lReturn all items§r', 'textures/ROT/forms/Auction House/block.png');
+    dev.addButton('§e§lEnd all auctions§r', 'textures/ROT/forms/Auction House/ultra.png');
+    dev.addButton('§8§lDelete all auctions§r', 'textures/ROT/forms/Auction House/garbage.png');
+    dev.addButton('§c§lBack§r', 'textures/ROT/forms/Auction House/leave.png');
     dev.send(player, async (res) => {
         if (res.selection === 3 || res.canceled)
             return AH.openAH(player);
@@ -54,13 +54,13 @@ export function managementForm(player) {
                     p: post.startPrice,
                     c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
                 });
-                AH.AHC.write('AHC', [AH.AHC.read(player.rID) || [], id].flat());
+                AH.client.update(player.rID, 'AHC', 'add', id);
                 Database.drop(p, 'AHP');
                 const lastBidder = Player.getBy({ id: post.bidID[0] }, { from: AH.config.npcName });
                 if (lastBidder)
                     lastBidder.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${post.bids[0]}`);
                 else if (post.bidID[0])
-                    AH.AHR.write(post.bidID[0], (AH.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
+                    AH.client.AHR.write(post.bidID[0], (AH.client.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
             });
             const success = new MessageForm();
             success.setTitle('§4§lCongratulations :)!§r');
@@ -87,7 +87,7 @@ export function managementForm(player) {
                     p: post.startPrice,
                     c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
                 });
-                AH.AHC.write(target, [AH.AHC.read(target) || [], id].flat());
+                AH.client.update(target, 'AHC', 'add', id);
                 Database.drop(p, 'AHP');
             });
             const success = new MessageForm();
@@ -98,11 +98,10 @@ export function managementForm(player) {
             return success.send(player, res => res.selection && AH.openAH(player));
         }
         //Delete all auctions
-        AH.AHP.clear();
-        AH.AHB.clear();
-        AH.AHC.clear();
-        AH.AHS.clear();
-        AH.AHR.clear();
+        AH.reg.AHP[1].clear();
+        AH.reg.AHB[1].clear();
+        AH.reg.AHC[1].clear();
+        AH.reg.AHS[1].clear();
         Database.allTables('AHI').forEach(i => Database.drop(i, 'AHI'));
         Database.allTables('AHP').forEach(i => Database.drop(i, 'AHP'));
         Database.allTables('AHC').forEach(i => Database.drop(i, 'AHC'));

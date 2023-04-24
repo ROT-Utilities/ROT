@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { ActionForm } from "../../Papers/FormPaper.js";
@@ -37,10 +37,10 @@ export async function serverPosts(player, from) {
     allPosts.forEach(a => {
         const post = AH.getPost(a);
         if (post)
-            ah.addButton(`§c§l${post.name.length > 10 ? post.name.slice(0, 12) + '...' : post.name}\n§6${post.bids[0] ? 'Highest Bid' : 'Starting price'}: §a$${metricNumbers(post.price)}§r`, `textures/rot/forms/random${~~(Math.random() * 8) + 1}.png`);
+            ah.addButton(`§c§l${post.name.length > 10 ? post.name.slice(0, 12) + '...' : post.name}\n§6${post.bids[0] ? 'Highest Bid' : 'Starting price'}: §a$${metricNumbers(post.price)}§r`, `textures/ROT/forms/Auction House/random${~~(Math.random() * 8) + 1}.png`);
     });
-    ah.addButton('§a§lRefresh§r', 'textures/rot/forms/refresh.png');
-    ah.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
+    ah.addButton('§a§lRefresh§r', 'textures/ROT/forms/Auction House/refresh.png');
+    ah.addButton('§c§lBack§r', 'textures/ROT/forms/Auction House/leave.png');
     ah.send(player, res => {
         if (res.canceled)
             return AH.openAH(player);

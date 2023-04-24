@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from "@minecraft/server";
@@ -26,7 +26,7 @@ import quick from "../../quick.js";
 let color = 0;
 const config = quick.epics['Auction House'];
 try {
-    world.scoreboard.addObjective(config.obj, config.obj);
+    world.scoreboard.addObjective(config.obj, '');
 }
 catch { }
 ;
@@ -80,20 +80,19 @@ export function checkPosts() {
             c: [post.creator.id, post.creator.name, post.creator.silent ? 1 : 0]
         });
         const target = post.bidID[0] ? post.bidID[0] : post.creator.id;
-        AH.AHC.write(target, [AH.AHC.read(target) || [], id].flat());
+        AH.client.update(target, 'AHC', 'add', id);
         Database.drop(p, 'AHP');
     });
     //Trying to give people items if nobody accepts it, or delete it
     Database.allTables('AHC').forEach(c => {
         if (hexToNumber(c) > date)
             return;
-        const collect = Database.register(c, 'AHC').getCollection(), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6)), ahc = AH.AHC.read(collect.w[0]);
-        if (!collect.w) {
+        const collect = Database.register(c, 'AHC').getCollection(), id = numberToHex(new Date().getTime() + (config.maxHoldTime * 3.6e+6));
+        if (!collect.w?.[0]) {
             Database.drop(collect.d, 'AHI');
             return Database.drop(c, 'AHC');
         }
-        ahc.splice(ahc.indexOf(c), 1);
-        AH.AHC.write(collect.w[0], ahc);
+        AH.client.update(collect.w[0], 'AHC', 'remove', c);
         const db = Database.register(id, 'AHC');
         if (collect.hasOwnProperty('n'))
             db.write('n', collect.n);
@@ -104,7 +103,7 @@ export function checkPosts() {
             p: collect.p,
             c: collect.c
         });
-        AH.AHC.write(collect.c[0], [AH.AHC.read(collect.c[0]) || [], id].flat());
+        AH.client.update(collect.c[0], 'AHC', 'add', id);
         Database.drop(c, 'AHC');
     });
 }

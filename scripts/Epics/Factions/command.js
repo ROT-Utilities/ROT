@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
@@ -26,12 +26,13 @@ import { fac } from './main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
+import Server from '../../Papers/ServerPaper.js';
 import quick from '../../quick.js';
 const config = quick.epics.Factions;
 const cmd = Commands.create({
-    name: 'ftn',
+    name: 'f',
     description: 'Factions commands!',
-    aliases: ['f', 'fac', 'faction', 'factions'],
+    aliases: ['ftn', 'fac', 'faction', 'factions'],
     category: 'Epics',
     developers: ['Mo9ses', 'Aex66']
 });
@@ -39,7 +40,7 @@ cmd.startingArgs(['create', 'delete', 'claim', 'set', 'home', 'info', 'members',
 cmd.staticType('create', 'create', (plr, name) => createFaction(plr, name));
 cmd.staticType('delete', 'remove', (plr, _, args) => {
     const name = fac.names.find(fac.player.read(plr.rID));
-    if (args[0][0] !== name)
+    if (args[0]?.[0] !== name)
         return plr.send(`Please type your faction's name (k sensitive) at the end to confirm removal. `);
     deleteFaction(plr);
 }, 'any', false, false);
@@ -51,11 +52,15 @@ cmd.bridge('set', 'set', ['set:home', 'set:description', 'set:permissions'], plr
     cmd.end();
 });
 cmd.dynamicType('set:home', ['home', 'h', 'spawn', 's'], plr => {
-    const db = Database.register(fac.player.read(plr.rID, true), 'FTN');
+    const db = Database.register(fac.player.read(plr.rID, true), 'FTN'), spawn = Server.db.read('spawn');
+    ;
     if (getRole(plr, db) === 'member')
         return plr.error('You do not have permission to execute this command. You need to either be the owner or a admin of this faction.');
-    //Add min max spawn
-    const loc = [parseInt(`${plr.location.z}`), parseInt(`${plr.location.y}`), parseInt(`${plr.location.z}`), plr.dimension.id];
+    if (spawn?.length && Array.from(plr.dimension.getEntities({ type: 'minecraft:player', location: { x: spawn[0], y: spawn[1], z: spawn[2] }, maxDistance: config.radius })).some(p => p.id === plr.id))
+        return plr.error(`You have to be further than §c${config.radius}§e blocks from spawn.`);
+    if (spawn?.length && !Array.from(plr.dimension.getEntities({ type: 'minecraft:player', location: { x: spawn[0], y: spawn[1], z: spawn[2] }, maxDistance: config.maxRadius })).some(p => p.id === plr.id))
+        return plr.error(`You have to be within §c${config.maxRadius}§e blocks from spawn.`);
+    const loc = [parseInt(`${plr.location.x}`), parseInt(`${plr.location.y}`), parseInt(`${plr.location.z}`), plr.dimension.id];
     db.write('s', loc);
     plr.send(`The faction spawn point has been set to §a${loc.join('§e, §a')}§e.`);
 });
@@ -142,11 +147,13 @@ cmd.staticType('join', 'join', (plr, name) => {
     const id = fac.names.read(name, true), db = Database.register(id, 'FTN');
     if (!db.read('o') && !fac.invites.some(i => i[0] === id && i[2] === plr.name))
         return plr.error(`You must have an invitation to join §6${name}§e.`);
-    let u = 0;
-    for (u > 300; u++;)
-        if (db.has(`u${u}`))
-            continue;
-    if (u === 0 || db.has(`u${u}`))
+    let trying = true, u = 1;
+    while (trying)
+        if (!db.has(`u${u}`))
+            trying = false;
+        else
+            u < 300 ? u++ : trying = false;
+    if (u > 299 || db.has(`u${u}`))
         return plr.error('Unable to find you a player slot. Please report this error.');
     world.getAllPlayers().forEach(p => String(fac.player.read(connected[p.name].rID)) === id && Player.send(p, `Hey! §c${plr.name}§e just joined your faction.`));
     db.write(`u${u}`, [plr.rID, plr.name, 0, plr.getScore(config.powerObj), new Date().getTime()]);

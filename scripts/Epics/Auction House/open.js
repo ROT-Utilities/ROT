@@ -12,8 +12,8 @@ __________ ___________________
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 © Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
-Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
+Website: https://www.rotmc.ml
 Thank you!
 */
 import { ActionForm, ModalForm } from "../../Papers/FormPaper.js";
@@ -56,14 +56,14 @@ export function openPost(player, date, from) {
         '\n§rWant the item? Place a bid below!'
     ].join(''));
     if (post.bidID[0] === player.rID)
-        view.addButton('§4§lRemove bid§r', 'textures/rot/forms/garbage.png');
+        view.addButton('§4§lRemove bid§r', 'textures/ROT/forms/Auction House/garbage.png');
     else if (post.creator.id === player.rID)
-        view.addButton('§9§lEdit Auction§r', 'textures/rot/forms/change.png');
+        view.addButton('§9§lEdit Auction§r', 'textures/ROT/forms/Auction House/change.png');
     else
-        view.addButton('§6§lBid!§r', 'textures/rot/forms/bid.png');
-    view.addButton('§c§lBack§r', 'textures/rot/forms/leave.png');
+        view.addButton('§6§lBid!§r', 'textures/ROT/forms/Auction House/bid.png');
+    view.addButton('§c§lBack§r', 'textures/ROT/forms/Auction House/leave.png');
     if (player.isAdmin && post.creator.id !== player.rID)
-        view.addButton('§4§lDev menu§r', 'textures/rot/forms/dev.png');
+        view.addButton('§4§lDev menu§r', 'textures/ROT/forms/Auction House/dev.png');
     view.send(player, async (res) => {
         if (res.selection === 1)
             return from(player, AH.openAH);
@@ -88,7 +88,7 @@ export function openPost(player, date, from) {
                 lastBidder.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${post.bids[1]}`);
             }
             //Deletes player from post
-            AH.updatePost(date, { bidData: removeBid(date, post, player), removedIDs: [post.removedIDs, player.rID].flat() });
+            AH.updatePost(date, { bidData: removeBid(date, post, player), removedIDs: post.removedIDs.concat(player.rID) });
             return openPost(player, date, from);
         }
         //Add bid screen
@@ -135,17 +135,14 @@ function addBid(date, post, player, sent, silent) {
         lastBidder.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     }
     else if (post.bidID[0])
-        AH.AHR.write(post.bidID[0], (AH.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
-    if (!AH.AHB.read(player.rID)?.includes(date))
-        AH.AHB.write(player.rID, [AH.AHB.read(player.rID) || [], date].flat());
+        AH.client.AHR.write(post.bidID[0], (AH.client.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
+    AH.client.update(player.rID, 'AHB', 'add', date);
     delete post.bidData[player.rID];
     return Object.assign(post.bidData, { [player.rID]: [player.name, sent, silent ? 1 : 0] });
 }
 function removeBid(date, post, player) {
-    const clientBids = AH.AHB.read(player.rID);
     player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
-    clientBids.splice(clientBids.indexOf(date), 1);
-    AH.AHB.write(player.rID, clientBids);
+    AH.client.update(player.rID, 'AHB', 'remove', date);
     delete post.bidData[player.rID];
     return post.bidData;
 }
