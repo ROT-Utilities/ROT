@@ -146,7 +146,7 @@ export class CommandPaper {
                 left = left.replace(`${num}`, '').trim();
             }
             if (loc.length === 3)
-                return { aRN: argTypes['loc'], tV: { x: loc[0], y: loc[1], z: loc[2] }, nA: left.split(' ') };
+                return { aRN: argTypes['loc'], tV: { x: loc[0], y: loc[1], z: loc[2] }, nA: left.length ? left.split(' ') : [] };
         }
         if (allTypes.includes('num') && !isNaN(Number(args[0])) && (cmd.aR[argTypes['num']].tV?.float ? true : !`${Number(args[0])}`.includes('.')))
             return { aRN: argTypes['num'], tV: Number(args[0]), nA: args.slice(1) };

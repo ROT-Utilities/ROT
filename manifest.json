@@ -1,7 +1,7 @@
 {
 	"format_version": 2,
 	"header": {
-		"name": "§e§lROT V3.1.20§r",
+		"name": "§e§lROT V3.1.25§r",
 		"description": "§6Welcome to §a§lROT§r§6! §a§lROT§r§6 is a Minecraft Bedrock addon designed to make §lYOUR§r§6 Minecraft server §6§lBETTER§r§6! Remember to use \"§7!help§6\"!§r",
 		"uuid": "75f662a5-8dbe-485e-af0e-41b29c8f1de1",
 		"version": [
@@ -42,7 +42,7 @@
 	"dependencies": [
 		{
 			"uuid": "b26a4d4c-afdf-4690-88f8-931846312678",
-			"version": "1.1.0-beta"
+			"version": "1.2.0-beta"
 		},
 		{
 			"uuid": "2bd50a27-ab5f-4f40-a596-3641627c635e",

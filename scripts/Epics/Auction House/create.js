@@ -41,11 +41,12 @@ export async function createPost(player, from, data) {
     //Checks if the item ID is not on the list of prohibited items
     if (AH.config.bannedItems.includes(item.typeId))
         return player.send('§c§lError §7-§r You cannot put this item up for auction XD');
+    const itemData = getItemData(item);
     // @ts-ignore Check enchants
     if (itemData.enchantments?.some(e => e.level > MinecraftEnchantmentTypes[e.id].maxLevel))
         return player.send('§c§lError §7-§r This item has illegal enchantment values.');
     // @ts-ignore Confirm create auction screen
-    const itemName = item.typeId.match(/:([\s\S]*)$/)[1].replace(/[\W_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), itemData = getItemData(item);
+    const itemName = item.typeId.match(/:([\s\S]*)$/)[1].replace(/[\W_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     if (!(await confirmForm(player, '§8§lAuction off this item?§r', `Do you really want to put §l§c${item.amount} ${itemName}(s)§r up for auction? You can only auction the items you are holding.`)))
         return clientPosts.length ? from(player, AH.openAH) : AH.openAH(player);
     //Creating the auction Modalform
@@ -94,7 +95,7 @@ export async function createPost(player, from, data) {
             silent: res.formValues[3]
         });
         //Taking item and removing money
-        inventory.clearItem(player.selectedSlot);
+        inventory.setItem(player.selectedSlot);
         player.runCommandAsync(`scoreboard players remove @s "${AH.config.obj}" ${keepersKeep}`);
         const success = new MessageForm();
         success.setTitle('§a§lCongratulations!§r');
