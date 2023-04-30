@@ -1,4 +1,4 @@
-# ROT V3.1.20
+# ROT V3.1.25
 
 Welcome to ROT. ROT is one of the bset, if not, the best Minecraft Bedrock server essential addon to use when you are creating a Minecraft server, realm, or world.
 
