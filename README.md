@@ -15,6 +15,6 @@ Upon applying the pack and joining the world the operator should run the command
 
 See all commands in-game by running **!help** in chat. Commands you don't have permission for won't show up.
 ```bash
--help <page: number>
--help <command: string>
+!help <page: number>
+!help <command: string>
 ```
