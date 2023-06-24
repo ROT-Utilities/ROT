@@ -1,21 +1,20 @@
 /*
 ROT Developers and Contributors:
 Moises (OWNER/CEO/Developer),
-notbeer (ROT's base code),
-baboonie (!inven code)
+Aex66 (Developer)
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 __________ ___________________
 \______   \\_____  \__    ___/
- |       _/ /   |   \|    |   
- |    |   \/    |    \    |   
- |____|_  /\_______  /____|   
-        \/         \/         
+ |       _/ /   |   \|    |
+ |    |   \/    |    \    |
+ |____|_  /\_______  /____|
+        \/         \/
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-© Copyright 2023 all rights reserved by Moisesgamingtv9. Do NOT steal, copy the code, or claim it as yours!
+© Copyright 2023 all rights reserved by Mo9ses. Do NOT steal, copy the code, or claim it as yours!
 Please message Mo9ses#8583 on Discord, or join the ROT discord: https://discord.com/invite/2ADBWfcC6S
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Website: https://www.rotmc.ml
-Thank you
+Thank you!
 */
 {
 	"format_version": "1.16.0",
@@ -32,6 +31,7 @@ Thank you
 			}
 		},
 		"components": {
+			"minecraft:type_family": { "family": [ "rot" ] },
 			"minecraft:timer": {
                 "time": [ 5.0, 5.0 ],
                 "looping": false,

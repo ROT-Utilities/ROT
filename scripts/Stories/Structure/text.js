@@ -36,6 +36,6 @@ cmd.dynamicType('spawn', 'spawn', (plr, _, args) => {
 }, 'any');
 cmd.dynamicType('kill', 'kill', (plr, _, args) => {
     let radius = args[0] ?? 1;
-    plr.send(`Killing all floating text in the radius of §c${radius}§7 blocks from your current loction!`, 'TEXT');
+    plr.send(`Killing all floating text in the radius of §c${radius}§e blocks from your current loction!`, 'TEXT');
     plr.runCommandAsync(`kill @e[type=rot:hologram,r=${radius},tag=!ROTLB]`);
 }, 'anynumber', true, undefined, false);

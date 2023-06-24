@@ -135,6 +135,7 @@ cmd.dynamicType('invite', 'invite', async (plr, _, args) => {
         return plr.error('The faction you are in has reached the maximum amount of players.');
     if (fac.player.read(args[0].rID))
         return plr.error('This player is already in a faction.');
+    //                  ^^ error here.
     plr.send(`A invite has been sent to §c${args[0].name}§e.`);
     args[0].send(`§c${plr.name}§e sent you a invite to join their faction. Type "§g${quick.prefix}f join ${db.read('n')}§e" in chat to join.`, 'FTN');
     fac.invites.push([fac.player.read(plr.rID, true), plr.name, args[0].name]);

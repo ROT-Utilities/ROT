@@ -39,8 +39,9 @@ export const quick = {
     defaultChatColor: '§f',
     displayHealth: true,
     bannedPlayers: {},
+    dimNotAllowedLoc: { loc: { x: 10, y: -60, z: 10 }, dim: 'overworld' },
     maxHomes: 5,
-    homeDim: ['minecraft:overworld', 'minecraft:the_end', 'minecraft:nether'],
+    homeDims: ['minecraft:overworld', 'minecraft:the_end', 'minecraft:nether'],
     enchantmentList: ['aqua_affinity', 'bane_of_arthropods', 'binding', 'blast_protection', 'channeling', 'depth_strider', 'efficiency', 'feather_falling', 'fire_aspect', 'fire_protection', 'flame', 'fortune', 'frost_walker', 'impaling', 'infinity', 'knockback', 'looting', 'loyalty', 'luck_of_the_sea', 'lure', 'mending', 'multishot', 'piercing', 'power', 'projectile_protection', 'protection', 'punch', 'quick_charge', 'respiration', 'riptide', 'sharpness', 'silk_touch', 'smite', 'soul_speed', 'swift_sneak', 'thorns', 'unbreaking', 'vanishing'],
     toggle: {
         Server: {
@@ -50,6 +51,8 @@ export const quick = {
             members: true,
             spawn: true,
             warp: true,
+            tps: true,
+            lockdimension: true,
         },
         Management: {
             ban: true,
@@ -152,6 +155,19 @@ export const quick = {
         'beforeChat',
         'playerConnect'
     ],
+    version: 'ROT',
+    developerCommands: false,
+    developerLogging: true,
+    logs: {
+        errors: [],
+        tps: [],
+        epics: [],
+        commands: [],
+        commandLogs: [],
+        connectedLogs: [],
+        intervalAmount: 0,
+        intervalTicks: []
+    },
     useQuick: true
 };
 export default quick;

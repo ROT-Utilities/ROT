@@ -80,6 +80,7 @@ export function setTickInterval(handler, timeout, firstTick, ...args) {
         }
         catch (e) {
             console.warn(e + e.stack);
+            // Quick.logs.errors.push(`${e} : ${e.stack}`);
         }
     return tickIntervalID;
 }
@@ -133,3 +134,20 @@ export function compass(angle) {
         face += 'East';
     return face.trim();
 }
+/**
+ * Grammarize Minecraft point
+ * @param text The item?
+ * @returns {string}
+ */
+export function grammarText(text) {
+    return text.match(/:([\s\S]*)$/)[1].replace(/[\W_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+export let tps = 20;
+let lastTick = Date.now(), timeArray = [];
+system.runInterval(() => {
+    if (timeArray.length === 20)
+        timeArray.shift();
+    timeArray.push(Math.round(1000 / (Date.now() - lastTick) * 100) / 100);
+    tps = timeArray.reduce((a, b) => a + b) / timeArray.length;
+    lastTick = Date.now();
+});

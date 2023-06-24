@@ -37,8 +37,7 @@ cmd.staticType('set', 'set', (plr, homeName) => {
         return plr.error('You reached the max home limit: ' + quick.maxHomes);
     if (pHomes.length && pHomes.some(x => x.split('$-$')[0] === homeName))
         return plr.error('You already have a home with that name!');
-    //@ts-ignore
-    if (!quick.homeDim.includes(plr.dimension.id))
+    if (!quick.homeDims.includes(plr.dimension.id))
         return plr.error('You cannot have a home in this dimension!');
     home.write(`${homeName}$-$${~~(plr.location.x)}$-$${~~(plr.location.y)}$-$${~~(plr.location.z)}$-$${plr.dimension.id}$-$${plr.rID}`, Number(plr.rID));
     plr.send(`You have successfully created §a${homeName}§e home at ${~~(plr.location.x)} ${~~(plr.location.y)} ${~~(plr.location.z)}`);
@@ -62,7 +61,6 @@ cmd.staticType('tp', 'teleport', (plr, homeName) => {
         return plr.error('You dont have a home with that name!');
     const sp = val.split('$-$');
     const x = Number(sp[1]), y = Number(sp[2]), z = Number(sp[3]), d = sp[4];
-    //@ts-ignore
-    plr.teleport({ x, y, z }, world.getDimension(d), plr.getRotation().x, plr.getRotation().y);
+    plr.teleport({ x, y, z }, { dimension: world.getDimension(d), rotation: { x: plr.getRotation().x, y: plr.getRotation().y } });
     plr.send(`You have successfully teleported to your home §a${homeName}`);
 });

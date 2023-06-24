@@ -18,8 +18,8 @@ Thank you!
 */
 import { world } from '@minecraft/server';
 import { setTickInterval } from './Paragraphs/ExtrasParagraphs.js';
-import Player from './PlayerPaper.js';
 import Database from './DatabasePaper.js';
+import Player from './PlayerPaper.js';
 /*
  * ROT's command queue system
 */

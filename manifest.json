@@ -1,40 +1,40 @@
 {
 	"format_version": 2,
 	"header": {
-		"name": "§e§lROT V3.1.50§r",
+		"name": "§e§lROT V3.1.90§r",
 		"description": "§6Welcome to §a§lROT§r§6! §a§lROT§r§6 is a Minecraft Bedrock addon designed to make §lYOUR§r§6 Minecraft server §6§lBETTER§r§6! Remember to use \"§7!help§6\"!§r",
-		"uuid": "2549553e-e295-4167-aa20-f63ce1001542",
+		"uuid": "4890ad67-7a51-4345-9425-e98bf3a116b9",
 		"version": [
 			3,
 			1,
-			20
+			90
 		],
 		"min_engine_version": [
 			1,
-			19,
-			51
+			20,
+			0
 		]
 	},
 	"modules": [
 		{
 			"description": "§6Welcome to §a§lROT§r§c! §a§lROT§r§6 is a Minecraft Bedrock addon designed to make §lYOUR§r§6 Minecraft server §6§lBETTER§r§6! Remember to use \"§7!help§6\"!§r",
 			"type": "data",
-			"uuid": "8a054b99-cd0e-4132-9dd2-a712c5a8998e",
+			"uuid": "ad5cce6b-4aa1-49cd-970a-53853b826fa5",
 			"version": [
 				3,
 				1,
-				20
+				90
 			]
 		},
 		{
 			"description": "§c§lROT Gametest Modifier. Remember to use §7!help§r",
 			"type": "script",
 			"language": "javascript",
-			"uuid": "54c8deab-6a7b-4ae5-9d21-eb1654af5341",
+			"uuid": "ca6fc623-459c-407c-996e-4d49013e3dbc",
 			"version": [
 				3,
 				1,
-				20
+				90
 			],
 			"entry": "scripts/main.js"
 		}

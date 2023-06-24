@@ -16,7 +16,7 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { system, world } from '@minecraft/server';
+import { world } from '@minecraft/server';
 import { setTickInterval } from '../../Papers/Paragraphs/ExtrasParagraphs.js';
 import { metricNumbers } from '../../Papers/Paragraphs/ConvertersParagraphs.js';
 import { connected } from '../../Tales/playerConnect.js';
@@ -35,18 +35,18 @@ const cmd = Commands.create({
 cmd.startingArgs(['create', 'delete', 'set']);
 cmd.staticType('create', 'create', (player, value, args) => {
     Server.runCommand(`scoreboard objectives add "${value}" dummy`);
-    system.runTimeout(() => {
-        const rabbit = world.afterEvents.entitySpawn.subscribe(async ({ entity }) => {
-            entity.addTag('ROTLB');
-            entity.addTag(`o:${value}`);
-            entity.addTag(`l:${args[0] ? args[0] : 10}`);
-            entity.addTag(`h:§4§l${value.toUpperCase()}§r§c LEADERBOARD§r`);
-            const db = await Database.register(value, 'ROTLB');
-            db.write('l', (db.has('l') ? db.read('l') : 0) + 1);
-            world.afterEvents.entitySpawn.unsubscribe(rabbit);
-        });
+    const hologram = world.afterEvents.entitySpawn.subscribe(async ({ entity }) => {
+        if (entity.typeId !== 'rot:hologram')
+            return;
+        entity.addTag('ROTLB');
+        entity.addTag(`o:${value}`);
+        entity.addTag(`l:${args[0] ? args[0] : 10}`);
+        entity.addTag(`h:§4§l${value.toUpperCase()}§r§c LEADERBOARD§r`);
+        const db = await Database.register(value, 'ROTLB');
+        db.write('l', (db.has('l') ? db.read('l') : 0) + 1);
+        world.afterEvents.entitySpawn.unsubscribe(hologram);
     });
-    player.runCommandAsync('summon rot:hologram "§4§lLoading..." ~~~');
+    player.dimension.spawnEntity('rot:hologram', player.location);
     player.send(`Successfully created a leaderboard displaying the objective "§6${value}§r§e".§r`);
 }, 'length', true, false);
 cmd.numberType('length', null, null, { min: 4, max: 16 });
@@ -59,7 +59,7 @@ cmd.staticType('delete', 'delyeet', async (plr) => {
     db.write('l', db.read('l') - 1);
     if (!db.read('l'))
         Database.drop(obj, 'ROTLB');
-    entity.kill();
+    entity.triggerEvent('rot:despawn');
 }, null, false);
 cmd.bridge('set', 'set', ['long', 'head']);
 cmd.dynamicType('long', ['length', 'long', 'l'], (plr, _, args) => {
@@ -71,13 +71,14 @@ cmd.dynamicType('long', ['length', 'long', 'l'], (plr, _, args) => {
     plr.send(`Successfully changed the length of the leaderboard "§c${entity.getTags().find(tag => tag.startsWith('o:')).replace('o:', '')}§r§e".`);
 }, 'length');
 cmd.dynamicType('head', ['head', 'header', 'h'], (plr, _, args) => {
+    console.warn(args);
     let entity = Array.from(plr.dimension.getEntities({ type: "rot:hologram", tags: ['ROTLB'], maxDistance: 2, location: plr.toLocation() }))[0];
     if (!entity)
         return plr.error('Unable to locate a leaderboard within the radius of §a2§e blocks. Maybe move a bit closer?§r');
     entity.removeTag(entity.getTags().find(tag => tag.startsWith('h:')));
-    entity.addTag(`h:${args[0].join(' ')}`);
+    entity.addTag(`h:${args[0]?.join(' ') ?? `§4§l${entity.getTags().find(tag => tag.startsWith('o:')).toUpperCase().slice(2)}§r§c LEADERBOARD§r`}`);
     plr.send(`Successfully changed the heading of the leaderboard "§c${entity.getTags().find(tag => tag.startsWith('o:')).replace('o:', '')}§r§e".`);
-}, 'name', false);
+}, 'name');
 cmd.unknownType('name');
 setTickInterval(() => {
     const leaderboards = {};

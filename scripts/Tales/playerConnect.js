@@ -20,7 +20,7 @@ import { world } from '@minecraft/server';
 import { ID, setTickInterval } from '../Papers/Paragraphs/ExtrasParagraphs.js';
 import { listeners } from './main.js';
 import Database from '../Papers/DatabasePaper.js';
-import Player from '../Papers/PlayerPaper.js';
+import quick from '../quick.js';
 export const connected = {};
 export let nameReg, dateReg;
 (async function () {
@@ -29,7 +29,12 @@ export let nameReg, dateReg;
     dateReg = await Database.registry('PLRdate');
     setTickInterval(() => {
         const keys = Object.keys(connected);
-        keys.forEach(p => connected[p].release && connected[p].release < Date.now() && delete connected[p]);
+        keys.forEach(p => {
+            if (!connected[p]?.hasOwnProperty('release'))
+                return delete connected?.[p];
+            if (connected[p].release !== 0 && connected[p].release < Date.now())
+                delete connected[p];
+        });
         world.getAllPlayers().filter(p => !keys.includes(p.name)).forEach(p => join(p));
     }, 25, false);
 })();
@@ -38,7 +43,7 @@ export let nameReg, dateReg;
  * @param {player} player The player
  */
 function join(player) {
-    if (!player)
+    if (!player?.nameTag)
         return;
     let id = world.scoreboard.getObjective('PLRid').getScores().find(p => p.participant.displayName === player.name)?.score;
     if (!id) {
@@ -49,10 +54,14 @@ function join(player) {
         player.runCommandAsync(`scoreboard players set @s PLRid ${id}`);
         dateReg.write(Date.now(), id);
     }
-    else
-        nameReg.delete(nameReg.find(id));
+    else {
+        const find = nameReg.find(id);
+        if (find)
+            nameReg.delete(find);
+    }
     nameReg.write(`$${player.name}`, id);
     connected[player.name] = { memory: {}, rID: String(id), release: 0 };
+    quick.logs.connectedLogs.push(connected[player.name]);
     listeners.forEach(event => {
         if (event[0] !== 'playerConnect')
             return;
@@ -62,8 +71,6 @@ function join(player) {
         catch { }
         ;
     });
-    if (Player.isAdmin(player))
-        return;
 }
 world.afterEvents.playerLeave.subscribe(data => leave(data.playerName));
 /**
@@ -71,6 +78,8 @@ world.afterEvents.playerLeave.subscribe(data => leave(data.playerName));
  * @param name Name?
  */
 function leave(name) {
+    if (!connected?.[name]?.release)
+        return;
     connected[name].release = Date.now() + 3600000;
     listeners.forEach(event => {
         if (event[0] !== 'playerDisconnect')

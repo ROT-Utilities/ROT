@@ -397,7 +397,7 @@ class database {
      * @returns {this}
      */
     delete(key) {
-        delete memory[this.fullName][key];
+        delete memory?.[this.fullName]?.[key];
         let length = world.scoreboard.getObjective(this.fullName).getScores().filter(p => p.participant.displayName.startsWith(key)).length + 1;
         for (let l = 1; l < length; l++)
             Server.queueCommand(`scoreboard players reset "${key}=${l}" "${this.fullName}"`);

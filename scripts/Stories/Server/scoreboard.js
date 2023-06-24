@@ -145,7 +145,7 @@ system.runInterval(() => {
                     board.match(/(?<=\(score:).+?(?=\))/g).map((obj) => board = board.replace(`(score:${obj})`, Player.getScore(p, obj) ? metricNumbers(Player.getScore(p, obj)) : 0));
                 if (/(?<=\(tag:).+?(?=\))/.test(board))
                     board.match(/(?<=\(tag:).+?(?=\))/g).map((tag) => board = board.replace(`(tag:${tag})`, Array.from(world.getPlayers()).filter(p => p.hasTag(tag)).map(p => p?.name)?.length ? Array.from(world.getPlayers()).filter(p => p.hasTag(tag)).map(p => p?.name).join('§r§7, ') : ''));
-                Server.runCommand(`titleraw "${p.name}" actionbar {"rawtext":[{"text":${JSON.stringify(board)}}]}`);
+                Server.runCommand(`titleraw "${p.name}" title {"rawtext":[{"text":${JSON.stringify(board)}}]}`);
             }
         });
     });

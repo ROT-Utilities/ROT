@@ -16,10 +16,11 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
+import { system, world } from '@minecraft/server';
 import { MS, timeRegex } from '../Paragraphs/ConvertersParagraphs.js';
 import { staticBook, staticValues } from './argumentTypes.js';
 import { ActionForm } from '../FormPaper.js';
+// import Server from '../ServerPaper.js';
 import Player from '../PlayerPaper.js';
 import lang from '../LangPaper.js';
 import quick from '../../quick.js';
@@ -202,6 +203,7 @@ export class CommandPaper {
      * @returns {void}
      */
     run(cmd, player, args) {
+        quick.logs.commandLogs.push([player?.name, player?.rID, cmd?.name, args]);
         if (!cmd)
             return player.error(lang.cmd.unknown(this.prefix, player.isAdmin), 'ROT');
         if (!cmd.rM.cM)
@@ -259,15 +261,17 @@ export class CommandPaper {
             for (let i = 0; i < keys.length; i++) {
                 if (Object.keys(this.endQueue).includes(cmd.name))
                     return this.endQueue[cmd.name] && this.endQueue[cmd.name](player);
+                let value = [values].flat(1);
                 if (cmd.aR[keys[i]].cB)
-                    cmd.aR[keys[i]].cB(player, cls[keys[i]], values);
-                if (Object.keys(this.forceQueue).includes(cmd.name))
-                    cmd.aR[this.forceQueue[cmd.name][0]].cB && cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], values);
+                    system.run(() => cmd.aR[keys[i]].cB(player, cls[keys[i]], value));
+                if (Object.keys(this.forceQueue).includes(cmd.name) && cmd.aR[this.forceQueue[cmd.name][0]].cB)
+                    system.run(() => cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], value));
                 values.splice(0, 1);
             }
         }
         catch (e) {
             console.warn(`${e}:${e.stack}`);
+            quick.logs.errors.push(`${e} : ${e.stack}`);
         }
         delete this.forceQueue[cmd.name];
         delete this.endQueue[cmd.name];
@@ -319,6 +323,7 @@ class command {
         this.handle = handle;
         this.name = information.name;
         this.index = this.handle.list.findIndex(c => c.name === this.name);
+        quick.logs.commands.push(information.name);
     }
     /**
      * Runs a function if the command is execute successfully (Before the arg callbacks)

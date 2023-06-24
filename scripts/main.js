@@ -47,9 +47,23 @@ export async function startup() {
     if (quick.useQuick && Server.db.has('quick'))
         Object.entries(Server.db.read('quick')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
     updateLang();
-    await quick.tales.forEach(t => import(`./Tales/${t}.js`).catch(e => console.warn(`Failed to import tale "${e}"     ${e}: ${e.stack}`)));
-    await Object.keys(quick.epics).forEach((e) => quick.epics[e].enabled && import(`./Epics/${e}/${quick.epics[e].entry}.js`).catch(e => console.warn(`Failed to import epic "${e}"     ${e}: ${e.stack}`)));
-    await Object.keys(quick.toggle).forEach((c) => Object.keys(quick.toggle[c]).forEach((cmd) => quick.toggle[c][cmd] && import(`./Stories/${c}/${cmd}.js`).catch(e => console.warn(`Failed to import command "${cmd}" from category "${c}"     ${e}: ${e.stack}`))));
+    await quick.tales.forEach(t => import(`./Tales/${t}.js`).catch(e => {
+        console.warn(`Failed to import tale "${t}"     ${e}: ${e.stack}`);
+        quick.logs.errors.push(`${e} : ${e.stack}`);
+    }));
+    await Object.keys(quick.epics).forEach((E) => {
+        if (!quick.epics[E].enabled)
+            return;
+        quick.logs.epics.push(E);
+        import(`./Epics/${E}/${quick.epics[E].entry}.js`).catch(e => {
+            console.warn(`Failed to import epic "${E}"     ${e}: ${e.stack}`);
+            quick.logs.errors.push(`${e} : ${e.stack}`);
+        });
+    });
+    await Object.keys(quick.toggle).forEach((c) => Object.keys(quick.toggle[c]).forEach((cmd) => quick.toggle[c][cmd] && import(`./Stories/${c}/${cmd}.js`).catch(e => {
+        console.warn(`Failed to import command "${cmd}" from category "${c}"     ${e}: ${e.stack}`);
+        quick.logs.errors.push(`${e} : ${e.stack}`);
+    })));
     //Checks ROT command arguments for imperfections 
     Commands.list.forEach((cmd, i) => {
         try {
@@ -76,9 +90,15 @@ export async function startup() {
         catch (e) {
             console.warn(e);
             Commands.list.splice(i, 1);
+            quick.logs.errors.push(`${e} : ${e.stack}`);
         }
     });
-    //Dev stuff
-    import('./Stories/test.js');
     // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
+    //Dev stuff
+    if (quick.developerLogging)
+        import('./Stories/!test/log.js');
+    if (!quick.developerCommands)
+        return;
+    import('./Stories/!test/editstick.js');
+    import('./Stories/!test/test.js');
 }
