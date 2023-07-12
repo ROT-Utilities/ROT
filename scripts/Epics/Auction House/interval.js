@@ -16,12 +16,11 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from "@minecraft/server";
-import { setTickInterval } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
+import { system, world } from "@minecraft/server";
 import { hexToNumber, numberToHex } from "../../Papers/Paragraphs/ConvertersParagraphs.js";
 import { AH } from "./main.js";
-import Player from "../../Papers/PlayerPaper.js";
 import Database from "../../Papers/DatabasePaper.js";
+import Player from "../../Papers/PlayerPaper.js";
 import quick from "../../quick.js";
 let color = 0;
 const config = quick.epics['Auction House'];
@@ -30,9 +29,16 @@ try {
 }
 catch { }
 ;
-setTickInterval(() => {
+system.runInterval(() => {
+    if (system.currentTick < 20)
+        return;
     if (config.tag.length)
-        world.getAllPlayers().forEach(player => player.hasTag(config.tag) && AH.openAH(Player.playerType(player, { from: config.npcName, sound: false })));
+        world.getAllPlayers().forEach(player => {
+            if (!player.hasTag(config.tag) || !Player.isConnected(player))
+                return;
+            player.removeTag(config.tag);
+            AH.openAH(Player.playerType(player, { from: config.npcName, sound: false }));
+        });
     if (!config.coolHouseNames)
         return;
     if (color > config.houseName.length)
@@ -47,7 +53,7 @@ setTickInterval(() => {
     name = '§l' + config.color1 + name.join('');
     for (const dim of ['overworld', 'nether', 'the end'])
         Array.from(world.getDimension(dim).getEntities({ type: 'rot:ah' })).forEach(entity => entity.nameTag = name);
-}, 5, false);
+}, 5);
 /** Identifers
  * AHP {postData}
  * AHI {itemData}
@@ -56,7 +62,7 @@ setTickInterval(() => {
 */
 //States: (collect items, collect failed auction items), (collect old bid money, collect money)
 if (config.checkPosts)
-    setTickInterval(() => checkPosts(), config.checkPosts * 20, false);
+    system.runInterval(() => checkPosts(), config.checkPosts * 20);
 export function checkPosts() {
     if (!AH?.client?.AHR)
         return;

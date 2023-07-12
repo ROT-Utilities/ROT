@@ -78,7 +78,6 @@ export const quick = {
         },
         ROT: {
             //ui: true,
-            //quick: true,
             help: true //Please keep this command at the bottom
         }
     },
@@ -123,7 +122,7 @@ export const quick = {
             powerObj: 'power',
             autoTag: 'automap',
             spawn: [0, 200, 0],
-            radius: 300,
+            radius: 1,
             maxRadius: 10000,
             autoTimer: 15,
             veiwFaction: true,
@@ -149,6 +148,36 @@ export const quick = {
             ],
             blockObi: false,
             chat: true, //If true your faction name will appear in chat
+        },
+        "Automod": {
+            enabled: false,
+            entry: "main",
+            bypass: "c",
+            maxWarns: 3,
+            automod: {
+                crasher: true,
+                unobtainable: true,
+                block: true,
+                teleport: true,
+            },
+            protections: {
+                block: {
+                    action: 'warn' //Action that will be taken for the player; valid values: kick | warn | cancel
+                },
+                unobtainable: {
+                    action: 'kick' //Action that will be taken for the player; valid values: kick | warn | cancel
+                },
+                crasher: {
+                    action: 'kick',
+                    distance: 30000000,
+                    location: { x: 1, y: 1, z: 1 },
+                    dimension: 'overworld' //Dimension to which the player will teleport when attempting to crash (overworld | nether | the_end)
+                },
+                teleport: {
+                    action: 'cancel',
+                    skip: 'skip-teleport' //Tag required to skip this protection once
+                },
+            }
         }
     },
     tales: [

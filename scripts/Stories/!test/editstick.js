@@ -78,13 +78,11 @@ world.afterEvents.blockPlace.subscribe((res) => {
     const e = p.dimension.fillBlocks({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }, res.block.type);
     p.sendMessage(`§aFilled §c${e}§a blocks!`);
 });
-world.afterEvents.entityHit.subscribe((res) => {
-    if (!res?.hitBlock)
-        return;
-    if (!(res.entity instanceof Player))
+world.afterEvents.entityHitBlock.subscribe((res) => {
+    if (!(res.damagingEntity instanceof Player))
         return;
     const block = res.hitBlock;
-    const p = res.entity;
+    const p = res.damagingEntity;
     //@ts-ignore
     const inv = p.getComponent('inventory').container;
     const itemStack = inv.getItem(p.selectedSlot);

@@ -18,6 +18,7 @@ Thank you!
 */
 import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 import { system } from "@minecraft/server";
+import quick from "../../quick.js";
 const requests = [];
 const cmd = Commands.create({
     name: 'tpa',
@@ -38,6 +39,7 @@ cmd.staticType('accept', 'accept', (plr, val, sender) => {
         return plr.error(`§a${sender[0].name}§e has not sent you a TPA request`, 'TPA');
     sender[0].send(`Teleporting to §a${plr.name}'s§e location...`, 'TPA');
     plr.send(`You accepted §a${sender[0].name}'s §eTPA request`, 'TPA');
+    plr.addTag(quick.epics['Automod'].protections.teleport.skip);
     sender[0].teleport(plr.location, { dimension: plr.dimension, rotation: { x: plr.getRotation().x, y: plr.getRotation().y } });
     requests.splice(requests.indexOf(getRequest(sender[0], plr)));
 }, 'plr', false, true);

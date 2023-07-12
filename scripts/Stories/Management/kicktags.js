@@ -16,8 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { setTickInterval, sleep } from '../../Papers/Paragraphs/ExtrasParagraphs.js';
+import { system, world } from '@minecraft/server';
+import { sleep } from '../../Papers/Paragraphs/ExtrasParagraphs.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Server from '../../Papers/ServerPaper.js';
 import Player from '../../Papers/PlayerPaper.js';
@@ -47,16 +47,16 @@ cmd.dynamicType('msg', ['message', 'msg', 'text', 'mess', 'reason', 'reasons'], 
     Server.db.write('KTM', reason);
     plr.send(`The new kick message is now "§c${reason}§r§e".`);
 }, 'any');
-setTickInterval(async () => {
-    if (!Server.db.read('KTT'))
+system.runInterval(async () => {
+    if (!Server.db.read('KTT') || system.currentTick < 50)
         return;
     const tag = Server.db.read('KT'), reason = Server.db.read('KTM');
     if (!tag)
         return;
     for (const player of world.getPlayers()) {
-        if (!player.hasTag(tag) || Player.isAdmin(player))
+        if (!player.hasTag(tag) || !Player.isConnected(player) || Player.isAdmin(player))
             continue;
         player.dimension.runCommandAsync(`kick "${player.name}" ${reason ?? 'No reason!'}`);
         await sleep(10);
     }
-}, 25, false);
+}, 25);

@@ -16,8 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from "@minecraft/server";
-import { compass, setTickInterval } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
+import { system, world } from "@minecraft/server";
+import { compass } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import { getChunk, getOwner } from "./chunk/claim.js";
 import { fac } from "./main.js";
 import quick from "../../quick.js";
@@ -77,4 +77,8 @@ export function AsciiMap(player, size = 9) {
     map.unshift(`§6_____.[§2(${inChunk[0]}, ${inChunk[1]}) ${inChunkID ? fac.names.find(inChunkID) : 'The Wild'}§6]._____\n`);
     return map.join('');
 }
-setTickInterval(() => world.getAllPlayers().forEach(p => p.hasTag(quick.epics.Factions.autoTag) && p.sendMessage(`${AsciiMap(p)}\n§a${quick.prefix}!f n§e to stop auto mapping.`)), quick.epics.Factions.autoTimer * 20);
+system.runInterval(() => world.getAllPlayers().forEach(p => {
+    if (!p.hasTag(quick.epics.Factions.autoTag))
+        return;
+    p.sendMessage(`${AsciiMap(p)}\n§a${quick.prefix}!f n§e to stop auto mapping.`);
+}), quick.epics.Factions.autoTimer * 20);

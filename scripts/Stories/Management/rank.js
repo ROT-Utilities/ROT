@@ -16,8 +16,7 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { setTickInterval } from '../../Papers/Paragraphs/ExtrasParagraphs.js';
+import { system, world } from '@minecraft/server';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
@@ -68,7 +67,9 @@ cmd.dynamicType('prefix', ['prefix', 'pre', 'before'], null, 'any');
 cmd.staticType('name', 'rename', null, 'any', false);
 cmd.dynamicType('color', ['color', 'namecolor'], null, 'any');
 cmd.unknownType('any', null, 255, true);
-setTickInterval(() => world.getAllPlayers().forEach(player => {
-    const health = player.getComponent('health').current;
+system.runInterval(() => world.getAllPlayers().forEach(player => {
+    if (!Player.isConnected(player))
+        return;
+    const health = player.getComponent('health').currentValue;
     player.nameTag = `§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player)}${quick.displayHealth ? `\n§r§4❤ §c${~~(health)}` : ''}`;
 }), 20);

@@ -35,8 +35,8 @@ world.afterEvents.blockBreak.subscribe(res => {
     res.block.setPermutation(res.brokenBlockPermutation);
     res.player.runCommandAsync('kill @e[type=item, r=8]');
 });
-world.afterEvents.entityHit.subscribe(res => {
-    if (!res.hitBlock || !(res.entity instanceof IPlayer) || Player.getGamemode(res.entity) === 'creative')
+world.afterEvents.entityHitBlock.subscribe(res => {
+    if (!res.hitBlock || !(res.damagingEntity instanceof IPlayer) || Player.getGamemode(res.damagingEntity) === 'creative')
         return;
     if (fac.config.containers.includes(res.hitBlock.typeId))
         return;
@@ -44,12 +44,12 @@ world.afterEvents.entityHit.subscribe(res => {
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
     const owner = getOwner(chunk);
-    if (owner === `${fac.player.read(connected[res.entity.name].rID)}`)
+    if (owner === `${fac.player.read(connected[res.damagingEntity.name].rID)}`)
         return;
-    Player.send(res.entity, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
-    showBorder(res.entity, chunk, res.hitBlock.location.y, false);
-    res.entity.runCommandAsync('gamemode a').then(async () => {
+    Player.send(res.damagingEntity, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
+    showBorder(res.damagingEntity, chunk, res.hitBlock.location.y, false);
+    res.damagingEntity.runCommandAsync('gamemode a').then(async () => {
         await sleep(60);
-        res.entity.runCommandAsync('gamemode s');
+        res.damagingEntity.runCommandAsync('gamemode s');
     });
 });

@@ -21,12 +21,12 @@ Thank you!
 * @returns {string}
 * @example metricNumbers(15000);
 */
-export const metricNumbers = (value) => {
+export const metricNumbers = (value, fixed) => {
     const types = ["", "k", "M", "B", "T", "QT", "ST", "Z", "Y"], selectType = Math.log10(value) / 3 | 0;
     if (selectType == 0)
         return value;
     let scaled = value / Math.pow(10, selectType * 3);
-    return scaled.toFixed(1) + types[selectType];
+    return scaled.toFixed(fixed ?? 3) + types[selectType];
 }, 
 /**
 * Convert string to hex

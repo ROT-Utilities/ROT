@@ -16,13 +16,12 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { setTickInterval } from '../../Papers/Paragraphs/ExtrasParagraphs.js';
+import { system, world } from '@minecraft/server';
 import { metricNumbers } from '../../Papers/Paragraphs/ConvertersParagraphs.js';
 import { connected } from '../../Tales/playerConnect.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
-import Server from '../../Papers/ServerPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
+import Server from '../../Papers/ServerPaper.js';
 import Player from '../../Papers/PlayerPaper.js';
 const cmd = Commands.create({
     name: 'leaderboard',
@@ -80,7 +79,9 @@ cmd.dynamicType('head', ['head', 'header', 'h'], (plr, _, args) => {
     plr.send(`Successfully changed the heading of the leaderboard "§c${entity.getTags().find(tag => tag.startsWith('o:')).replace('o:', '')}§r§e".`);
 }, 'name');
 cmd.unknownType('name');
-setTickInterval(() => {
+system.runInterval(() => {
+    if (system.currentTick < 50)
+        return;
     const leaderboards = {};
     Array.from(world.getDimension('overworld').getEntities({ type: 'rot:hologram', tags: ['ROTLB'] })).forEach(async (entity) => {
         const objective = entity.getTags().find(t => t.startsWith('o:')).replace('o:', '');

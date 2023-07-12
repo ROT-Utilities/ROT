@@ -138,7 +138,7 @@ export class ModalForm {
      * @returns {void}
      */
     addInput(label, placeHolderText, defaultValue) {
-        this.form.textField(label, placeHolderText, defaultValue ?? '');
+        this.form.textField(label, placeHolderText ?? '', defaultValue ?? '');
     }
     /**
      * @function addDropdown Make a drop down menu to the form

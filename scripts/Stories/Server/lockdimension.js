@@ -28,8 +28,11 @@ const cmd = Commands.create({
     category: 'Server'
 });
 cmd.startingArgs(['dim']);
+let lockReg = null;
+(async function () {
+    lockReg = await Database.registry('lockDim');
+})();
 cmd.dynamicType('dim', ['the end', 'nether'], async (plr, val) => {
-    const lockReg = await Database.registry('lockDim');
     const value = lockReg.read(val) ?? 0;
     if (!value)
         lockReg.write(val, 1);
@@ -38,10 +41,11 @@ cmd.dynamicType('dim', ['the end', 'nether'], async (plr, val) => {
     plr.send(`Succesfully ${value ? 'unlocked' : 'locked'} §a${val} §edimension`);
 });
 system.runInterval(async () => {
+    if (!lockReg)
+        return;
     for (const player of world.getPlayers()) {
-        if (Player.isAdmin(player))
+        if (Player.isAdmin(player) || !player?.dimension)
             continue;
-        const lockReg = await Database.registry('lockDim');
         const val = lockReg.read(player.dimension.id.replace('minecraft:', ''));
         if (!val)
             continue;

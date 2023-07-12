@@ -19,6 +19,7 @@ Thank you!
 import { world } from '@minecraft/server';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Server from '../../Papers/ServerPaper.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'spawn',
     description: 'Tp to spawn!',
@@ -35,6 +36,7 @@ cmd.callback((plr, args) => {
         return plr.error('An error occurred while teleporting to spawn...');
     const [x, y, z, dim] = spawn;
     plr.send('Teleporting to spawn...');
+    plr.addTag(quick.epics['Automod'].protections.teleport.skip);
     plr.teleport({ x, y, z }, { dimension: world.getDimension(dim), rotation: { x: plr.getRotation().x, y: plr.getRotation().y } });
 });
 cmd.staticType('set', 'set', (plr) => {

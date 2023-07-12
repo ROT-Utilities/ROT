@@ -16,15 +16,9 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import Commands from "../../Papers/CommandPaper/CommandPaper.js";
+import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 const cmd = Commands.create({
-    name: 'test',
-    description: 'Let\'s you test a ROT command by having a AI run random operations.',
-    aliases: ['t-'],
-    category: 'Dev',
-    admin: true
-});
-cmd.startingArgs([], false);
-cmd.callback(plr => {
-    plr.send('Hi!');
+    name: 'speed',
+    description: 'Command soon for ROTJ',
+    category: 'ROT'
 });

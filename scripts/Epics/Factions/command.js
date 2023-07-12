@@ -86,6 +86,7 @@ cmd.dynamicType('home', ['home', 'spawn', 'h'], async (plr) => {
     if (!spawn.length)
         return plr.error('You faction spawn hasen\'t been set yet...');
     plr.send('You have been teleported to your faction\'s spawnpoint');
+    plr.addTag(quick.epics['Automod'].protections.teleport.skip);
     plr.teleport({ x: spawn[0], y: spawn[1], z: spawn[2] }, { dimension: world.getDimension(spawn[3]), rotation: { x: plr.getRotation().x, y: plr.getRotation().y } });
 });
 //set:name

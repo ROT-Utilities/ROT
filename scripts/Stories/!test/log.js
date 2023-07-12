@@ -16,8 +16,7 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { setTickInterval, tps } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
+import { system } from "@minecraft/server";
+import { tps } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import quick from "../../quick.js";
-setTickInterval(() => {
-    quick.logs.tps.push([`${new Date().getHours()}:${new Date().getMinutes()}`, tps.toFixed(3)]);
-}, 7200);
+system.runInterval(() => quick.logs.tps.push([`${new Date().getHours()}:${new Date().getMinutes()}`, tps.toFixed(3)]), 7200);

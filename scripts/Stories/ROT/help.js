@@ -27,7 +27,7 @@ const cmd = Commands.create({
     developers: ['Mo9ses']
 });
 cmd.startingArgs(['cmd', 'page'], false);
-cmd.callback((_, args) => !args.length && cmd.force('page', 1));
+cmd.callback((plr, args) => !args.length && cmd.force(plr, 'page', 1));
 cmd.dynamicType('cmd', [Commands.list.map(c => c.name), Commands.list.map(c => c.aliases)].flat(2), (plr, val) => {
     const cmd = Commands.list.find(c => c.name === val || c.aliases.includes(val));
     if (cmd && cmd.admin && !plr.isAdmin)

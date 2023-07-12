@@ -16,8 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world, system } from '@minecraft/server';
-system.events.beforeWatchdogTerminate.subscribe(res => res.cancel = true);
+import { world } from '@minecraft/server';
+import { sleep } from './Papers/Paragraphs/ExtrasParagraphs.js';
 import { updateLang } from './Papers/LangPaper.js';
 import Commands from './Papers/CommandPaper/CommandPaper.js';
 import Server from './Papers/ServerPaper.js';
@@ -27,24 +27,13 @@ import quick from './quick.js';
  * Main Developer: Mo9ses
  * Sub developer: Nobody!
  * Link to name: MAIN ROT
- **************************
- * Quick
- * This handles in game configuration
  */
-updateLang();
-world.afterEvents.worldInitialize.subscribe(() => {
-    Server.queueCommands([
-        'gamerule sendcommandfeedback false',
-        'gamerule commandblockoutput false'
-    ]);
-    startup();
-});
 /**
  * The startup function
  */
 export async function startup() {
     await Server.startServer();
-    if (quick.useQuick && Server.db.has('quick'))
+    if (quick.useQuick && Server.db?.has('quick'))
         Object.entries(Server.db.read('quick')).forEach(s => Object.assign(quick, { [s[0]]: s[1] }));
     updateLang();
     await quick.tales.forEach(t => import(`./Tales/${t}.js`).catch(e => {
@@ -94,7 +83,7 @@ export async function startup() {
         }
     });
     // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
-    //Dev stuff
+    //Dev stuff 
     if (quick.developerLogging)
         import('./Stories/!test/log.js');
     if (!quick.developerCommands)
@@ -102,3 +91,8 @@ export async function startup() {
     import('./Stories/!test/editstick.js');
     import('./Stories/!test/test.js');
 }
+updateLang();
+world.afterEvents.worldInitialize.subscribe(async () => {
+    sleep(10);
+    await startup();
+});

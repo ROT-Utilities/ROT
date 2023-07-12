@@ -30,7 +30,7 @@ const cmd = Commands.create({
     developers: ['Mo9ses']
 });
 cmd.startingArgs('page', false);
-cmd.callback((_, args) => !args.length && cmd.force('page', 1));
+cmd.callback((plr, args) => !args.length && cmd.force(plr, 'page', 1));
 cmd.numberType('page', (plr, page) => {
     const key = Object.entries(nameReg.getCollection()), len = key.length, memberList = new Array(Math.ceil(key.length / 35)).fill(0).map(_ => key.splice(0, 35)), members = [];
     if (!memberList[page - 1]?.[0])

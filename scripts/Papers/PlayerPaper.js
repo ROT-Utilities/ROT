@@ -20,6 +20,7 @@ import { world, Player as IPlayer, GameMode } from '@minecraft/server';
 import { connected } from '../Tales/playerConnect.js';
 import Database from './DatabasePaper.js';
 import quick from '../quick.js';
+import Commands from './CommandPaper/CommandPaper.js';
 /*
  * Welcome to the PlayerPaper!
  * Main Developer: Mo9ses
@@ -84,9 +85,10 @@ class PlayerPaper {
             veiwBlock: (getBlock) => this.veiwBlock(plr, getBlock),
             veiwEntity: (getPos) => {
                 const l = plr.getEntitiesFromViewDirection({ maxDistance: 300 });
-                return getPos ? [l[0].location.x, l[0].location.y, l[0].location.z] : l;
+                return getPos ? [l[0].entity.location, l[0].entity.location.y, l[0].entity.location.z] : l;
             },
-            toLocation: () => { return { x: plr.location.x, y: plr.location.y, z: plr.location.z }; }
+            toLocation: () => { return { x: plr.location.x, y: plr.location.y, z: plr.location.z }; },
+            asyncCommandPaper: async (text) => await this.asyncCommandPaper(plr, text)
         });
     }
     /**
@@ -112,13 +114,13 @@ class PlayerPaper {
     }
     error(plr, msg, frm, sund) {
         if (sund)
-            plr.runCommandAsync('playsound mob.zombie.woodbreak @s ~~~ 1 1');
+            plr.runCommandAsync('playsound note.bass @s ~~~ 1 1');
         plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : ''}§6Error >>§r§e ` }, { 'text': msg }] }); //§r
     }
     getPrefixes(plr) {
         const ranks = plr.getTags().filter(tag => tag.startsWith('rank:')).map(c => c.replace('rank:', '').trim());
         ranksDB.allKeys().forEach(k => plr.hasTag(ranksDB.read(k).tag) && ranks.push(ranksDB.read(k).prefix));
-        return ranks.length ? ranks : [quick.defaultRank];
+        return ranks.length ? ranks : this.isAdmin(plr) ? ['§n§lOperator'] : [quick.defaultRank];
     }
     getNameColors(plr) {
         const colors = plr.getTags().filter(tag => tag.startsWith('color:')).map(c => c.replace('color:', '').trim());
@@ -127,6 +129,10 @@ class PlayerPaper {
     getNameColor(plr) {
         const colors = plr.getTags().filter(tag => tag.startsWith('color:')).map(c => c.replace('color:', '').trim());
         return `${(colors.length ? colors : [quick.defaultNameColor]).join('')}${plr.name}`;
+    }
+    getChatColors(plr) {
+        const chat = plr.getTags().filter(tag => tag.startsWith('chat:')).map(c => c.replace('chat:', '').trim());
+        return chat.length ? chat.join('') : quick.defaultChatColor;
     }
     getScore(plr, obj) {
         try {
@@ -157,8 +163,26 @@ class PlayerPaper {
             return this.playerType(world.getAllPlayers().find(p => p?.name.toLowerCase() === name?.toLowerCase()), typeData);
     }
     veiwBlock(player, getBlock) {
-        const l = player.getBlockFromViewDirection({ includeLiquidBlocks: true, maxDistance: 300 });
-        return getBlock ? l : { x: l.x, y: l.y, z: l.z };
+        const l = player.getBlockFromViewDirection({ includeLiquidBlocks: true, maxDistance: 300 }).block;
+        return getBlock ? l : { x: l.location.x, y: l.location.y, z: l.location.z };
+    }
+    async asyncCommandPaper(player, text) {
+        text = text.replace(/\s+/g, ' ').trim();
+        if (text === '')
+            return;
+        if (!text.startsWith(quick.prefix))
+            try {
+                return await player.runCommandAsync(text);
+            }
+            catch (e) {
+                return;
+            }
+        ;
+        const args = text.slice(quick.prefix.length).trim().split(/\s+/), command = args.shift().toLowerCase(), cmd = Commands.list.find(cmd => cmd.name === command || cmd.aliases && cmd.aliases.includes(command));
+        Commands.run(cmd, Player.playerType(player, { from: cmd?.name ?? 'ROT' }), args);
+    }
+    isConnected(player) {
+        return connected.hasOwnProperty(player.name);
     }
     /**
      * Used to execute certain functions on players that might be offline or online

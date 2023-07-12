@@ -16,16 +16,15 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import { connected } from "../../Tales/playerConnect.js";
-import { setTickInterval } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import { fac } from "./main.js";
-import Player from "../../Papers/PlayerPaper.js";
 import Database from "../../Papers/DatabasePaper.js";
+import Player from "../../Papers/PlayerPaper.js";
 import quick from "../../quick.js";
 const config = quick.epics.Factions;
-setTickInterval(() => world.getAllPlayers().forEach(async (plr) => {
-    if (!fac.player)
+system.runInterval(() => world.getAllPlayers().forEach(async (plr) => {
+    if (!Player.isConnected(plr) || !fac.player)
         return;
     if (!fac.player.has(connected[plr.name]?.rID))
         return;
@@ -38,8 +37,10 @@ setTickInterval(() => world.getAllPlayers().forEach(async (plr) => {
     const db = await Database.register(fac.player.read(connected[plr.name].rID, true), 'FTN'), user = db.read(`u${fac.playerI.read(connected[plr.name].rID)}`), newP = db.allKeys().filter(key => key.startsWith('u'));
     db.write(`u${fac.playerI.read(connected[plr.name].rID)}`, [connected[plr.name].rID, plr.name, user[2], score, user[4]]);
     fac.power.write(db.read('n'), parseInt(`${newP.map(u => db.read(`u${u.replace('u', '')}`)[3]).reduce((a, b) => a + b, 0) / newP.length}`));
-}), 60, true);
-setTickInterval(() => world.getAllPlayers().forEach(plr => {
+}), 60);
+system.runInterval(() => world.getAllPlayers().forEach(plr => {
+    if (system.currentTick < 100)
+        return;
     const memory = Player.memory(plr);
     if (Date.now() < memory.read('FTNtimer'))
         return;
@@ -52,4 +53,4 @@ setTickInterval(() => world.getAllPlayers().forEach(plr => {
         nPower = config.maxPower;
     plr.runCommandAsync(`scoreboard players set @s "${config.powerObj}" ${nPower}`);
     plr.sendMessage(`§a§l+${nPower - power} power`);
-}), 300, false);
+}), 300);

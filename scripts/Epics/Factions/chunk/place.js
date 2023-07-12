@@ -16,9 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { MinecraftBlockTypes, Player as IPlayer, world } from "@minecraft/server";
+import { MinecraftBlockTypes, Player as IPlayer, world, system } from "@minecraft/server";
 import { connected } from "../../../Tales/playerConnect.js";
-import { setTickInterval } from "../../../Papers/Paragraphs/ExtrasParagraphs.js";
 import { getOwner, showBorder } from "./claim.js";
 import { fac } from "../main.js";
 import Player from "../../../Papers/PlayerPaper.js";
@@ -37,6 +36,7 @@ world.afterEvents.blockPlace.subscribe(res => {
     Player.send(res.player, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
     showBorder(res.player, chunk, res.block.location.y, false);
     res.block.setType(MinecraftBlockTypes.air);
+    res.player.runCommandAsync(`give @s ${res.block.typeId}`);
 });
 const rate = {};
 world.beforeEvents.itemUseOn.subscribe(res => {
@@ -57,4 +57,4 @@ world.beforeEvents.itemUseOn.subscribe(res => {
     showBorder(res.source, chunk, res.source.location.y, false);
     res.cancel = true;
 });
-setTickInterval(() => Object.keys(rate).forEach(r => new Date().getTime() > rate[r] && delete rate[r]), 20);
+system.runInterval(() => Object.keys(rate).forEach(r => new Date().getTime() > rate[r] && delete rate[r]), 20);

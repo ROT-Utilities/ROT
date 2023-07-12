@@ -16,9 +16,8 @@ Website: https://www.rotmc.ml
 Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNaraVgg
 Thank you!
 */
-import { world } from '@minecraft/server';
+import { system, world } from '@minecraft/server';
 import { textToAscii, asciiToText } from './Paragraphs/ConvertersParagraphs.js';
-import { setTickInterval } from './Paragraphs/ExtrasParagraphs.js';
 import Server from './ServerPaper.js';
 import quick from '../quick.js';
 /*
@@ -511,20 +510,14 @@ class database {
         return this;
     }
 }
-// regMemory release system
-// setTickInterval(() => {
-//     const minute = new Date().getMinutes();
-//     Object.keys(regMemory).forEach(file => {
-//         if(regMemory[file][1] >= 5 && regMemory[file][1] > minute) return;
-//         delete regMemory[file];
-//     });
-// }, 1200, false);
 //Memory release system
-setTickInterval(() => {
+system.runInterval(() => {
+    if (system.currentTick < 50)
+        return;
     const minute = new Date().getMinutes();
     Object.keys(memory).forEach(table => Object.keys(memory[table]).forEach(key => {
         if (memory[table][key][1] >= 5 && memory[table][key][1] > minute)
             return;
         delete memory[table][key];
     }));
-}, 1200, false);
+}, 1200);

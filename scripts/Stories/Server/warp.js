@@ -20,6 +20,7 @@ import { world } from "@minecraft/server";
 import { sleep } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 import Server from "../../Papers/ServerPaper.js";
+import quick from "../../quick.js";
 if (!Server.db.has('warps'))
     Server.db.write('warps', {});
 const cmd = Commands.create({
@@ -65,6 +66,7 @@ cmd.unknownType('warp', (plr, val, args) => {
     const target = args.length ? args[0] : plr;
     if (target.name !== plr.name && !plr.isAdmin)
         return plr.error('You don\'t have perrmission to teleport other players');
+    target.addTag(quick.epics['Automod'].protections.teleport.skip);
     target.teleport({ x: warp[1][1][0], y: warp[1][1][1], z: warp[1][1][2] }, { dimension: world.getDimension(warp[1][1][3]), rotation: { x: target.getRotation().x, y: target.getRotation().y } });
     target.send(`You have been teleported to §a§l${val}§r§e.`);
 }, 1, true, 'plr');

@@ -16,8 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { ID, setTickInterval } from '../Papers/Paragraphs/ExtrasParagraphs.js';
+import { system, world } from '@minecraft/server';
+import { ID } from '../Papers/Paragraphs/ExtrasParagraphs.js';
 import { listeners } from './main.js';
 import Database from '../Papers/DatabasePaper.js';
 import quick from '../quick.js';
@@ -27,7 +27,9 @@ export let nameReg, dateReg;
     world.getDimension('overworld').runCommandAsync('scoreboard objectives add "PLRid" dummy');
     nameReg = await Database.registry('PLRname');
     dateReg = await Database.registry('PLRdate');
-    setTickInterval(() => {
+    system.runInterval(() => {
+        if (system.currentTick < 50)
+            return;
         const keys = Object.keys(connected);
         keys.forEach(p => {
             if (!connected[p]?.hasOwnProperty('release'))
@@ -36,7 +38,7 @@ export let nameReg, dateReg;
                 delete connected[p];
         });
         world.getAllPlayers().filter(p => !keys.includes(p.name)).forEach(p => join(p));
-    }, 25, false);
+    }, 25);
 })();
 /**
  * The join function

@@ -18,6 +18,7 @@ Thank you!
 */
 import { world } from '@minecraft/server';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'dimension',
     description: 'Teleport to a dimension',
@@ -29,6 +30,7 @@ const cmd = Commands.create({
 cmd.startingArgs('dimension');
 cmd.dynamicType('dimension', ['overworld', 'nether', 'end'], (sender, dim, args) => {
     const loc = args[1], rot = args[0].getRotation();
+    args[0].addTag(quick.epics['Automod'].protections.teleport.skip);
     args[0].teleport(loc, { dimension: world.getDimension(dim === 'end' ? 'the end' : dim), rotation: { x: rot.x, y: rot.y } });
     args[0].send(`You have been teleported to the dimension §6${dim}§e at §6${~~loc.x}§e, §6${~~loc.y}§e, §6${~~loc.z}§e!`);
     if (sender.name !== args[0].name)

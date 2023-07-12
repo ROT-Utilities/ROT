@@ -19,6 +19,7 @@ Thank you!
 import { world } from "@minecraft/server";
 import { clientBids, clientPosts, bidPING, clientCollect, collectPING } from "./client.js";
 import { numberToHex } from "../../Papers/Paragraphs/ConvertersParagraphs.js";
+import { sleep } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import { ActionForm, MessageForm } from "../../Papers/FormPaper.js";
 import { managementForm } from "./manage.js";
 import { serverPosts } from "./server.js";
@@ -32,7 +33,6 @@ export const AH = {
     config: quick.epics['Auction House'],
     //Main form / home page
     openAH(player) {
-        player.removeTag(AH.config.tag);
         player.runCommandAsync(`scoreboard players add @s "${AH.config.obj}" ${AH.client.AHR.read(player.rID) ?? 0}`);
         AH.client.AHR.delete(player.rID);
         const choose = new ActionForm();
@@ -92,6 +92,7 @@ export const AH = {
         }
     },
     async verifyPost(date, data) {
+        await sleep(5);
         if (!Database.has(date, 'AHP'))
             return;
         const many = (await Database.register(date, 'AHP')).readMany(['i', 'b']);
@@ -129,6 +130,7 @@ export const AH = {
         if (data.hasOwnProperty('enchants'))
             Object.assign(update, { e: data.enchants });
         db.writeMany(update);
+        await sleep(20);
     },
     /**
      * Creates a auction post
@@ -149,6 +151,7 @@ export const AH = {
         });
         AH.client.update(player.rID, 'AHP', 'add', date);
         (await Database.register(date, 'AHI')).write('', item);
+        await sleep(10);
         return date;
     },
     /**
@@ -211,10 +214,12 @@ export const AH = {
 })();
 //Opening methods
 if (AH.config.npc)
-    world.afterEvents.entityHit.subscribe(data => {
-        if (data.hitEntity?.typeId !== 'rot:ah' || data.entity.typeId !== 'minecraft:player')
+    world.afterEvents.entityHitEntity.subscribe(data => {
+        if (data.hitEntity?.typeId !== 'rot:ah' || data.damagingEntity.typeId !== 'minecraft:player')
             return;
-        const player = Player.playerType(data.entity, { from: AH.config.npcName, sound: false });
+        const player = Player.playerType(data.damagingEntity, { from: AH.config.npcName, sound: false });
+        if (player.isAdmin && player.isSneaking)
+            return data.hitEntity.triggerEvent('rot:despawn');
         try {
             AH.openAH(player);
         }

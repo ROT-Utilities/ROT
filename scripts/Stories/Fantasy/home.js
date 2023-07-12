@@ -26,7 +26,8 @@ let home = null;
 })();
 const cmd = Commands.create({
     name: 'home',
-    category: 'Fantasy'
+    description: 'Set a home and teleport to it',
+    category: 'Fantasy',
 });
 cmd.startingArgs(['set', 'remove', 'tp']);
 cmd.staticType('set', 'set', (plr, homeName) => {
@@ -61,6 +62,7 @@ cmd.staticType('tp', 'teleport', (plr, homeName) => {
         return plr.error('You dont have a home with that name!');
     const sp = val.split('$-$');
     const x = Number(sp[1]), y = Number(sp[2]), z = Number(sp[3]), d = sp[4];
+    plr.addTag(quick.epics['Automod'].protections.teleport.skip);
     plr.teleport({ x, y, z }, { dimension: world.getDimension(d), rotation: { x: plr.getRotation().x, y: plr.getRotation().y } });
     plr.send(`You have successfully teleported to your home §a${homeName}`);
 });

@@ -16,15 +16,14 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
-import { setTickInterval } from './Paragraphs/ExtrasParagraphs.js';
+import { system, world } from '@minecraft/server';
 import Database from './DatabasePaper.js';
 import Player from './PlayerPaper.js';
 /*
  * ROT's command queue system
 */
 const commandQueue = [];
-setTickInterval(() => {
+system.runInterval(() => {
     if (!commandQueue.length)
         return;
     const hundred = commandQueue.slice(0, 100);
@@ -48,6 +47,7 @@ class ServerPaper {
      */
     async startServer() {
         this.db = await Database.register('server');
+        return 1;
     }
     /**
      * Broadcast a message to everyone in game

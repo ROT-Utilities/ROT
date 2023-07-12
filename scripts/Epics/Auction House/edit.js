@@ -95,7 +95,6 @@ export function editPost(player, date, from) {
                 if (res.formValues[3] !== post.creator.silent)
                     Object.assign(update, { silent: res.formValues[3] });
                 if (res.formValues[2] === 0) {
-                    console.warn(Object.keys(update));
                     if (!Object.keys(update).length)
                         return player.send('§c§lError §e- Nothing has changed!§r');
                     await AH.updatePost(date, update);

@@ -38,10 +38,10 @@ cmd.unknownType('any', null, 1);
 cmd.numberType('anynumber', null);
 cmd.unknownType('anynull', null);
 cmd.startingArgs(['create', 'remove', 'preview', 'setline', 'removeline', 'settag', 'list'], false);
-cmd.callback((_, args) => {
+cmd.callback((plr, args) => {
     if (args.length)
         return;
-    cmd.force('list', null);
+    cmd.force(plr, 'list', null);
 });
 cmd.staticType('create', 'create', (plr, val) => {
     if (sc.has(val))
@@ -137,7 +137,9 @@ system.runInterval(() => {
     if (!sc)
         return;
     world.getAllPlayers().forEach((p) => {
-        const tags = p.getTags();
+        const tags = p?.getTags();
+        if (!tags?.length)
+            return;
         tags.forEach((tag) => {
             if (sc.has(tag)) {
                 let board = sc.read(tag).join('§r\n').replace(/\(rank\)/g, Player.getPrefixes(p).join('§r§7, ') + '§r').replace(/\(name\)/g, Player.getNameColor(p) + '§r');

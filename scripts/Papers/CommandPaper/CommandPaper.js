@@ -20,10 +20,9 @@ import { system, world } from '@minecraft/server';
 import { MS, timeRegex } from '../Paragraphs/ConvertersParagraphs.js';
 import { staticBook, staticValues } from './argumentTypes.js';
 import { ActionForm } from '../FormPaper.js';
-// import Server from '../ServerPaper.js';
 import Player from '../PlayerPaper.js';
-import lang from '../LangPaper.js';
 import quick from '../../quick.js';
+import lang from '../LangPaper.js';
 /*
  * Welcome to the CommandPaper!
  * Main Developer: Mo9ses
@@ -142,7 +141,7 @@ export class CommandPaper {
                 if (num.startsWith('~'))
                     loc[i] = Number(num.replace('~', '')) + player.location[i == 0 ? 'x' : i == 1 ? 'y' : 'z'];
                 else
-                    //if(num.startsWith('^')) loc[i] = Number(num.replace('^', '')) + player.viewVector[i == 0 ? 'x' : i == 1 ? 'y' : 'z'] else //To be finished
+                    // if(num.startsWith('^')) loc[i] = Number(num.replace('^', '')) + player.viewVector[i == 0 ? 'x' : i == 1 ? 'y' : 'z'] else //To be finished
                     loc[i] = Number(num);
                 left = left.replace(`${num}`, '').trim();
             }
@@ -253,19 +252,25 @@ export class CommandPaper {
         }
         try {
             const keys = Object.keys(cls), values = keys.map(k => cls[k]);
-            if (cmd.cB)
-                cmd.cB(player, values);
+            if (cmd.cB) {
+                let value = [values].flat(1);
+                system.run(() => {
+                    cmd.cB(player, value);
+                    if (this.forceQueue.hasOwnProperty(player.name))
+                        cmd.aR[this.forceQueue[player.name][1]].cB(player, this.forceQueue[player.name][2], []);
+                });
+            }
             values.splice(0, 1);
-            if (Object.keys(this.forceQueue).includes(cmd.name))
-                cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], []);
             for (let i = 0; i < keys.length; i++) {
                 if (Object.keys(this.endQueue).includes(cmd.name))
                     return this.endQueue[cmd.name] && this.endQueue[cmd.name](player);
                 let value = [values].flat(1);
                 if (cmd.aR[keys[i]].cB)
-                    system.run(() => cmd.aR[keys[i]].cB(player, cls[keys[i]], value));
-                if (Object.keys(this.forceQueue).includes(cmd.name) && cmd.aR[this.forceQueue[cmd.name][0]].cB)
-                    system.run(() => cmd.aR[this.forceQueue[cmd.name][0]].cB(player, this.forceQueue[cmd.name][1], value));
+                    system.run(() => {
+                        cmd.aR[keys[i]].cB(player, cls[keys[i]], value);
+                        if (this.forceQueue.hasOwnProperty(player.name) && cmd.aR[this.forceQueue[player.name][1]].cB)
+                            system.run(() => cmd.aR[this.forceQueue[player.name][1]].cB(player, this.forceQueue[player.name][2], value));
+                    });
                 values.splice(0, 1);
             }
         }
@@ -273,7 +278,7 @@ export class CommandPaper {
             console.warn(`${e}:${e.stack}`);
             quick.logs.errors.push(`${e} : ${e.stack}`);
         }
-        delete this.forceQueue[cmd.name];
+        delete this.forceQueue[player.name];
         delete this.endQueue[cmd.name];
     }
     /**
@@ -348,8 +353,8 @@ class command {
      * @param argument The name of the argument
      * @param {string} value The value that will the command builder will send to the argument (recommended)
      */
-    force(argument, value) {
-        Object.assign(this.handle.forceQueue, { [this.name]: [argument, value] });
+    force(player, argument, value) {
+        Object.assign(this.handle.forceQueue, { [player.name]: [this.name, argument, value] });
     }
     /**
      * The starting argument(s) for the command. This is required if you have arguments
