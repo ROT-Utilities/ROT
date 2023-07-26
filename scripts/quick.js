@@ -78,6 +78,8 @@ export const quick = {
         },
         ROT: {
             //ui: true,
+            speed: true,
+            quick: true,
             help: true //Please keep this command at the bottom
         }
     },
@@ -122,7 +124,7 @@ export const quick = {
             powerObj: 'power',
             autoTag: 'automap',
             spawn: [0, 200, 0],
-            radius: 1,
+            radius: 300,
             maxRadius: 10000,
             autoTimer: 15,
             veiwFaction: true,
@@ -148,6 +150,21 @@ export const quick = {
             ],
             blockObi: false,
             chat: true, //If true your faction name will appear in chat
+        },
+        "Money Transfer": {
+            enabled: true,
+            entry: 'main',
+            houseName: 'Money Transfer',
+            currency: 'Gold',
+            obj: 'money',
+            tag: 'mt',
+            color1: '§6',
+            color2: '§g',
+            color3: '§e',
+            npc: true,
+            npcName: 'Jimmy Jackpot',
+            comeBack: true,
+            coolHouseNames: true
         },
         "Automod": {
             enabled: false,
@@ -184,7 +201,7 @@ export const quick = {
         'beforeChat',
         'playerConnect'
     ],
-    version: 'ROT',
+    version: 'LIGHT',
     developerCommands: false,
     developerLogging: true,
     logs: {

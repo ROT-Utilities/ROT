@@ -20,7 +20,8 @@ import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 import { ban } from "./ban.js";
 const cmd = Commands.create({
     name: 'unban',
-    category: 'Management'
+    category: 'Management',
+    admin: true
 });
 cmd.startingArgs('player');
 cmd.playerType('player', (plr, val) => {

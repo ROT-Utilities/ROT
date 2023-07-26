@@ -17,6 +17,7 @@ Website: https://www.rotmc.ml
 Thank you!
 */
 import { system, world } from '@minecraft/server';
+import { orderVender } from '../../Tales/main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
 import Player from '../../Papers/PlayerPaper.js';
@@ -67,9 +68,19 @@ cmd.dynamicType('prefix', ['prefix', 'pre', 'before'], null, 'any');
 cmd.staticType('name', 'rename', null, 'any', false);
 cmd.dynamicType('color', ['color', 'namecolor'], null, 'any');
 cmd.unknownType('any', null, 255, true);
+//If you are changing the style of the health icon, don't for get both of them below, or this WON'T work.
+//If you need help, join the ROT Discord here: https://discord.com/invite/2ADBWfcC6S
 system.runInterval(() => world.getAllPlayers().forEach(player => {
     if (!Player.isConnected(player))
         return;
-    const health = player.getComponent('health').currentValue;
-    player.nameTag = `§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player)}${quick.displayHealth ? `\n§r§4❤ §c${~~(health)}` : ''}`;
-}), 20);
+    const health = player.getComponent('health').currentValue, received = orderVender('rankPrefix', player);
+    ;
+    player.nameTag = `${received.length ? `${received.join('§r ')} ` : ''}§7[${Player.getPrefixes(player).join('§r§7, ')}§r§7] ${Player.getNameColor(player, true)}${quick.displayHealth ? `\n§r§4❤ §c${~~(health)}` : ''}`;
+}), 60);
+if (quick.displayHealth)
+    system.runInterval(() => world.getAllPlayers().forEach(player => {
+        if (!Player.isConnected(player))
+            return;
+        const health = player.getComponent('health').currentValue;
+        player.nameTag = player.nameTag.replace(/❤ §c\d+/g, `❤ §c${~~(health)}`);
+    }), 20);

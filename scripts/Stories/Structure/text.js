@@ -20,7 +20,7 @@ import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 const cmd = Commands.create({
     name: 'text',
     description: 'Makes a cool little floating text so you don\'t have to place signs everywhere!',
-    aliases: ['t', 'floating-text'],
+    aliases: ['t', 'floating-text', 'holo', 'hologram'],
     category: 'Structure',
     admin: true,
     developers: ['Mo9ses']
@@ -29,13 +29,16 @@ cmd.startingArgs(['spawn', 'kill']);
 cmd.unknownType('any', null);
 cmd.numberType('anynumber', null, null, { float: true, min: 1 });
 cmd.dynamicType('spawn', 'spawn', (plr, _, args) => {
-    plr.send(`Creating floating text...\nCreated floating text "§c${args[0].join(' ')}§r§7"!`, 'TEXT');
-    if (args[0].join(' ').includes('"'))
-        plr.error('The text may not include a §4"§r');
-    plr.runCommandAsync(`summon rot:hologram "${args[0].join(' ')}" ~~~`);
+    const text = args[0].join(' ');
+    if (text.includes('"'))
+        return plr.error('The hologram may not include a §4"§r');
+    plr.send(`Creating a hologram...\nCreated hologram "§c${text}§r§7"!`);
+    console.warn(text);
+    const lines = text.split('\\n');
+    lines.forEach((l, i) => plr.runCommandAsync(`summon rot:hologram "${l}" ~~${0.25 * (lines.length - i)}~`));
 }, 'any');
 cmd.dynamicType('kill', 'kill', (plr, _, args) => {
     let radius = args[0] ?? 1;
-    plr.send(`Killing all floating text in the radius of §c${radius}§e blocks from your current loction!`, 'TEXT');
+    plr.send(`Killing all holograms in the radius of §c${radius}§e blocks from your current loction!`, 'TEXT');
     plr.runCommandAsync(`kill @e[type=rot:hologram,r=${radius},tag=!ROTLB]`);
 }, 'anynumber', true, undefined, false);

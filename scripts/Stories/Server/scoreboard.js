@@ -34,7 +34,7 @@ let sc = null;
 (async function () {
     sc = await Database.register('SC');
 })();
-cmd.unknownType('any', null, 1);
+cmd.unknownType('any', null, 1, false);
 cmd.numberType('anynumber', null);
 cmd.unknownType('anynull', null);
 cmd.startingArgs(['create', 'remove', 'preview', 'setline', 'removeline', 'settag', 'list'], false);

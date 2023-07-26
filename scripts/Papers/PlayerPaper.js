@@ -17,7 +17,7 @@ Website: https://www.rotmc.ml
 Thank you!
 */
 import { world, Player as IPlayer, GameMode } from '@minecraft/server';
-import { connected } from '../Tales/playerConnect.js';
+import { connected, nameReg } from '../Tales/playerConnect.js';
 import Database from './DatabasePaper.js';
 import quick from '../quick.js';
 import Commands from './CommandPaper/CommandPaper.js';
@@ -55,6 +55,11 @@ class PlayerPaper {
                 plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : data?.from ? `${data.from} ` : ''}§aTIP §6>>§r§e ` }, { 'text': msg }] }); //§r
             },
             error: (msg, frm, sund) => this.error(plr, msg, frm ?? data?.from ?? undefined, sund ?? sound),
+            /**
+            * getNickname Gets the nickname of a player
+            * @example .getNickname();
+            */
+            getNickname: () => this.getNickname(plr),
             /**
             * getRanks Gets the ranks of a player
             * @example .getPrefixes();
@@ -117,6 +122,17 @@ class PlayerPaper {
             plr.runCommandAsync('playsound note.bass @s ~~~ 1 1');
         plr.sendMessage({ 'rawtext': [{ 'text': `§l§e${frm ? `${frm} ` : ''}§6Error >>§r§e ` }, { 'text': msg }] }); //§r
     }
+    getNickname(plr) {
+        const name = plr.getTags().find(tag => tag.startsWith('name:'))?.replace('name:', '')?.trim();
+        if (!name?.length)
+            return plr.name;
+        if (nameReg.has(`$${name}`)) {
+            console.warn('Found name');
+            plr.removeTag(`name:${name}`);
+            return plr.name;
+        }
+        return name;
+    }
     getPrefixes(plr) {
         const ranks = plr.getTags().filter(tag => tag.startsWith('rank:')).map(c => c.replace('rank:', '').trim());
         ranksDB.allKeys().forEach(k => plr.hasTag(ranksDB.read(k).tag) && ranks.push(ranksDB.read(k).prefix));
@@ -126,9 +142,9 @@ class PlayerPaper {
         const colors = plr.getTags().filter(tag => tag.startsWith('color:')).map(c => c.replace('color:', '').trim());
         return colors.length ? colors : [quick.defaultNameColor];
     }
-    getNameColor(plr) {
+    getNameColor(plr, getNickname) {
         const colors = plr.getTags().filter(tag => tag.startsWith('color:')).map(c => c.replace('color:', '').trim());
-        return `${(colors.length ? colors : [quick.defaultNameColor]).join('')}${plr.name}`;
+        return `${(colors.length ? colors : [quick.defaultNameColor]).join('')}${getNickname ? this.getNickname(plr) : plr.name}`;
     }
     getChatColors(plr) {
         const chat = plr.getTags().filter(tag => tag.startsWith('chat:')).map(c => c.replace('chat:', '').trim());

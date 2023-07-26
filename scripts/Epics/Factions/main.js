@@ -17,7 +17,8 @@ Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from '@minecraft/server';
-import { addListener } from '../../Tales/main.js';
+import { addListener, vender } from '../../Tales/main.js';
+import { connected } from '../../Tales/playerConnect.js';
 import Database from "../../Papers/DatabasePaper.js";
 import Player from '../../Papers/PlayerPaper.js';
 import quick from '../../quick.js';
@@ -44,7 +45,14 @@ export let fac = {
     fac.value = await Database.registry('FTNvalue');
     fac.kills = await Database.registry('FTNkills');
 })();
-addListener('playerConnect', res => Player.memory(res).write('FTNtimer', Date.now() + 3600000));
+if (fac.config.powerHour)
+    addListener('playerConnect', res => Player.memory(res).write('FTNtimer', Date.now() + 3600000));
+if (fac.config.chat)
+    vender('rankPrefix', player => {
+        const name = fac.names.find(fac.player.read(connected[player.name].rID));
+        if (name?.length)
+            return `§7[§a${name}§7]`;
+    });
 try {
     world.getDimension('overworld').runCommandAsync(`scoreboard objectives add "${fac.config.obj}" dummy`);
 }

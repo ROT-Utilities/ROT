@@ -24,13 +24,11 @@ import Player from "../../Papers/PlayerPaper.js";
 import quick from "../../quick.js";
 const config = quick.epics.Factions;
 system.runInterval(() => world.getAllPlayers().forEach(async (plr) => {
-    if (!Player.isConnected(plr) || !fac.player)
-        return;
-    if (!fac.player.has(connected[plr.name]?.rID))
+    if (!Player.isConnected(plr) || !fac.player.has(connected[plr.name]?.rID) || !fac.player)
         return;
     const score = Player.getScore(plr, quick.epics.Factions.powerObj), memory = Player.memory(plr);
     if (!memory.has('FTN'))
-        return memory.write('FTN', score);
+        memory.write('FTN', score);
     if (score === memory.read('FTN'))
         return;
     memory.write('FTN', score);

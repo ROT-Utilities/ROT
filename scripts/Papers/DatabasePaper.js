@@ -163,7 +163,7 @@ class registry {
      * Add or subtract a number to a key's value
      * @param {string} key The key you want to save the value as
      * @param {number} value The number value you want to save
-     * @example .write('Test Key', 1);
+     * @example .shift('Test Key', 1);
      * @returns {this}
      */
     shift(key, value) {

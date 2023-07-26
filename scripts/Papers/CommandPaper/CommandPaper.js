@@ -167,7 +167,7 @@ export class CommandPaper {
         }
         if (allTypes.includes('ukn') && args.length) {
             const text = cmd.aR[argTypes['ukn']].tV[0] === 1 ? args[0] : args.slice(0, cmd.aR[argTypes['ukn']].tV[0]);
-            if (cmd.aR[argTypes['ukn']].tV[1] && [].concat(text).join(' ').replace(/[\w!#$&*',.-_~§ ]/g, '') !== '')
+            if (cmd.aR[argTypes['ukn']].tV[1] && [].concat(text).join(' ').replace(/[\w!#$&*',.-_~§()[ \]]/g, '') !== '')
                 return;
             return { aRN: argTypes['ukn'], tV: text, nA: args.slice(cmd.aR[argTypes['ukn']].tV[0]) };
         }

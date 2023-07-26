@@ -16,7 +16,8 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { world } from '@minecraft/server';
+import { world, system } from '@minecraft/server';
+system.beforeEvents.watchdogTerminate.subscribe(res => res.cancel = true);
 import { sleep } from './Papers/Paragraphs/ExtrasParagraphs.js';
 import { updateLang } from './Papers/LangPaper.js';
 import Commands from './Papers/CommandPaper/CommandPaper.js';

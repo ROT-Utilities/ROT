@@ -115,8 +115,8 @@ async function getLeaderboard(objective) {
     Object.entries(after).sort((a, b) => b[1] - a[1]).slice(0, 32).forEach((p, i) => {
         const player = players.find(plr => connected[plr.name].rID === p[0]);
         if (player && before[p[0]] !== p[1])
-            Object.assign(writeMany, { [p[0]]: [Player.getNameColor(player), Player.getPrefixes(player).join('§r§7, '), p[1]] });
-        leaderboard.push(`§9${i + 1} §7[${player ? Player.getPrefixes(player).join('§r§7, ') : top[p[0]][1]}§r§7] ${player ? Player.getNameColor(player) : top[p[0]][0]} §r§7- §c${metricNumbers(p[1])}§r`);
+            Object.assign(writeMany, { [p[0]]: [Player.getNameColor(player, true), Player.getPrefixes(player).join('§r§7, '), p[1]] });
+        leaderboard.push(`§9${i + 1} §7[${player ? Player.getPrefixes(player).join('§r§7, ') : top[p[0]][1]}§r§7] ${player ? Player.getNameColor(player, true) : top[p[0]][0]} §r§7- §c${metricNumbers(p[1])}§r`);
     });
     db.writeMany(writeMany);
     return leaderboard;
