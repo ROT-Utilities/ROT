@@ -16,12 +16,11 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { system } from '@minecraft/server';
+import { system, world } from '@minecraft/server';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Database from '../../Papers/DatabasePaper.js';
-import { connected } from '../../Tales/playerConnect.js';
-import { world } from "@minecraft/server";
 import { MS } from '../../Papers/Paragraphs/ConvertersParagraphs.js';
+import { connected } from '../../Tales/playerConnect.js';
 export const ban = {
     regReason: null,
     regExpire: null

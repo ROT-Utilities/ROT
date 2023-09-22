@@ -29,15 +29,15 @@ const cmd = Commands.create({
 const config = quick.epics['Money Transfer'];
 cmd.startingArgs(['player'], true);
 cmd.playerType('player', (player, plr, args) => {
-    if (player.getScore(config.currency) < args[0])
-        return player.error(`You need ${args[0] - player.getScore(config.currency)} more to be able to transfer that amount of money!`);
+    if (player.getScore(config.obj) < args[0])
+        return player.error(`You need ${args[0] - player.getScore(config.obj)} more to be able to transfer that amount of money!`);
     if (args[0] > 1000000)
         return player.error('The amount cant be more than 1 Million!');
     if (0 >= args[0])
         return player.error('That is not a number...');
     player.runCommandAsync(`scoreboard players remove @s "${config.obj}" ${args[0]}`);
     plr.runCommandAsync(`scoreboard players add @s "${config.obj}" ${args[0]}`);
-    plr.send(`§a${player.name} §eHas gaven you §c${metricNumbers(args[0])} ${config.currency}.`);
+    plr.send(`§a${player.name} §eHas gaven you §c${metricNumbers(args[0])} ${config.obj}.`);
     player.send('Transition successfull!');
 }, true, 'amount', { self: false });
 cmd.numberType('amount', null, null, { min: 1, max: 1000000 });

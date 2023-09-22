@@ -80,7 +80,7 @@ world.afterEvents.playerLeave.subscribe(data => leave(data.playerName));
  * @param name Name?
  */
 function leave(name) {
-    if (!connected?.[name]?.release)
+    if (!connected.hasOwnProperty(name))
         return;
     connected[name].release = Date.now() + 3600000;
     listeners.forEach(event => {

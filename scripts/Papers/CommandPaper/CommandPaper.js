@@ -117,19 +117,19 @@ export class CommandPaper {
         nextArgs?.filter(a => !['sta', 'dyn'].includes(cmd.aR[a].tY))?.forEach(a => Object.assign(argTypes, { [cmd.aR[a].tY]: a }));
         const allTypes = Object.keys(argTypes);
         if (allTypes.includes('plr')) {
-            if (args[0] === '@s' || args[0].toLowerCase() === player.name.toLowerCase())
+            if (args[0] === '@s' || args[0].replace(/@/g, '').toLowerCase() === player.name.toLowerCase())
                 if (cmd.aR[argTypes['plr']].tV[0]?.self ?? true)
                     return { aRN: argTypes['plr'], tV: cmd.aR[argTypes['plr']].tV[1] ? player : Player.offlinePlayer(player.name), nA: args.slice(1) };
                 else
                     return;
-            const val = cmd.aR[argTypes['plr']].tV[1] ? Player.playerType(world.getAllPlayers().find(p => p.name.toLowerCase() === args[0].toLowerCase()), cmd.aR[argTypes['plr']].tV[0]) : Player.offlinePlayer(args[0]);
+            const val = cmd.aR[argTypes['plr']].tV[1] ? Player.playerType(world.getAllPlayers().find(p => p.name.toLowerCase() === args[0].replace(/@/g, '').toLowerCase()), cmd.aR[argTypes['plr']].tV[0]) : Player.offlinePlayer(args[0]);
             if (val)
                 return { aRN: argTypes['plr'], tV: val, nA: args.slice(1) };
         }
         if (allTypes.includes('boo')) {
-            if (['true', 't-'].includes(args[0]))
+            if (['true', 't-', 'on'].includes(args[0]))
                 return { aRN: argTypes['boo'], tV: true, nA: args.slice(1) };
-            if (['false', 'f-'].includes(args[0]))
+            if (['false', 'f-', 'off'].includes(args[0]))
                 return { aRN: argTypes['boo'], tV: false, nA: args.slice(1) };
         }
         if (allTypes.includes('loc')) {
@@ -167,7 +167,7 @@ export class CommandPaper {
         }
         if (allTypes.includes('ukn') && args.length) {
             const text = cmd.aR[argTypes['ukn']].tV[0] === 1 ? args[0] : args.slice(0, cmd.aR[argTypes['ukn']].tV[0]);
-            if (cmd.aR[argTypes['ukn']].tV[1] && [].concat(text).join(' ').replace(/[\w!#$&*',.-_~§()[ \]]/g, '') !== '')
+            if (cmd.aR[argTypes['ukn']].tV[1] && [].concat(text).join(' ').replace(/[\w!#$&*',.-_~§(){}[ \]]/g, '') !== '')
                 return;
             return { aRN: argTypes['ukn'], tV: text, nA: args.slice(cmd.aR[argTypes['ukn']].tV[0]) };
         }

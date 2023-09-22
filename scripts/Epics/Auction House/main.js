@@ -67,22 +67,22 @@ export const AH = {
         try {
             if (!Database.has(date, 'AHP'))
                 return;
-            const data = (await Database.register(date, 'AHP')).getCollection(), bidData = data?.b ?? {}, bidKeys = Object.keys(bidData).reverse();
+            const data = (await Database.register(date, 'AHP')).getCollection(), hold = data.b?.sort((a, b) => a[2] - b[2])?.reverse() ?? [], bidReverse = Array(hold.length).fill(0).map((_, i) => hold[i]);
             return {
                 date: date,
                 name: data?.n ?? data.i,
                 itemName: data.i,
                 amount: data.a,
-                price: bidData?.[bidKeys[0]]?.[1] ?? data.p,
+                price: bidReverse[0]?.[2] ?? data.p,
                 startPrice: data.p,
                 buyout: data.o,
                 time: data.t,
                 creator: { id: data.c[0], name: data.c[1], silent: Boolean(data.c[2]) },
-                bidData: data?.b ?? {},
-                bidID: bidKeys,
-                bidName: bidKeys.map(n => bidData[n][0]),
-                bidSilent: bidKeys.map(s => Boolean(bidData[s][2])),
-                bids: bidKeys.map(n => bidData[n][1]),
+                bidData: bidReverse,
+                bidID: bidReverse.map(b => b[0]),
+                bidName: bidReverse.map(b => b[1]),
+                bids: bidReverse.map(b => b[2]),
+                bidSilent: bidReverse.map(b => Boolean(b[3])),
                 removedIDs: data?.r ?? [],
                 enchants: data.e
             };
@@ -98,7 +98,7 @@ export const AH = {
         const many = (await Database.register(date, 'AHP')).readMany(['i', 'b']);
         if (many[0] !== data.itemName)
             return;
-        if (Object.values(many[1] ?? {})?.reverse()?.[0]?.[1] !== data.bids[0])
+        if (JSON.stringify(many[1]?.reverse()) !== JSON.stringify(data.bidData))
             return;
         return true;
     },
@@ -116,7 +116,7 @@ export const AH = {
         if (data.hasOwnProperty('amount'))
             Object.assign(update, { a: data.amount });
         if (data.hasOwnProperty('bidData'))
-            Object.assign(update, { b: data.bidData });
+            Object.assign(update, { b: data.bidData.sort((a, b) => a[2] - b[2]) });
         if (data.hasOwnProperty('startPrice'))
             Object.assign(update, { p: data.startPrice });
         if (data.hasOwnProperty('buyout'))

@@ -23,6 +23,7 @@ export const quick = {
     release: 5,
     displayChatTime: true,
     chatStyle: '$rank $player $time: §f$msg§r',
+    welcomeBack: 'Welcome back §c$player§e!',
     chatRanks: true,
     rankStyle: '',
     defaultRank: '§bMember',
@@ -61,6 +62,7 @@ export const quick = {
             tac: true,
             inventory: true,
             kicktags: true,
+            afk: true
         },
         Structure: {
             leaderboard: true,
@@ -73,12 +75,13 @@ export const quick = {
             tpa: true,
         },
         Miscellaneous: {
+            lore: true,
+            click: true,
             timezone: true,
             dimension: true,
         },
         ROT: {
             //ui: true,
-            speed: true,
             quick: true,
             help: true //Please keep this command at the bottom
         }
@@ -201,7 +204,7 @@ export const quick = {
         'beforeChat',
         'playerConnect'
     ],
-    version: 'LIGHT',
+    version: 'ROT',
     developerCommands: false,
     developerLogging: true,
     logs: {

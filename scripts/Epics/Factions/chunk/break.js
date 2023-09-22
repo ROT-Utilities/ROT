@@ -22,7 +22,7 @@ import { connected } from "../../../Tales/playerConnect.js";
 import { getOwner, showBorder } from "./claim.js";
 import { fac } from "../main.js";
 import Player from "../../../Papers/PlayerPaper.js";
-world.afterEvents.blockBreak.subscribe(res => {
+world.afterEvents.playerBreakBlock.subscribe(res => {
     if (Player.getGamemode(res.player) === 'creative' || fac.config.containers.includes(res.brokenBlockPermutation.type.id))
         return;
     const chunk = [~~((res.block.location.x + 1) / 16), ~~((res.block.location.z + 1) / 16)];

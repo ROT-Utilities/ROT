@@ -16,17 +16,17 @@ Docs: https://docs.google.com/document/d/1hasFU7_6VOBfjXrQ7BE_mTzwacOQs5HC21MJNa
 Website: https://www.rotmc.ml
 Thank you!
 */
-import { MinecraftBlockTypes, Player as IPlayer, world, system } from "@minecraft/server";
+import { BlockTypes, Player as IPlayer, world, system } from "@minecraft/server";
 import { connected } from "../../../Tales/playerConnect.js";
 import { getOwner, showBorder } from "./claim.js";
 import { fac } from "../main.js";
 import Player from "../../../Papers/PlayerPaper.js";
-world.afterEvents.blockPlace.subscribe(res => {
+world.afterEvents.playerPlaceBlock.subscribe(res => {
     if (Player.getGamemode(res.player) === 'creative')
         return;
     const block = res.block;
-    if (fac.config.blockObi && block.typeId === MinecraftBlockTypes.obsidian.id)
-        return res.block.setType(MinecraftBlockTypes.air);
+    if (fac.config.blockObi && block.typeId === BlockTypes.get('minecraft:obsidian').id)
+        return res.block.setType(BlockTypes.get('minecraft:air'));
     const chunk = [~~((block.location.x + 1) / 16), ~~((block.location.z + 1) / 16)];
     if (!fac.chunks.has(`${chunk[0]}_${chunk[1]}`))
         return;
@@ -35,7 +35,7 @@ world.afterEvents.blockPlace.subscribe(res => {
         return;
     Player.send(res.player, `§cYou cannoct place blocks in this chunk because a faction is protecting it.`, 'FTN');
     showBorder(res.player, chunk, res.block.location.y, false);
-    res.block.setType(MinecraftBlockTypes.air);
+    res.block.setType(BlockTypes.get('minecraft:air'));
     res.player.runCommandAsync(`give @s ${res.block.typeId}`);
 });
 const rate = {};
@@ -50,7 +50,7 @@ world.beforeEvents.itemUseOn.subscribe(res => {
     const owner = getOwner(chunk);
     if (owner === `${fac.player.read(connected[res.source.name].rID)}`)
         return;
-    if ((block.typeId.endsWith('door') || block.typeId.endsWith('button') || block.typeId === MinecraftBlockTypes.lever.id))
+    if ((block.typeId.endsWith('door') || block.typeId.endsWith('button') || block.typeId === BlockTypes.get('minecraft:lever').id))
         return;
     Player.send(res.source, `§cYou cannoct interact with this chunk because a faction is protecting it.`, 'FTN');
     rate[res.source.name] = new Date().getTime() + 5000;

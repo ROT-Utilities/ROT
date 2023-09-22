@@ -137,12 +137,15 @@ function addBid(date, post, player, sent, silent) {
     else if (post.bidID[0])
         AH.client.AHR.write(post.bidID[0], (AH.client.AHR.read(post.bidID[0]) || 0) + post.bids[0]);
     AH.client.update(player.rID, 'AHB', 'add', date);
-    delete post.bidData[player.rID];
-    return Object.assign(post.bidData, { [player.rID]: [player.name, sent, silent ? 1 : 0] });
+    const index = post.bidData.findIndex(b => b[0] === player.rID);
+    if (index >= 0)
+        post.bidData.splice(index, 1);
+    post.bidData.push([player.rID, player.name, sent, silent ? 1 : 0]);
+    return post.bidData;
 }
 function removeBid(date, post, player) {
     player.runCommandAsync(`scoreboard players add @s "${config.obj}" ${post.bids[0]}`);
     AH.client.update(player.rID, 'AHB', 'remove', date);
-    delete post.bidData[player.rID];
+    post.bidData.splice(post.bidData.findIndex(b => b[0] === player.rID), 1);
     return post.bidData;
 }

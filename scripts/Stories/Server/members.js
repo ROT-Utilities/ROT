@@ -21,6 +21,7 @@ import { dateReg, nameReg } from '../../Tales/playerConnect.js';
 import { addListener } from '../../Tales/main.js';
 import Commands from '../../Papers/CommandPaper/CommandPaper.js';
 import Player from '../../Papers/PlayerPaper.js';
+import quick from '../../quick.js';
 const cmd = Commands.create({
     name: 'members',
     description: 'List all of the members that have joined the server before',
@@ -39,5 +40,5 @@ cmd.numberType('page', (plr, page) => {
         members.push(`§eMember name: §a${member[0].slice(1)}§e, join date: §a${MS(Date.now() - Number(dateReg.find(member[1]) ?? 0))} ago§e, member ID:§a ${member[1]}`);
     plr.send(`§aCongratulations§e! This server has §c${metricNumbers(len)}§e members! Here is a list of them:\n${members.join('\n')}\n§ePage §a${page}§e/§a${memberList.length}§e. §cPlease remember that the dates are not 100%% accurate.`);
 });
-addListener('playerConnect', plr => Player.send(plr, `Welcome back §c${plr.name}§e!`, 'ROT'));
+addListener('playerConnect', plr => Player.send(plr, quick.welcomeBack.replace(/\$player/, plr.name), 'ROT'));
 //Use this for the ban command as well

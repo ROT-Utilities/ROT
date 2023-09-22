@@ -19,9 +19,9 @@ Thank you!
 /**
  * DEV COMMAND
  */
-import { ItemStack, MinecraftBlockTypes, Player, system } from "@minecraft/server";
-import Commands from "../../Papers/CommandPaper/CommandPaper.js";
+import { ItemStack, BlockTypes, Player, system } from "@minecraft/server";
 import { world } from "@minecraft/server";
+import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 const cmd = Commands.create({
     name: 'editstick',
     category: 'Dev',
@@ -58,7 +58,7 @@ cmd.dynamicType('clear', 'clear', (plr) => {
     interactions[plr.id] = { toDelete: [], toPaste: [], toFill: [] };
     plr.sendMessage('§aDeleted your history!');
 });
-world.afterEvents.blockBreak.subscribe((res) => {
+world.afterEvents.playerBreakBlock.subscribe((res) => {
     //@ts-ignore
     const inv = res.player.getComponent('inventory').container;
     const item = inv.getItem(res.player.selectedSlot);
@@ -68,7 +68,7 @@ world.afterEvents.blockBreak.subscribe((res) => {
         return;
     res.block.setPermutation(res.brokenBlockPermutation);
 });
-world.afterEvents.blockPlace.subscribe((res) => {
+world.afterEvents.playerBreakBlock.subscribe((res) => {
     if (interactions[res.player.id].toFill.length !== 2)
         return;
     const p = res.player;
@@ -156,7 +156,7 @@ system.runInterval(() => {
             const i = interactions[p.id].toDelete;
             interactions[p.id].toDelete = [];
             const { x: x1, y: y1, z: z1 } = i[0], { x: x2, y: y2, z: z2 } = i[1];
-            const e = p.dimension.fillBlocks({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }, MinecraftBlockTypes.air);
+            const e = p.dimension.fillBlocks({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }, BlockTypes.get('minecraft:air'));
             if (e > 0)
                 p.sendMessage('§aDeleted!');
             else
