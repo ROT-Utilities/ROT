@@ -17,10 +17,10 @@ Website: https://www.rotmc.ml
 Thank you!
 */
 import { system, world } from '@minecraft/server';
-import Commands from '../../Papers/CommandPaper/CommandPaper.js';
-import Database from '../../Papers/DatabasePaper.js';
 import { MS } from '../../Papers/Paragraphs/ConvertersParagraphs.js';
 import { connected } from '../../Tales/playerConnect.js';
+import Commands from '../../Papers/CommandPaper/CommandPaper.js';
+import Database from '../../Papers/DatabasePaper.js';
 export const ban = {
     regReason: null,
     regExpire: null

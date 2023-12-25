@@ -40,6 +40,14 @@ export const quick = {
     defaultChatColor: '§f',
     displayHealth: true,
     bannedPlayers: {},
+    lagClearMessages: [
+        '§a5§e seconds till lag is cleared...',
+        '§a4§e seconds till lag is cleared...',
+        '§a3§e seconds till lag is cleared...',
+        '§a2§e seconds till lag is cleared...',
+        '§a1§e second till lag is cleared...',
+        '§6Lag has been cleared! Killed §a$amount§6 entities' //Cleared
+    ],
     dimNotAllowedLoc: { loc: { x: 10, y: -60, z: 10 }, dim: 'overworld' },
     maxHomes: 5,
     homeDims: ['minecraft:overworld', 'minecraft:the_end', 'minecraft:nether'],
@@ -54,6 +62,7 @@ export const quick = {
             warp: true,
             tps: true,
             lockdimension: true,
+            lagclear: true
         },
         Management: {
             ban: true,
@@ -79,14 +88,40 @@ export const quick = {
             click: true,
             timezone: true,
             dimension: true,
+            smite: true
         },
         ROT: {
             //ui: true,
-            quick: true,
+            // quick: true,
             help: true //Please keep this command at the bottom
         }
     },
     epics: {
+        "Director Mode": {
+            enabled: true,
+            entry: "main",
+            tag: 'dm',
+            prefixes: ['-', '_', '@', '#', '$', '^', '&', '*', '+', '=', '\\', ':', '.'],
+            Actors: {
+                enabled: true,
+                scales: ['0.3', '0.5', '0.8', '1', '1.2', '1.5', '2', '2.5', '3', '5', '7', '10'],
+                actions: {
+                    'Bob': 'animation.humanoid.bob',
+                    'Flip': 'animation.humanoid.flip',
+                    'Champion': 'animation.humanoid.champion',
+                    'Stomp': 'animation.humanoid.stomp',
+                    'Hi': 'animation.humanoid.hi',
+                    'Moruto': 'animation.humanoid.naruto',
+                    'Command': 'animation.humanoid.command',
+                    'Sentado': 'animation.humanoid.sentado',
+                    'Sentado 2': 'animation.humanoid.sentado2',
+                    'Deitado': 'animation.humanoid.deitado',
+                    'Float': 'animation.humanoid.float',
+                    'Salute': 'animation.humanoid.salute',
+                    // 'Watch': null
+                },
+            }
+        },
         "Auction House": {
             enabled: true,
             entry: 'main',
@@ -169,6 +204,21 @@ export const quick = {
             comeBack: true,
             coolHouseNames: true
         },
+        "Shop": {
+            enabled: true,
+            entry: 'main',
+            houseName: 'Shop',
+            currency: 'Gold',
+            obj: 'money',
+            tag: 'shop',
+            color1: '§4',
+            color2: '§c',
+            color3: '§7',
+            npc: true,
+            npcName: 'Jack Keeper',
+            comeBack: true,
+            coolHouseNames: true
+        },
         "Automod": {
             enabled: false,
             entry: "main",
@@ -204,7 +254,7 @@ export const quick = {
         'beforeChat',
         'playerConnect'
     ],
-    version: 'ROT',
+    version: 'LIGHT',
     developerCommands: false,
     developerLogging: true,
     logs: {
@@ -214,8 +264,8 @@ export const quick = {
         commands: [],
         commandLogs: [],
         connectedLogs: [],
-        intervalAmount: 0,
-        intervalTicks: []
+        lagClear: [],
+        chat: []
     },
     useQuick: true
 };

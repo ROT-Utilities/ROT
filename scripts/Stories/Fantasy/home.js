@@ -17,6 +17,7 @@ Website: https://www.rotmc.ml
 Thank you!
 */
 import { world } from "@minecraft/server";
+import { grammarText } from "../../Papers/Paragraphs/ExtrasParagraphs.js";
 import Commands from "../../Papers/CommandPaper/CommandPaper.js";
 import Database from "../../Papers/DatabasePaper.js";
 import quick from "../../quick.js";
@@ -26,16 +27,24 @@ let home = null;
 })();
 const cmd = Commands.create({
     name: 'home',
+    aliases: ['house', 'h'],
     description: 'Set a home and teleport to it',
     category: 'Fantasy',
 });
-cmd.startingArgs(['set', 'remove', 'tp']);
+cmd.startingArgs(['list', 'set', 'remove', 'tp']);
+cmd.staticType('list', 'list', plr => {
+    const homes = home.findMany(Number(plr.rID)).map(id => {
+        const sp = id.split('$-$'), x = Number(sp[1]), y = Number(sp[2]), z = Number(sp[3]), d = sp[4];
+        return { name: sp[0], x, y, z, d };
+    });
+    plr.send(`You have §a${homes.length}§e home(s). Here are a list of them:\n${homes.map(h => `§eName: §c${h.name}§e, X: §c${h.x}§e, Y: §c${h.y}§e, Z: §c${h.z}§e. §eDimension: §d${grammarText(h.d)}`).join('\n')}`);
+}, [], false, false);
 cmd.staticType('set', 'set', (plr, homeName) => {
     if (homeName.includes('$-$'))
         return plr.error('You cannot use the characters "$-$" in your home\'s name.');
     const pHomes = home.findMany(Number(plr.rID));
     if (pHomes.length >= quick.maxHomes)
-        return plr.error('You reached the max home limit: ' + quick.maxHomes);
+        return plr.error(`You reached the max home limit: ${quick.maxHomes}`);
     if (pHomes.length && pHomes.some(x => x.split('$-$')[0] === homeName))
         return plr.error('You already have a home with that name!');
     if (!quick.homeDims.includes(plr.dimension.id))

@@ -83,10 +83,8 @@ export async function startup() {
             quick.logs.errors.push(`${e} : ${e.stack}`);
         }
     });
-    // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
     //Dev stuff 
-    if (quick.developerLogging)
-        import('./Stories/!test/log.js');
+    // world.scoreboard.getObjectives().forEach(o => world.scoreboard.removeObjective(o.id));
     if (!quick.developerCommands)
         return;
     import('./Stories/!test/editstick.js');
